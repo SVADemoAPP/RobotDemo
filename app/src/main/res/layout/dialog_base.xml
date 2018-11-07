@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="416.6641dp"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="150"
+        android:background="@drawable/shape_blue_dialog_top"
+        android:gravity="center_vertical"
+        android:paddingLeft="33.33dp"
+        android:text="@string/setUploadParameter"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="950"
+        android:background="@color/white"
+        android:orientation="vertical" >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="25" />
+
+        <RelativeLayout
+            android:id="@+id/rl1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="180" >
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8.33dp"
+                android:layout_marginLeft="33.33dp"
+                android:layout_marginRight="33.33dp"
+                android:layout_marginTop="8.33dp"
+                android:background="@mipmap/feature_gray_stroken" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="50dp"
+                android:background="@color/white"
+                android:text="@string/xCoordinate"
+                android:textColor="@color/black_text"
+                android:textSize="16sp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="158.33dp"
+                android:background="@null"
+                android:hint="@string/clickInput"
+                android:inputType="numberDecimal"
+                android:text="50.26"
+                android:textColor="@color/black_text"
+                android:textColorHint="@color/gray_stroken"
+                android:textSize="16sp" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="43.33dp"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="6.67dp"
+                    android:src="@mipmap/feature_fork" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="180" >
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8.33dp"
+                android:layout_marginLeft="33.33dp"
+                android:layout_marginRight="33.33dp"
+                android:layout_marginTop="8.33dp"
+                android:background="@mipmap/feature_gray_stroken" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="50dp"
+                android:background="@color/white"
+                android:text="@string/yCoordinate"
+                android:textColor="@color/black_text"
+                android:textSize="16sp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="158.33dp"
+                android:background="@null"
+                android:hint="@string/clickInput"
+                android:inputType="numberDecimal"
+                android:text="50.26"
+                android:textColor="@color/black_text"
+                android:textColorHint="@color/gray_stroken"
+                android:textSize="16sp" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="43.33dp"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="6.67dp"
+                    android:src="@mipmap/feature_fork" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl3"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="180" >
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8.33dp"
+                android:layout_marginLeft="33.33dp"
+                android:layout_marginRight="33.33dp"
+                android:layout_marginTop="8.33dp"
+                android:background="@mipmap/feature_gray_stroken" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="50dp"
+                android:background="@color/white"
+                android:text="enodeId"
+                android:textColor="@color/black_text"
+                android:textSize="16sp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="158.33dp"
+                android:background="@null"
+                android:hint="@string/clickInput"
+                android:inputType="numberDecimal"
+                android:text="500"
+                android:textColor="@color/black_text"
+                android:textColorHint="@color/gray_stroken"
+                android:textSize="16sp" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="43.33dp"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="6.67dp"
+                    android:src="@mipmap/feature_fork" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl4"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="180" >
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8.33dp"
+                android:layout_marginLeft="33.33dp"
+                android:layout_marginRight="33.33dp"
+                android:layout_marginTop="8.33dp"
+                android:background="@mipmap/feature_gray_stroken" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="50dp"
+                android:background="@color/white"
+                android:text="cellId"
+                android:textColor="@color/black_text"
+                android:textSize="16sp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="158.33dp"
+                android:background="@null"
+                android:hint="@string/clickInput"
+                android:inputType="number"
+                android:text="15"
+                android:textColor="@color/black_text"
+                android:textColorHint="@color/gray_stroken"
+                android:textSize="16sp" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="43.33dp"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="6.67dp"
+                    android:src="@mipmap/feature_fork" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl5"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="180" >
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8.33dp"
+                android:layout_marginLeft="33.33dp"
+                android:layout_marginRight="33.33dp"
+                android:layout_marginTop="8.33dp"
+                android:background="@mipmap/feature_gray_stroken" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="50dp"
+                android:background="@color/white"
+                android:text="rsrp"
+                android:textColor="@color/black_text"
+                android:textSize="16sp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="158.33dp"
+                android:background="@null"
+                android:hint="@string/clickInput"
+                android:inputType="number"
+                android:text="60"
+                android:textColor="@color/black_text"
+                android:textColorHint="@color/gray_stroken"
+                android:textSize="16sp" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="43.33dp"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="6.67dp"
+                    android:src="@mipmap/feature_fork" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="25" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/gray_stroken" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="150"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/tv_confirm"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/tv_press_selector_radiusbottomleft"
+            android:gravity="center"
+            android:text="@string/confirm"
+            android:textColor="@color/blue"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:background="@color/gray_stroken" />
+
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/tv_press_selector_radiusbottomright"
+            android:gravity="center"
+            android:text="@string/cancel"
+            android:textColor="@color/gray_stroken"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

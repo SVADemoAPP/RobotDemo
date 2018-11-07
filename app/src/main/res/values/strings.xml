@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">RobotDemo</string>
+    <string name="xCoordinate">X坐标</string>
+    <string name="yCoordinate">Y坐标</string>
+    <string name="clickInput">点击输入</string>
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+    <string name="nullWarm">参数不能为空</string>
+    <string name="setUploadParameter">设置上传参数</string>
+    <string name="setInitParameter">设置初始参数</string>
+    <string name="scaleRuler">比例尺</string>
+</resources>
