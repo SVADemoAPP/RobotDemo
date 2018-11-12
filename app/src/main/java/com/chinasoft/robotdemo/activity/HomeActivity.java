@@ -11,11 +11,13 @@ import android.view.View;
 
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
+import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.FileUtil;
 import com.chinasoft.robotdemo.view.dialog.ParamsDialog;
 import com.slamtec.slamware.AbstractSlamwarePlatform;
 import com.slamtec.slamware.action.IAction;
 import com.slamtec.slamware.discovery.DeviceManager;
+import com.slamtec.slamware.robot.HealthInfo;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Pose;
 
@@ -23,14 +25,11 @@ import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
 import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.LineShape;
-import net.yoojia.imagemap.core.MoniPointShape;
-import net.yoojia.imagemap.core.PushMessageShape;
 import net.yoojia.imagemap.core.RobotShape;
-import net.yoojia.imagemap.core.ShapeExtension;
-import net.yoojia.imagemap.core.SpecialShape;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Vector;
 
 public class HomeActivity extends BaseActivity {
@@ -75,6 +74,8 @@ public class HomeActivity extends BaseActivity {
 
     private Bitmap mapBitmap;
 
+    private List<HealthInfo.BaseError> eList;
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -86,7 +87,7 @@ public class HomeActivity extends BaseActivity {
 //                        Log.e("msg", "x:" + nowPose.getX() + ",y:" + nowPose.getY());
                         nowX=nowPose.getX();
                         nowY=nowPose.getY();
-                        if (nowX - lastX > 0.5 || nowY - lastY > 0.5) {
+                        if (nowX - lastX > 0.3 || nowY - lastY > 0.3) {
                             newF = realToMap(nowX, nowY);
                             path.lineTo(newF[0], newF[1]);
                             lineShape.setPath(path);
@@ -138,7 +139,6 @@ public class HomeActivity extends BaseActivity {
                     } catch (Exception e) {
 
                     }
-
                     break;
                 default:
                     break;
@@ -167,20 +167,8 @@ public class HomeActivity extends BaseActivity {
     public void dealLogicAfterInitView() {
 //        mapBitmap= BitmapFactory.decodeResource(getResources(),R.mipmap.f1_100);
 //        map.setMapDrawable(getResources().getDrawable(R.mipmap.f1_100));
-        File dir = new File("/sdcard/test");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        File mapFile = new File("/sdcard/test/test.png");
-        if (!mapFile.exists()) {
-            try {
-                mapFile.createNewFile();
-                FileUtil.writeBytesToFile(this.getAssets().open("test.png"), mapFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        mapBitmap = BitmapFactory.decodeFile("/sdcard/test/test.png");
+        String currentMap=getIntent().getExtras().getString("currentMap");
+        mapBitmap = BitmapFactory.decodeFile(Constant.sdPath+"/maps/"+currentMap);
         map.setMapBitmap(mapBitmap);
         Log.e("msg", "高度：" + mapBitmap.getHeight() + "，宽度：" + mapBitmap.getWidth());
 //        showToast("高度："+mapBitmap.getHeight()+"，宽度："+mapBitmap.getWidth());
@@ -190,19 +178,6 @@ public class HomeActivity extends BaseActivity {
             public void onLongClick(PointF point) {
                 Log.e("long", point.x + "," + point.y);
                 if (isStart) {
-//                    if (canMove) {
-//                    showToast("像素点："+x + "," + y);
-//                    robotShape.setValues(String.format(
-//                            "%.5f:%.5f",
-//                            new Object[] { x,
-//                                    y}));
-//                    map.addShape(robotShape,false);
-//                    lineShape.setValues(x,  y, oldX, oldY);
-////                    path.reset();
-//                    path.moveTo(oldX,oldY);
-//                    path.lineTo(x,y);
-//                    lineShape.setPath(path);
-//                    map.addShape(lineShape, false);
                     float[] dXY = mapToReal(point.x, point.y);
 //                    showToast("目的点："+dXY[0]+","+dXY[1]);
                     forwardLocation.setX(dXY[0]);
@@ -233,85 +208,11 @@ public class HomeActivity extends BaseActivity {
                         showToast("出错了：" + e.toString());
 
                     }
-//                    } else {
-//                        canMove = true;
-//                        mHandler.sendEmptyMessageDelayed(1, 1000);
-//                    }
                 }
             }
         });
-//        map.setOnShapeClickListener(new ShapeExtension.OnShapeActionListener() {
-//            @Override
-//            public void onSpecialShapeClick(SpecialShape specialShape, float v, float v1) {
-//
-//            }
-//
-//            @Override
-//            public void onPushMessageShapeClick(PushMessageShape pushMessageShape, float v, float v1) {
-//
-//            }
-//
-//            @Override
-//            public void onCollectShapeClick(CollectPointShape collectPointShape, float v, float v1) {
-//
-//            }
-//
-//            @Override
-//            public void onMoniShapeClick(MoniPointShape moniPointShape, float v, float v1) {
-//
-//            }
-//
-//            @Override
-//            public void outShapeClick(float x, float y) {
-//                if(isStart) {
-////                    showToast("像素点："+x + "," + y);
-////                    robotShape.setValues(String.format(
-////                            "%.5f:%.5f",
-////                            new Object[] { x,
-////                                    y}));
-////                    map.addShape(robotShape,false);
-////                    lineShape.setValues(x,  y, oldX, oldY);
-//////                    path.reset();
-////                    path.moveTo(oldX,oldY);
-////                    path.lineTo(x,y);
-////                    lineShape.setPath(path);
-////                    map.addShape(lineShape, false);
-//                        float[] dXY = mapToReal(x, y);
-////                    showToast("目的点："+dXY[0]+","+dXY[1]);
-//                        forwardLocation.setX(dXY[0]);
-//                        forwardLocation.setY(dXY[1]);
-//                        try {
-//                            platform.getCurrentAction().cancel();
-//                            for (int i = 0, len = coorCount; i < len; i++) {
-//                                map.removeShape("coor" + i);
-//                            }
-//                            locVector = platform.searchPath(forwardLocation).getPoints();
-//                            coorCount = locVector.size();
-//                            for (int i = 0, len = coorCount; i < len; i++) {
-////                            CoorInMap c=new CoorInMap();
-//                                float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
-////                            c.setX(tf[0]);
-////                            c.setY(tf[1]);
-////                            coorOrbit.add(c);
-//                                CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.blue, HomeActivity.this, "dwf");
-//                                collectPointShape.setValues(tf[0], tf[1]);
-//                                map.addShape(collectPointShape, false);
-//                            }
-//                            platform.moveTo(locVector);
-//                            if (mHandler.hasMessages(0)) {
-//                                mHandler.removeMessages(0);
-//                            }
-//                            mHandler.sendEmptyMessageDelayed(0, 2000);
-//                        } catch (Exception e) {
-//                            showToast("出错了：" + e.toString());
-//
-//                        }
-//
-//                }
-//            }
-//        });
         try {
-            platform = DeviceManager.connect("192.168.11.1", 1445); // 连接到机器人底盘
+            platform = DeviceManager.connect(Constant.robotIp, Constant.robotPort); // 连接到机器人底盘
             nowPose = platform.getPose();// 当前机器人的位置,
 //            System.out.println(nowPose.getX() + "," + nowPose.getY());
             initX = nowPose.getX();
@@ -323,6 +224,7 @@ public class HomeActivity extends BaseActivity {
             e.printStackTrace();
         }
         if (robotConnect) {
+//            mHandler.sendEmptyMessageDelayed(1,3000);
             paramsDialog = new ParamsDialog(this, R.style.MyDialogStyle);
             paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
                 @Override

@@ -9,4 +9,5 @@
     <string name="setUploadParameter">设置上传参数</string>
     <string name="setInitParameter">设置初始参数</string>
     <string name="scaleRuler">比例尺</string>
+    <string name="mapSelect">地图选择</string>
 </resources>

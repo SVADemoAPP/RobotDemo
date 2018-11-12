@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".activity.HomeActivity">
+        <activity android:name=".activity.MapselectActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,6 +22,11 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".activity.HomeActivity">
+        </activity>
+
+        <activity android:name=".activity.SettingActivity">
+    </activity>
 
     </application>
 

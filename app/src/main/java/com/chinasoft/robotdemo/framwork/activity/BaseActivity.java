@@ -239,5 +239,21 @@ public abstract class BaseActivity extends FragmentActivity implements OnClickLi
             startActivity(intent);
         }
     }
+
+    protected void openActivityForResult(Class<?> pClass, int requestCode) {
+        if (!isFinishing()) {
+            openActivityForResult(pClass, null, requestCode);
+        }
+    }
+
+    protected void openActivityForResult(Class<?> pClass, Bundle pBundle, int requestCode) {
+        if (!isFinishing()) {
+            Intent intent = new Intent(this, pClass);
+            if (pBundle != null) {
+                intent.putExtras(pBundle);
+            }
+            startActivityForResult(intent, requestCode);
+        }
+    }
 }
 
