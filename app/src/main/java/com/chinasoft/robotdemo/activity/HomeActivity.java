@@ -11,6 +11,7 @@ import android.view.View;
 
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
+import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.FileUtil;
 import com.chinasoft.robotdemo.view.dialog.ParamsDialog;
@@ -68,13 +69,16 @@ public class HomeActivity extends BaseActivity {
 
     private LineShape lineShape;
 
-    private float lastX, lastY,nowX,nowY;
+    private float lastX, lastY, nowX, nowY;
 
-    private  float[] oldF,newF;
+    private float[] newF;
 
     private Bitmap mapBitmap;
 
-    private List<HealthInfo.BaseError> eList;
+    private boolean isContinue;
+
+    private  String currentMap;
+
 
     private Handler mHandler = new Handler() {
         @Override
@@ -85,15 +89,17 @@ public class HomeActivity extends BaseActivity {
                     try {
                         nowPose = platform.getPose();
 //                        Log.e("msg", "x:" + nowPose.getX() + ",y:" + nowPose.getY());
-                        nowX=nowPose.getX();
-                        nowY=nowPose.getY();
-                        if (nowX - lastX > 0.3 || nowY - lastY > 0.3) {
+                        nowX = nowPose.getX();
+                        nowY = nowPose.getY();
+//                        Log.e("handler",(nowX - lastX)+","+(nowY - lastY)+" now:"+nowX+","+nowY+" last:"+lastX+","+lastY);
+                        if (Math.abs(nowX - lastX) > 0.3 || Math.abs(nowY - lastY) > 0.3) {
+//                            Log.e("handler","的点点滴滴顶顶顶顶顶顶顶顶顶大等等");
                             newF = realToMap(nowX, nowY);
                             path.lineTo(newF[0], newF[1]);
                             lineShape.setPath(path);
                             map.addShape(lineShape, false);
-                            lastX=nowX;
-                            lastY=nowY;
+                            lastX = nowX;
+                            lastY = nowY;
                         }
                         Log.e("action", "action:" + platform.getCurrentAction().getActionName());
 //                        showToast("action:" + platform.getCurrentAction().getActionName());
@@ -108,15 +114,15 @@ public class HomeActivity extends BaseActivity {
                         map.addShape(robotShape, false);
                         switch (platform.getCurrentAction().getActionName()) {
                             case "":
-                                Log.e("msg","aaa");
-                                    Log.e("msg","bbb");
-                                    removeMessages(0);
-                                    newF = realToMap(nowX, nowY);
-                                    path.lineTo(newF[0], newF[1]);
-                                    lineShape.setPath(path);
-                                    map.addShape(lineShape, false);
-                                    lastX=nowX;
-                                    lastY=nowY;
+                                Log.e("msg", "aaa");
+                                Log.e("msg", "bbb");
+                                removeMessages(0);
+                                newF = realToMap(nowX, nowY);
+                                path.lineTo(newF[0], newF[1]);
+                                lineShape.setPath(path);
+                                map.addShape(lineShape, false);
+                                lastX = nowX;
+                                lastY = nowY;
                                 break;
                             case "MoveAction":
                                 locVector = platform.searchPath(forwardLocation).getPoints();
@@ -167,8 +173,8 @@ public class HomeActivity extends BaseActivity {
     public void dealLogicAfterInitView() {
 //        mapBitmap= BitmapFactory.decodeResource(getResources(),R.mipmap.f1_100);
 //        map.setMapDrawable(getResources().getDrawable(R.mipmap.f1_100));
-        String currentMap=getIntent().getExtras().getString("currentMap");
-        mapBitmap = BitmapFactory.decodeFile(Constant.sdPath+"/maps/"+currentMap);
+        currentMap = getIntent().getExtras().getString("currentMap");
+        mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
         map.setMapBitmap(mapBitmap);
         Log.e("msg", "高度：" + mapBitmap.getHeight() + "，宽度：" + mapBitmap.getWidth());
 //        showToast("高度："+mapBitmap.getHeight()+"，宽度："+mapBitmap.getWidth());
@@ -211,59 +217,93 @@ public class HomeActivity extends BaseActivity {
                 }
             }
         });
+        mapHeight = mapBitmap.getHeight();
         try {
             platform = DeviceManager.connect(Constant.robotIp, Constant.robotPort); // 连接到机器人底盘
             nowPose = platform.getPose();// 当前机器人的位置,
 //            System.out.println(nowPose.getX() + "," + nowPose.getY());
-            initX = nowPose.getX();
-            initY = nowPose.getY();
+            nowX = nowPose.getX();
+            nowY = nowPose.getY();
             initZ = nowPose.getZ();
 //            showToast("初始位置："+initX+","+initY+","+initZ);
+            if (nowX > 0.1f || nowY > 0.1f) {
+                if (currentMap.equals( SharedPrefHelper.getString(this, "currentMap",""))) {
+                    isContinue = true;
+                } else {
+                    isContinue = false;
+                }
+            } else {
+                isContinue = false;
+            }
         } catch (Exception e) {
             robotConnect = false;
             e.printStackTrace();
         }
         if (robotConnect) {
-//            mHandler.sendEmptyMessageDelayed(1,3000);
-            paramsDialog = new ParamsDialog(this, R.style.MyDialogStyle);
-            paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
-                @Override
-                public void paramsComplete(float x, float y, float scaleRuler) {
-//                    Location location=new Location(50f,20f,nowPose.getZ());
-//                    try {
-//                        platform.moveTo(location);
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-                    isStart = true;
-                    mapHeight = mapBitmap.getHeight();
-//                    showToast("高度："+mapHeight+"，宽度："+mapBitmap.getWidth());
-                    forwardLocation = new Location();
-                    forwardLocation.setZ(initZ);
-//                    canMove = true;
-                    scale = scaleRuler;
-                    xo = x * scaleRuler;
-                    yo = mapHeight - y * scaleRuler;
-                    path = new Path();
-                    lastX = initX;
-                    lastY = initY;
-                    oldF = realToMap(lastX, lastY);
-                    path.moveTo(oldF[0], oldF[1]);
-                    lineShape = new LineShape("line", R.color.green);
-                    robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
-                    robotShape.setValues(String.format(
-                            "%.5f:%.5f",
-                            new Object[]{xo,
-                                    yo}));
-//                    black.setId(tempModel.id + "");
-                    map.addShape(robotShape, true);
-                }
-            });
-            paramsDialog.show();
+            if (isContinue) {
+                scale = SharedPrefHelper.getFloat(this, "scale");
+                initX=SharedPrefHelper.getFloat(this, "initX");
+                initY=SharedPrefHelper.getFloat(this, "initY");
+                xo=SharedPrefHelper.getFloat(this, "xo");
+                yo=SharedPrefHelper.getFloat(this, "yo");
+                float[] continueXY = realToMap(nowX, nowY);
+                initStart(continueXY[0],continueXY[1]);
+//                robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
+//                robotShape.setValues(String.format(
+//                        "%.5f:%.5f",
+//                        new Object[]{continueXY[0],
+//                                continueXY[1]}));
+//                map.addShape(robotShape, true);
+//                isStart = true;
+//                forwardLocation = new Location();
+//                forwardLocation.setZ(initZ);
+//                path = new Path();
+//                lastX = nowX;
+//                lastY = nowY;
+//                path.moveTo(continueXY[0], continueXY[1]);
+//                lineShape = new LineShape("line", R.color.green);
+            } else {
+                paramsDialog = new ParamsDialog(this, R.style.MyDialogStyle);
+                paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
+                    @Override
+                    public void paramsComplete(float x, float y, float scaleRuler) {
+                        scale = scaleRuler;
+                        xo = x * scaleRuler;
+                        yo = mapHeight - y * scaleRuler;
+                        SharedPrefHelper.putString(HomeActivity.this, "currentMap", currentMap);
+                        SharedPrefHelper.putFloat(HomeActivity.this, "scale", scale);
+                        SharedPrefHelper.putFloat(HomeActivity.this, "xo", xo);
+                        SharedPrefHelper.putFloat(HomeActivity.this, "yo", yo);
+                        initX=nowX;
+                        initY=nowY;
+                        SharedPrefHelper.putFloat(HomeActivity.this, "initX", initX);
+                        SharedPrefHelper.putFloat(HomeActivity.this, "initY", initY);
+                        initStart(xo,yo);
+                    }
+                });
+                paramsDialog.show();
+            }
         } else {
             showToast("机器人连接失败！");
         }
 
+    }
+
+    private void initStart(float x,float y){
+        robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
+        robotShape.setValues(String.format(
+                "%.5f:%.5f",
+                new Object[]{x,
+                        y}));
+        map.addShape(robotShape, true);
+        isStart = true;
+        forwardLocation = new Location();
+        forwardLocation.setZ(initZ);
+        path = new Path();
+        lastX = nowX;
+        lastY = nowY;
+        path.moveTo(x, y);
+        lineShape = new LineShape("line", R.color.green);
     }
 
     private float[] mapToReal(float x, float y) {
@@ -272,6 +312,10 @@ public class HomeActivity extends BaseActivity {
 
     private float[] realToMap(float px, float py) {
         return new float[]{(px - initX) * scale + xo, yo - (py - initY) * scale};
+    }
+
+    private float[] realToMapContinue(float px, float py, float lastInitX, float lastInitY, float lastXo, float lastYo) {
+        return new float[]{(px - lastInitX) * scale + lastXo, lastYo - (py - lastInitY) * scale};
     }
 
     @Override
