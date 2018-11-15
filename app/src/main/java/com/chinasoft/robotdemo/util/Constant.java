@@ -8,4 +8,6 @@ public class Constant {
     public static String robotIp;
     public static int robotPort;
     public static String sdPath;
+
+    public static String mapDirs="/sdcard/robotdemo/maps/";
 }

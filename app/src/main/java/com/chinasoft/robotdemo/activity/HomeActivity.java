@@ -174,7 +174,7 @@ public class HomeActivity extends BaseActivity {
 //        mapBitmap= BitmapFactory.decodeResource(getResources(),R.mipmap.f1_100);
 //        map.setMapDrawable(getResources().getDrawable(R.mipmap.f1_100));
         currentMap = getIntent().getExtras().getString("currentMap");
-        mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
+        mapBitmap = BitmapFactory.decodeFile(Constant.mapDirs + currentMap);
         map.setMapBitmap(mapBitmap);
         Log.e("msg", "高度：" + mapBitmap.getHeight() + "，宽度：" + mapBitmap.getWidth());
 //        showToast("高度："+mapBitmap.getHeight()+"，宽度："+mapBitmap.getWidth());
