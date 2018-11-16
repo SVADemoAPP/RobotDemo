@@ -1,7 +1,9 @@
 package com.chinasoft.robotdemo.activity;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -13,8 +15,14 @@ import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.MaplistAdapter;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
+import com.chinasoft.robotdemo.util.BlueUtils;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.FileUtil;
+import com.slamtec.slamware.discovery.AbstractDiscover;
+import com.slamtec.slamware.discovery.BleDevice;
+import com.slamtec.slamware.discovery.Device;
+import com.slamtec.slamware.discovery.DeviceManager;
+import com.slamtec.slamware.discovery.DiscoveryMode;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +40,8 @@ public class MaplistActivity extends BaseActivity {
     private MaplistAdapter maplistAdapter;
     private String currentMap;
     private TextView tv_next;
+
+    private DeviceManager deviceManager;
 
     @Override
     public void setContentLayout() {
@@ -71,6 +81,64 @@ public class MaplistActivity extends BaseActivity {
         lv_maplist = findViewById(R.id.lv_maplist);
         tv_next=findViewById(R.id.tv_next);
         tv_next.setOnClickListener(this);
+//
+        BlueUtils.getBlueUtils().getInitialization(this);
+//
+        BlueUtils.getBlueUtils().startBlue();
+
+        BlueUtils.getBlueUtils().setFindBlue(new BlueUtils.FindBlue() {
+            @Override
+            public void getBlues(BluetoothDevice bluetoothDevice) {
+                BleDevice device = new BleDevice(bluetoothDevice);
+                device.canBeFoundWith(DiscoveryMode.BLE);
+                deviceManager = new DeviceManager(MaplistActivity.this);
+                String wifiSSID = "iPhone";
+                String wifiPassword = "11111112";
+                // listener; // a concrete AbstractDiscover.BleConfigureListener object
+                deviceManager.pair(device, wifiSSID, wifiPassword, new AbstractDiscover.BleConfigureListener() {
+                    @Override
+                    public void onConfigureSuccess() {
+                        Log.e("start","success");
+                    }
+
+                    @Override
+                    public void onConfigureFailure(String s) {
+                        Log.e("start",s);
+                    }
+                });
+
+//        deviceManager.start(DiscoveryMode.MDNS);
+//        BleDevice device=new BleDevice(null);
+//        device.canBeFoundWith(DiscoveryMode.BLE);
+
+
+                deviceManager.setListener(new AbstractDiscover.DiscoveryListener() {
+                    @Override
+                    public void onStartDiscovery(AbstractDiscover abstractDiscover) {
+
+                        Log.e("start","start");
+                    }
+
+                    @Override
+                    public void onStopDiscovery(AbstractDiscover abstractDiscover) {
+                        Log.e("start","stop");
+                    }
+
+                    @Override
+                    public void onDiscoveryError(AbstractDiscover abstractDiscover, String s) {
+                        Log.e("start","error");
+                    }
+
+                    @Override
+                    public void onDeviceFound(AbstractDiscover abstractDiscover, Device device) {
+
+                    }
+                });
+            }
+        });
+
+
+
     }
 
     @Override
