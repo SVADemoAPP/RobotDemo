@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.chinasoft.robotdemo.activity.HomeActivity">
+    android:background="@mipmap/home_bg">
 
     <net.yoojia.imagemap.ImageMap1
         android:layout_width="match_parent"
@@ -12,4 +12,63 @@
         android:layout_centerInParent="true"
         />
 
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="18dp"
+        android:layout_marginTop="18dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="未连接"
+        android:drawablePadding="3dp"
+        android:textColor="@color/route_color"
+        android:textStyle="bold"
+        android:textSize="12dp"
+        android:gravity="center"
+        android:drawableLeft="@mipmap/home_unconnect"/>
+
+    <TextView
+        android:id="@+id/tv_setting"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="18dp"
+        android:layout_marginBottom="170dp"
+        android:layout_width="28dp"
+        android:layout_height="60dp"
+        android:ems="1"
+        android:paddingRight="3dp"
+        android:text="设置"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="13dp"
+        android:gravity="center"
+        android:background="@drawable/home_setting"/>
+
+    <TextView
+        android:id="@+id/tv_connect"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="18dp"
+        android:layout_marginBottom="100dp"
+        android:layout_width="28dp"
+        android:layout_height="60dp"
+        android:paddingRight="3dp"
+        android:ems="1"
+        android:text="连接"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="13dp"
+        android:gravity="center"
+        android:background="@drawable/home_connect"/>
+
+    <ImageView
+        android:id="@+id/iv_operation"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="18dp"
+        android:layout_marginBottom="18dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/home_start"/>
 </RelativeLayout>
+

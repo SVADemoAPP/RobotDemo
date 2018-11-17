@@ -18,6 +18,7 @@ import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.util.BlueUtils;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.FileUtil;
+import com.slamtec.slamware.AbstractSlamwarePlatform;
 import com.slamtec.slamware.discovery.AbstractDiscover;
 import com.slamtec.slamware.discovery.BleDevice;
 import com.slamtec.slamware.discovery.Device;
@@ -58,11 +59,11 @@ public class MaplistActivity extends BaseActivity {
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        File mapFile = new File(Constant.mapDirs + "/chinasoft_1f.png");
+        File mapFile = new File(Constant.mapDirs + "/U9.png");
         if (!mapFile.exists()) {
             try {
                 mapFile.createNewFile();
-                FileUtil.writeBytesToFile(this.getAssets().open("chinasoft_1f.png"), mapFile);
+                FileUtil.writeBytesToFile(this.getAssets().open("U9.png"), mapFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -89,11 +90,11 @@ public class MaplistActivity extends BaseActivity {
         BlueUtils.getBlueUtils().setFindBlue(new BlueUtils.FindBlue() {
             @Override
             public void getBlues(BluetoothDevice bluetoothDevice) {
-                BleDevice device = new BleDevice(bluetoothDevice);
+                final BleDevice device = new BleDevice(bluetoothDevice);
                 device.canBeFoundWith(DiscoveryMode.BLE);
                 deviceManager = new DeviceManager(MaplistActivity.this);
-                String wifiSSID = "iPhone";
-                String wifiPassword = "11111112";
+                String wifiSSID = "PHICOMM_3201";
+                String wifiPassword = "1225sznp";
                 // listener; // a concrete AbstractDiscover.BleConfigureListener object
                 deviceManager.pair(device, wifiSSID, wifiPassword, new AbstractDiscover.BleConfigureListener() {
                     @Override

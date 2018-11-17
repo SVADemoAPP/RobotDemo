@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
@@ -77,8 +79,13 @@ public class HomeActivity extends BaseActivity {
 
     private boolean isContinue;
 
-    private  String currentMap;
+    private String currentMap;
 
+    private TextView tv_status, tv_setting, tv_connect;
+
+    private ImageView iv_operation;
+
+    private boolean flag=false;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -92,7 +99,7 @@ public class HomeActivity extends BaseActivity {
                         nowX = nowPose.getX();
                         nowY = nowPose.getY();
 //                        Log.e("handler",(nowX - lastX)+","+(nowY - lastY)+" now:"+nowX+","+nowY+" last:"+lastX+","+lastY);
-                        if (Math.abs(nowX - lastX) > 0.3 || Math.abs(nowY - lastY) > 0.3) {
+                        if (Math.sqrt((nowX - lastX)*(nowX - lastX)+(nowY - lastY)*(nowY - lastY)) > 0.3) {
 //                            Log.e("handler","的点点滴滴顶顶顶顶顶顶顶顶顶大等等");
                             newF = realToMap(nowX, nowY);
                             path.lineTo(newF[0], newF[1]);
@@ -167,6 +174,13 @@ public class HomeActivity extends BaseActivity {
     @Override
     public void initView() {
         map = findViewById(R.id.imagemap);
+        tv_setting = findViewById(R.id.tv_setting);
+        tv_connect = findViewById(R.id.tv_connect);
+        tv_status = findViewById(R.id.tv_status);
+        iv_operation = findViewById(R.id.iv_operation);
+        tv_setting.setOnClickListener(this);
+        tv_connect.setOnClickListener(this);
+        iv_operation.setOnClickListener(this);
     }
 
     @Override
@@ -219,7 +233,7 @@ public class HomeActivity extends BaseActivity {
         });
         mapHeight = mapBitmap.getHeight();
         try {
-            platform = DeviceManager.connect(Constant.robotIp, Constant.robotPort); // 连接到机器人底盘
+            platform = DeviceManager.connect("192.168.2.108", 1445); // 连接到机器人底盘
             nowPose = platform.getPose();// 当前机器人的位置,
 //            System.out.println(nowPose.getX() + "," + nowPose.getY());
             nowX = nowPose.getX();
@@ -227,7 +241,7 @@ public class HomeActivity extends BaseActivity {
             initZ = nowPose.getZ();
 //            showToast("初始位置："+initX+","+initY+","+initZ);
             if (nowX > 0.1f || nowY > 0.1f) {
-                if (currentMap.equals( SharedPrefHelper.getString(this, "currentMap",""))) {
+                if (currentMap.equals(SharedPrefHelper.getString(this, "currentMap", ""))) {
                     isContinue = true;
                 } else {
                     isContinue = false;
@@ -242,26 +256,12 @@ public class HomeActivity extends BaseActivity {
         if (robotConnect) {
             if (isContinue) {
                 scale = SharedPrefHelper.getFloat(this, "scale");
-                initX=SharedPrefHelper.getFloat(this, "initX");
-                initY=SharedPrefHelper.getFloat(this, "initY");
-                xo=SharedPrefHelper.getFloat(this, "xo");
-                yo=SharedPrefHelper.getFloat(this, "yo");
+                initX = SharedPrefHelper.getFloat(this, "initX");
+                initY = SharedPrefHelper.getFloat(this, "initY");
+                xo = SharedPrefHelper.getFloat(this, "xo");
+                yo = SharedPrefHelper.getFloat(this, "yo");
                 float[] continueXY = realToMap(nowX, nowY);
-                initStart(continueXY[0],continueXY[1]);
-//                robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
-//                robotShape.setValues(String.format(
-//                        "%.5f:%.5f",
-//                        new Object[]{continueXY[0],
-//                                continueXY[1]}));
-//                map.addShape(robotShape, true);
-//                isStart = true;
-//                forwardLocation = new Location();
-//                forwardLocation.setZ(initZ);
-//                path = new Path();
-//                lastX = nowX;
-//                lastY = nowY;
-//                path.moveTo(continueXY[0], continueXY[1]);
-//                lineShape = new LineShape("line", R.color.green);
+                initStart(continueXY[0], continueXY[1]);
             } else {
                 paramsDialog = new ParamsDialog(this, R.style.MyDialogStyle);
                 paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
@@ -274,11 +274,11 @@ public class HomeActivity extends BaseActivity {
                         SharedPrefHelper.putFloat(HomeActivity.this, "scale", scale);
                         SharedPrefHelper.putFloat(HomeActivity.this, "xo", xo);
                         SharedPrefHelper.putFloat(HomeActivity.this, "yo", yo);
-                        initX=nowX;
-                        initY=nowY;
+                        initX = nowX;
+                        initY = nowY;
                         SharedPrefHelper.putFloat(HomeActivity.this, "initX", initX);
                         SharedPrefHelper.putFloat(HomeActivity.this, "initY", initY);
-                        initStart(xo,yo);
+                        initStart(xo, yo);
                     }
                 });
                 paramsDialog.show();
@@ -289,7 +289,7 @@ public class HomeActivity extends BaseActivity {
 
     }
 
-    private void initStart(float x,float y){
+    private void initStart(float x, float y) {
         robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
         robotShape.setValues(String.format(
                 "%.5f:%.5f",
@@ -314,12 +314,33 @@ public class HomeActivity extends BaseActivity {
         return new float[]{(px - initX) * scale + xo, yo - (py - initY) * scale};
     }
 
-    private float[] realToMapContinue(float px, float py, float lastInitX, float lastInitY, float lastXo, float lastYo) {
-        return new float[]{(px - lastInitX) * scale + lastXo, lastYo - (py - lastInitY) * scale};
-    }
 
     @Override
     public void onClickEvent(View view) {
+        switch (view.getId()) {
+            case R.id.tv_setting:
+                openActivity(SettingActivity.class);
+                break;
+            case R.id.tv_connect:
+                break;
+            case R.id.iv_operation:
+                if(flag){
+                    iv_operation.setImageResource(R.mipmap.home_start);
+                    tv_status.setText("未连接");
+                    tv_status.setTextColor(getResources().getColor(R.color.route_color));
+                    tv_status.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.home_unconnect,0,0,0);
+                    flag=false;
+                }else{
+                    iv_operation.setImageResource(R.mipmap.home_stop);
+                    tv_status.setText("已连接");
+                    tv_status.setTextColor(getResources().getColor(R.color.route_color_active));
+                    tv_status.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.home_connect,0,0,0);
+                    flag=true;
+                }
+                break;
+            default:
+                break;
+        }
 
     }
 
