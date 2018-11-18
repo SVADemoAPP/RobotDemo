@@ -24,6 +24,7 @@ import com.slamtec.slamware.discovery.BleDevice;
 import com.slamtec.slamware.discovery.Device;
 import com.slamtec.slamware.discovery.DeviceManager;
 import com.slamtec.slamware.discovery.DiscoveryMode;
+import com.slamtec.slamware.discovery.MdnsDevice;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,36 @@ public class MaplistActivity extends BaseActivity {
     private TextView tv_next;
 
     private DeviceManager deviceManager;
+
+    private AbstractDiscover.DiscoveryListener discoveryListener=new AbstractDiscover.DiscoveryListener() {
+        @Override
+        public void onStartDiscovery(AbstractDiscover abstractDiscover) {
+            Log.e("msg","111");
+        }
+
+        @Override
+        public void onStopDiscovery(AbstractDiscover abstractDiscover) {
+            Log.e("msg","222");
+        }
+
+        @Override
+        public void onDiscoveryError(AbstractDiscover abstractDiscover, String s) {
+            Log.e("msg","333");
+        }
+
+        @Override
+        public void onDeviceFound(AbstractDiscover abstractDiscover, Device device) {
+            Log.e("msg","444");
+            if(device instanceof BleDevice){
+//                                    Log.e("msg","aa"+((BleDevice)device).getDevice());
+            }else  if(device instanceof MdnsDevice){
+                Log.e("msg","444");
+                Log.e("msg",((MdnsDevice)device).getAddr()+","+((MdnsDevice) device).getPort());
+                Constant.robotIp=((MdnsDevice)device).getAddr();
+                Constant.robotPort=((MdnsDevice)device).getPort();
+            }
+        }
+    };
 
     @Override
     public void setContentLayout() {
@@ -82,17 +113,12 @@ public class MaplistActivity extends BaseActivity {
         lv_maplist = findViewById(R.id.lv_maplist);
         tv_next=findViewById(R.id.tv_next);
         tv_next.setOnClickListener(this);
-//
-        BlueUtils.getBlueUtils().getInitialization(this);
-//
-        BlueUtils.getBlueUtils().startBlue();
-
-        BlueUtils.getBlueUtils().setFindBlue(new BlueUtils.FindBlue() {
+ BlueUtils.getBlueUtils().setFindBlue(new BlueUtils.FindBlue() {
             @Override
             public void getBlues(BluetoothDevice bluetoothDevice) {
+
                 final BleDevice device = new BleDevice(bluetoothDevice);
-                device.canBeFoundWith(DiscoveryMode.BLE);
-                deviceManager = new DeviceManager(MaplistActivity.this);
+                boolean f= device.canBeFoundWith(DiscoveryMode.MDNS);
                 String wifiSSID = "PHICOMM_3201";
                 String wifiPassword = "1225sznp";
                 // listener; // a concrete AbstractDiscover.BleConfigureListener object
@@ -100,6 +126,9 @@ public class MaplistActivity extends BaseActivity {
                     @Override
                     public void onConfigureSuccess() {
                         Log.e("start","success");
+//                        deviceManager.setListener(discoveryListener);
+//                        deviceManager.start(DiscoveryMode.BLE);
+//                        deviceManager.start(DiscoveryMode.MDNS);
                     }
 
                     @Override
@@ -107,40 +136,26 @@ public class MaplistActivity extends BaseActivity {
                         Log.e("start",s);
                     }
                 });
-
-//        deviceManager.start(DiscoveryMode.MDNS);
-//        BleDevice device=new BleDevice(null);
-//        device.canBeFoundWith(DiscoveryMode.BLE);
-
-
-                deviceManager.setListener(new AbstractDiscover.DiscoveryListener() {
-                    @Override
-                    public void onStartDiscovery(AbstractDiscover abstractDiscover) {
-
-                        Log.e("start","start");
-                    }
-
-                    @Override
-                    public void onStopDiscovery(AbstractDiscover abstractDiscover) {
-                        Log.e("start","stop");
-                    }
-
-                    @Override
-                    public void onDiscoveryError(AbstractDiscover abstractDiscover, String s) {
-                        Log.e("start","error");
-                    }
-
-                    @Override
-                    public void onDeviceFound(AbstractDiscover abstractDiscover, Device device) {
-
-                    }
-                });
             }
         });
+        BlueUtils.getBlueUtils().getInitialization(this);
+//
+        BlueUtils.getBlueUtils().startBlue();
+        deviceManager = new DeviceManager(MaplistActivity.this);
+        deviceManager.setListener(discoveryListener);
+        deviceManager.start(DiscoveryMode.BLE);
+        deviceManager.start(DiscoveryMode.MDNS);
 
 
 
-    }
+
+
+
+            }
+////        });
+
+
+
 
     @Override
     public void dealLogicAfterInitView() {

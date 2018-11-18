@@ -6,6 +6,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -232,8 +233,14 @@ public class HomeActivity extends BaseActivity {
             }
         });
         mapHeight = mapBitmap.getHeight();
+        if(TextUtils.isEmpty(Constant.robotIp)){
+            Constant.robotIp="192.168.11.1";
+        }
+        if(Constant.robotPort==0){
+            Constant.robotPort=1445;
+        }
         try {
-            platform = DeviceManager.connect("192.168.2.108", 1445); // 连接到机器人底盘
+            platform = DeviceManager.connect(Constant.robotIp, Constant.robotPort); // 连接到机器人底盘
             nowPose = platform.getPose();// 当前机器人的位置,
 //            System.out.println(nowPose.getX() + "," + nowPose.getY());
             nowX = nowPose.getX();
