@@ -18,45 +18,45 @@ import android.widget.Toast;
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.framwork.utils.CommonTools;
 
-public class ParamsDialog extends Dialog implements OnClickListener {
+public class RobotparamDialog extends Dialog implements OnClickListener {
     ObjectAnimator animReturn1;
     ObjectAnimator animReturn2;
     ObjectAnimator animStart1;
     ObjectAnimator animStart2;
     private EditText[] ets;
-    private int[] idsRl = new int[]{R.id.rl1, R.id.rl2, R.id.rl3};
+    private int[] idsRl = new int[]{R.id.rl1, R.id.rl2,R.id.rl3};
     private RelativeLayout[] ivs;
     private Context mContext;
     private int nowEdit = 0;
-    private OnDialogStartCollectListener onDialogListener;
+    private OnRobotparamListener onRobotparamListener;
     private RelativeLayout[] rls;
     private TextView tv_confirm,tv_cancel;
 
-    public interface OnDialogStartCollectListener {
-        void paramsComplete(float x,float y,float scaleRuler);
+    public interface OnRobotparamListener {
+        void paramsComplete(String ip, int port,String userId);
     }
 
-    public void setData(String position_X, String position_Y, String string_enodeId, String cellId, String rsrp) {
-        ets[0].setText(position_X);
-        ets[1].setText(position_Y);
-        ets[2].setText(string_enodeId);
+    public void setData(String ip, int port,String userId) {
+        ets[0].setText(ip);
+        ets[1].setText(port + "");
+        ets[2].setText(userId);
         ets[0].setSelection(ets[0].getText().length());
         ets[1].setSelection(ets[1].getText().length());
         ets[2].setSelection(ets[2].getText().length());
     }
 
-    public void setOnDialogListener(OnDialogStartCollectListener onDialogListener) {
-        this.onDialogListener = onDialogListener;
+    public void setOnRobotparamListener(OnRobotparamListener onRobotparamListener) {
+        this.onRobotparamListener = onRobotparamListener;
     }
 
-    public ParamsDialog(Context context, int theme) {
+    public RobotparamDialog(Context context, int theme) {
         super(context, theme);
         mContext = context;
     }
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_params);
+        setContentView(R.layout.dialog_robotparam);
         tv_confirm = (TextView) findViewById(R.id.tv_confirm);
         tv_cancel = (TextView) findViewById(R.id.tv_cancel);
         tv_confirm.setOnClickListener(this);
@@ -149,16 +149,12 @@ public class ParamsDialog extends Dialog implements OnClickListener {
             case R.id.tv_confirm:
                 for (EditText text : ets) {
                     if (TextUtils.isEmpty(text.getText().toString())) {
-                        Toast.makeText(mContext, R.string.nullWarm,  Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, R.string.nullWarm, Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                 }
-                if(Float.parseFloat(ets[2].getText().toString())<=0){
-                    Toast.makeText(mContext, "比例尺必须大于0",  Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                onDialogListener.paramsComplete(Float.parseFloat(ets[0].getText().toString()), Float.parseFloat(ets[1].getText().toString()),Float.parseFloat(ets[2].getText().toString()));
+                onRobotparamListener.paramsComplete(ets[0].getText().toString(), Integer.parseInt(ets[1].getText().toString()),ets[2].getText().toString());
                 dismiss();
                 return;
             case R.id.tv_cancel:
