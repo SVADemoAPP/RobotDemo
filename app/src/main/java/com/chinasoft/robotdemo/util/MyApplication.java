@@ -19,19 +19,19 @@ public class MyApplication extends Application {
         FakeX509TrustManager.allowAllSSL();
         Constant.mRequestQueue = Volley.newRequestQueue(getApplicationContext());
         InterRequestUtil.getInstance(getApplicationContext());
-        Constant.IP_ADDRESS = SharedPrefHelper.getString(getApplicationContext(), "ip", "https://218.4.33.215:8083");
-        Constant.toast = Toast.makeText(this, "", 0);
+        Constant.IP_ADDRESS = SharedPrefHelper.getString(getApplicationContext(), "serverIp", "https://218.4.33.215:8083");
+        Constant.toast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
         super.onCreate();
         instance = this;
-        this.filePath = new StringBuilder(String.valueOf(Environment.getExternalStorageDirectory().getAbsolutePath())).append("/").append(instance.getApplicationContext().getPackageName()).append("/").toString();
+        filePath = new StringBuilder(String.valueOf(Environment.getExternalStorageDirectory().getAbsolutePath())).append("/").append(instance.getApplicationContext().getPackageName()).append("/").toString();
         CrashHelper.getInstance().init(getApplicationContext());
     }
 
     public String getFilePath() {
-        return this.filePath;
+        return filePath;
     }
 
     public String getRoutesPath() {
-        return this.filePath + "result_store";
+        return filePath + "result_store";
     }
 }

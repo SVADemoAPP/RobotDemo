@@ -28,6 +28,4 @@ dependencies {
     implementation files('libs/slamware_sdk_android.jar')
     implementation project(':activity_entry_name')
     compile project(path: ':activity_entry_name')
-    implementation files('src/main/libs/gson-2.6.2.jar')
-    implementation files('src/main/libs/volley.jar')
 }

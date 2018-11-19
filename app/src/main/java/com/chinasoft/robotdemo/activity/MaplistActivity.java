@@ -271,6 +271,9 @@ public class MaplistActivity extends BaseActivity {
     public void onClickEvent(View view) {
         switch (view.getId()) {
             case R.id.tv_next:
+                if(deviceManager!=null){
+                    deviceManager.stop(DiscoveryMode.MDNS);
+                }
                 Bundle bundle = new Bundle();
                 bundle.putString("currentMap", currentMap);
                 openActivity(HomeActivity.class, bundle);
@@ -281,4 +284,11 @@ public class MaplistActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(deviceManager!=null){
+            deviceManager.stop(DiscoveryMode.MDNS);
+        }
+    }
 }

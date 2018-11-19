@@ -62,6 +62,10 @@ public class HomeActivity extends BaseActivity {
 
     private boolean isStart = false;
 
+    private boolean isPrruCollect=false;
+
+    private PrruModel nowCollectPrru;
+
     private float xo, yo, scale, initX, initY, initZ,realXo,realYo;
 
     private RobotShape robotShape;
@@ -389,6 +393,31 @@ public class HomeActivity extends BaseActivity {
                 }
                 break;
             case R.id.iv_operation:
+                if(!robotConnect){
+                    showToast("机器人未连接");
+                    return;
+                }
+                if(isPrruCollect){
+                    try {
+                        platform.getCurrentAction().cancel();
+                    }catch (Exception e){
+
+                    }
+                    isPrruCollect=false;
+                    iv_operation.setImageResource(R.mipmap.home_start);
+                    return;
+                }
+
+                /**
+                 * 以下要移动到测试的prruModel
+                 */
+                isPrruCollect=true;
+                iv_operation.setImageResource(R.mipmap.home_stop);
+                nowCollectPrru=new PrruModel();
+                nowCollectPrru.x=1f;
+                nowCollectPrru.y=1f;
+                //以下写移动逻辑
+
                 Constant.interRequestUtil.getAllPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getAllPrruInfo?mapId=2046", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
@@ -407,6 +436,9 @@ public class HomeActivity extends BaseActivity {
                         LLog.getLog().e("getAllPrruInfo错误",volleyError.toString());
                     }
                 });
+
+
+
 //                if (flag) {
 //                    iv_operation.setImageResource(R.mipmap.home_start);
 //                    tv_status.setText("未连接");
