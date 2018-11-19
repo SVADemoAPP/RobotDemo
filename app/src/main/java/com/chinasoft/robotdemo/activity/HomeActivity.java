@@ -16,6 +16,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
+import com.chinasoft.robotdemo.bean.AllPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.BaseReponse;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.PrruModel;
@@ -39,6 +40,7 @@ import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.RobotShape;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -96,7 +98,7 @@ public class HomeActivity extends BaseActivity {
 
     private boolean flag = false;
 
-    private List<PrruModel> prruModelList;
+    private List<PrruModel> prruModelList=new ArrayList<>();
 
     private Handler mHandler = new Handler() {
         @Override
@@ -391,10 +393,13 @@ public class HomeActivity extends BaseActivity {
                     @Override
                     public void onResponse(String s) {
                         LLog.getLog().e("getAllPrruInfo成功",s);
+                        AllPrruInfoResponse ap=new Gson().fromJson(s,AllPrruInfoResponse.class);
 //                        P lap=new Gson().fromJson(s,LocAndPrruInfoResponse.class);
 //                        if(lap.code==0) {
 //                            LLog.getLog().prru( "," , prruDataToString(lap.data.prruData));
 //                        }
+                        prruModelList=ap.data;
+                        LLog.getLog().e("prruModelList",prruModelList+"");
                     }
                 }, new Response.ErrorListener() {
                     @Override
