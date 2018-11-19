@@ -11,6 +11,7 @@
     <color name="black_text">#222222</color>
     <color name="gray_bg">#eaeaea</color>
     <color name="gray_stroken">#a5a5a5</color>
+    <color name="gray_line_color">#D5D5D5</color>
     <color name="yellow">#febf0b</color>
     <color name="purple">#8f72db</color>
     <color name="cyan">#a2e5fc</color>

@@ -18,6 +18,9 @@ import com.chinasoft.robotdemo.util.Constant;
 public class SettingActivity extends BaseActivity {
 
 private TextView tv_exit,tv_reset,tv_save;
+    private TextView tv_http;
+    private TextView tv_https;
+
     @Override
     public void setContentLayout() {
         setContentView(R.layout.activity_setting);
@@ -33,9 +36,13 @@ private TextView tv_exit,tv_reset,tv_save;
         tv_exit=findViewById(R.id.tv_exit);
         tv_reset=findViewById(R.id.tv_reset);
         tv_save=findViewById(R.id.tv_save);
+        tv_http = findViewById(R.id.tv_http);
+        tv_https = findViewById(R.id.tv_https);
         tv_exit.setOnClickListener(this);
         tv_reset.setOnClickListener(this);
         tv_save.setOnClickListener(this);
+        tv_http.setOnClickListener(this);
+        tv_https.setOnClickListener(this);
     }
 
     @Override
@@ -51,6 +58,10 @@ private TextView tv_exit,tv_reset,tv_save;
             case R.id.tv_reset:
                 break;
             case R.id.tv_save:
+                break;
+            case R.id.tv_http:
+                break;
+            case R.id.tv_https:
                 break;
             default:
                 break;

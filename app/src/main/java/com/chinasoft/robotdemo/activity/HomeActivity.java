@@ -1,5 +1,7 @@
 package com.chinasoft.robotdemo.activity;
 
+import android.content.Context;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Path;
@@ -8,14 +10,19 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
+import com.chinasoft.robotdemo.adapter.PrruModelListAdapter;
 import com.chinasoft.robotdemo.bean.AllPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.BaseReponse;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
@@ -25,6 +32,8 @@ import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
+import com.chinasoft.robotdemo.util.SuperPopupWindow;
+import com.chinasoft.robotdemo.util.WindowChangeUtils;
 import com.chinasoft.robotdemo.view.dialog.ParamsDialog;
 import com.chinasoft.robotdemo.view.dialog.RobotparamDialog;
 import com.google.gson.Gson;
@@ -62,11 +71,11 @@ public class HomeActivity extends BaseActivity {
 
     private boolean isStart = false;
 
-    private boolean isPrruCollect=false;
+    private boolean isPrruCollect = false;
 
     private PrruModel nowCollectPrru;
 
-    private float xo, yo, scale, initX, initY, initZ,realXo,realYo;
+    private float xo, yo, scale, initX, initY, initZ, realXo, realYo;
 
     private RobotShape robotShape;
 
@@ -102,8 +111,17 @@ public class HomeActivity extends BaseActivity {
 
     private boolean flag = false;
 
-    private List<PrruModel> prruModelList=new ArrayList<>();
+    private List<PrruModel> prruModelList = new ArrayList<>();
 
+    /***xhf***/
+    SuperPopupWindow mSuperPopupWindow;
+
+    private Context mContext;
+    private static float Light = 1f;
+    private static float Black = 0.6f;
+    private View popupView;
+
+    /***xhf***/
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -115,21 +133,21 @@ public class HomeActivity extends BaseActivity {
 //                        Log.e("msg", "x:" + nowPose.getX() + ",y:" + nowPose.getY());
                         nowX = nowPose.getX();
                         nowY = nowPose.getY();
-                        final float logX=nowX+realXo;
-                        final float logY=nowY+realYo;
+                        final float logX = nowX + realXo;
+                        final float logY = nowY + realYo;
                         Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
                             @Override
                             public void onResponse(String s) {
-                                LLog.getLog().e("getLocAndPrruInfo成功",s);
-                                LocAndPrruInfoResponse lap=new Gson().fromJson(s,LocAndPrruInfoResponse.class);
-                                if(lap.code==0) {
+                                LLog.getLog().e("getLocAndPrruInfo成功", s);
+                                LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
+                                if (lap.code == 0) {
                                     LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData));
                                 }
                             }
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError volleyError) {
-                                LLog.getLog().e("getLocAndPrruInfo错误",volleyError.toString());
+                                LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
                             }
                         });
 //                        Log.e("handler",(nowX - lastX)+","+(nowY - lastY)+" now:"+nowX+","+nowY+" last:"+lastX+","+lastY);
@@ -194,6 +212,7 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     public void setContentLayout() {
+        mContext = HomeActivity.this;
         setContentView(R.layout.activity_home);
     }
 
@@ -326,8 +345,8 @@ public class HomeActivity extends BaseActivity {
                 break;
             case R.id.tv_connect:
                 try {
-                    robotConnect=true;
-                    LLog.getLog().e("连接机器人",Constant.robotIp+":"+Constant.robotPort);
+                    robotConnect = true;
+                    LLog.getLog().e("连接机器人", Constant.robotIp + ":" + Constant.robotPort);
                     platform = DeviceManager.connect(Constant.robotIp, Constant.robotPort); // 连接到机器人底盘
 
                     nowPose = platform.getPose();// 当前机器人的位置,
@@ -357,8 +376,8 @@ public class HomeActivity extends BaseActivity {
                         initY = SharedPrefHelper.getFloat(this, "initY");
                         xo = SharedPrefHelper.getFloat(this, "xo");
                         yo = SharedPrefHelper.getFloat(this, "yo");
-                        realXo=SharedPrefHelper.getFloat(this, "realXo");
-                        realYo=SharedPrefHelper.getFloat(this, "realYo");
+                        realXo = SharedPrefHelper.getFloat(this, "realXo");
+                        realYo = SharedPrefHelper.getFloat(this, "realYo");
                         float[] continueXY = realToMap(nowX, nowY);
                         initStart(continueXY[0], continueXY[1]);
                     } else {
@@ -367,8 +386,8 @@ public class HomeActivity extends BaseActivity {
                             paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
                                 @Override
                                 public void paramsComplete(float x, float y, float scaleRuler) {
-                                    realXo=x;
-                                    realYo=y;
+                                    realXo = x;
+                                    realYo = y;
                                     scale = scaleRuler;
                                     xo = x * scaleRuler;
                                     yo = mapHeight - y * scaleRuler;
@@ -393,50 +412,56 @@ public class HomeActivity extends BaseActivity {
                 }
                 break;
             case R.id.iv_operation:
-                if(!robotConnect){
-                    showToast("机器人未连接");
-                    return;
-                }
-                if(isPrruCollect){
-                    try {
-                        platform.getCurrentAction().cancel();
-                    }catch (Exception e){
-
-                    }
-                    isPrruCollect=false;
-                    iv_operation.setImageResource(R.mipmap.home_start);
-                    return;
-                }
-
-                /**
-                 * 以下要移动到测试的prruModel
-                 */
-                isPrruCollect=true;
-                iv_operation.setImageResource(R.mipmap.home_stop);
-                nowCollectPrru=new PrruModel();
-                nowCollectPrru.x=1f;
-                nowCollectPrru.y=1f;
-                //以下写移动逻辑
+//                openActivity(SettingActivity.class);
+//                if(!robotConnect){
+//                    showToast("机器人未连接");
+//                    return;
+//                }
+//                if(isPrruCollect){
+//                    try {
+//                        platform.getCurrentAction().cancel();
+//                    }catch (Exception e){
+//
+//                    }
+//                    isPrruCollect=false;
+//                    iv_operation.setImageResource(R.mipmap.home_start);
+//                    return;
+//                }
+//
+//                /**
+//                 * 以下要移动到测试的prruModel
+//                 */
+//                isPrruCollect=true;
+//                iv_operation.setImageResource(R.mipmap.home_stop);
+//                nowCollectPrru=new PrruModel();
+//                nowCollectPrru.x=1f;
+//                nowCollectPrru.y=1f;
+//                //以下写移动逻辑
 
                 Constant.interRequestUtil.getAllPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getAllPrruInfo?mapId=2046", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
-                        LLog.getLog().e("getAllPrruInfo成功",s);
-                        AllPrruInfoResponse ap=new Gson().fromJson(s,AllPrruInfoResponse.class);
+                        LLog.getLog().e("getAllPrruInfo成功", s);
+                        AllPrruInfoResponse ap = new Gson().fromJson(s, AllPrruInfoResponse.class);
 //                        P lap=new Gson().fromJson(s,LocAndPrruInfoResponse.class);
 //                        if(lap.code==0) {
 //                            LLog.getLog().prru( "," , prruDataToString(lap.data.prruData));
 //                        }
-                        prruModelList=ap.data;
-                        LLog.getLog().e("prruModelList",prruModelList+"");
+                        prruModelList = ap.data;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                initPop(prruModelList);
+                            }
+                        });
+                        LLog.getLog().e("prruModelList", prruModelList + "");
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
-                        LLog.getLog().e("getAllPrruInfo错误",volleyError.toString());
+                        LLog.getLog().e("getAllPrruInfo错误", volleyError.toString());
                     }
                 });
-
 
 
 //                if (flag) {
@@ -459,15 +484,61 @@ public class HomeActivity extends BaseActivity {
 
     }
 
-    private String prruDataToString(List<PrruSigalModel> prruSigalModelList){
-        if(prruSigalModelList==null||prruSigalModelList.size()==0){
+    private String prruDataToString(List<PrruSigalModel> prruSigalModelList) {
+        if (prruSigalModelList == null || prruSigalModelList.size() == 0) {
             return "null";
         }
-        StringBuffer sb=new StringBuffer();
-        for(PrruSigalModel p:prruSigalModelList){
-            sb.append(";"+p.toString());
+        StringBuffer sb = new StringBuffer();
+        for (PrruSigalModel p : prruSigalModelList) {
+            sb.append(";" + p.toString());
         }
         return sb.substring(1);
+    }
+
+    /***
+     * 初始化popupwindow
+     */
+    private void initPop(List<PrruModel> prruModelList) {
+        mSuperPopupWindow = new SuperPopupWindow(mContext, R.layout.layout_popup_list_choose);
+//        mSuperPopupWindow.setFocusable(true);
+        mSuperPopupWindow.setOutsideTouchable(true);
+        mSuperPopupWindow.setAnimotion(R.style.PopAnimation);
+        popupView = mSuperPopupWindow.getPopupView();
+
+        LinearLayout tv_Cancel = popupView.findViewById(R.id.tv_ll_pop_cancel);
+        ListView poplist =popupView.findViewById(R.id.pop_list);//获取list对象
+        PrruModelListAdapter prruModelListAdapter = new PrruModelListAdapter(mContext, prruModelList);
+        poplist.setAdapter(prruModelListAdapter);
+        prruModelListAdapter.notifyDataSetChanged();
+        prruModelListAdapter.setPrruModelListClickListener(new PrruModelListAdapter.OnPrruModelListClickListener() {
+            @Override
+            public void onClick(PrruModel prruModel) {
+                hidePop();
+                Toast.makeText(HomeActivity.this, prruModel.neId+"", Toast.LENGTH_SHORT).show();
+                //todo 回传点击数据
+            }
+        });
+        tv_Cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hidePop();
+            }
+        });
+        showPop();//默认开始一次
+    }
+
+    /**
+     * 显示Popupwindow
+     */
+    private void showPop() {
+        mSuperPopupWindow.showPopupWindow();
+    }
+
+    /**
+     * 隐藏Popupwindow
+     */
+    private void hidePop() {
+        mSuperPopupWindow.hidePopupWindow();
     }
 
 }

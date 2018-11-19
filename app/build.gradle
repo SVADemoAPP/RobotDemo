@@ -28,4 +28,9 @@ dependencies {
     implementation files('libs/slamware_sdk_android.jar')
     implementation project(':activity_entry_name')
     compile project(path: ':activity_entry_name')
+
+    compile 'com.android.support:appcompat-v7:26.1.0'
+    compile 'com.android.support:support-v4:26.1.0'
+    compile 'com.android.support:cardview-v7:26.1.0'
+    compile 'com.android.support:design:26.1.0'
 }

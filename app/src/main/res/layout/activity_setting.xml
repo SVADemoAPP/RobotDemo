@@ -7,6 +7,7 @@
 
 
     <RelativeLayout
+        android:id="@+id/rl_settitle"
         android:layout_width="match_parent"
         android:layout_height="67dp"
         android:layout_marginTop="40dp"
@@ -26,34 +27,202 @@
             android:textSize="12dp" />
     </RelativeLayout>
 
+    <!--机器人Ip-->
+    <RelativeLayout
+        android:id="@+id/rl_setrb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl_settitle"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="机器人IP"
+                android:textColor="@color/white"
+                android:textSize="18dp"
+                android:typeface="serif" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/tv_selector"
+                android:gravity="center"
+                android:hint="192.168.11.1"
+                android:singleLine="true"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:textSize="18dp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!--机器人端口-->
+    <RelativeLayout
+        android:id="@+id/rl_set_rb_port"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl_setrb"
+        android:layout_margin="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="机器人端口"
+                android:textColor="@color/white"
+                android:textSize="18dp"
+                android:typeface="serif" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/tv_selector"
+                android:gravity="center"
+                android:hint="1445"
+                android:singleLine="true"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:textSize="18dp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!--服务器地址-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl_set_rb_port"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="服务器地址"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:typeface="serif" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_http"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/tv_http_l_selector"
+                        android:gravity="center"
+                        android:text="Http"
+                        android:textColor="#00b5ff"
+                        android:textSize="13dp"
+                        android:typeface="serif" />
+
+                    <TextView
+                        android:id="@+id/tv_https"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/tv_https_r_selector"
+                        android:gravity="center"
+                        android:text="Https"
+                        android:textColor="@color/white"
+                        android:textSize="13dp"
+                        android:typeface="serif" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_weight="6"
+                    android:layout_height="40dp"
+                    android:background="@drawable/tv_selector"
+                    android:gravity="center"
+                    android:hint="198.168.11.1"
+                    android:singleLine="true"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
+                    android:textSize="18dp" />
+                <ImageView
+
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    android:layout_height="40dp"
+                    android:background="@drawable/tv_selector"
+                    android:gravity="center"
+                    android:hint="3880"
+                    android:singleLine="true"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </RelativeLayout>
+    <!--底部设置按钮-->
     <LinearLayout
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="30dp"
-        android:orientation="horizontal"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:orientation="horizontal">
+
         <TextView
             android:id="@+id/tv_reset"
-            android:layout_width="120dp"
+            android:layout_width="140dp"
             android:layout_height="60dp"
             android:background="@drawable/setting_tv"
             android:gravity="center"
-            android:text="重 置"
+            android:text="重置设置"
             android:textColor="@color/white"
-            android:textSize="20dp"
+            android:textSize="18dp"
             android:textStyle="bold" />
 
         <TextView
-            android:layout_marginLeft="20dp"
             android:id="@+id/tv_save"
-            android:layout_width="120dp"
+            android:layout_width="140dp"
             android:layout_height="60dp"
+            android:layout_marginLeft="20dp"
             android:background="@drawable/setting_tv"
             android:gravity="center"
-            android:text="保 存"
+            android:text="保存设置"
             android:textColor="@color/white"
-            android:textSize="20dp"
+            android:textSize="18dp"
             android:textStyle="bold" />
 
     </LinearLayout>
