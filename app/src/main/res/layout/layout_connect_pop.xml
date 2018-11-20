@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="400dp"
+    android:layout_margin="50dp"
+    android:background="@mipmap/home_bg_connect_popup">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <!--x y坐标-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
+            <!--x坐标-->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="X坐标"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:typeface="serif" />
+
+                <EditText
+                    android:id="@+id/edt_connect_pointX"
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@drawable/tv_selector"
+                    android:gravity="center"
+                    android:text="0.00"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:typeface="serif" />
+            </LinearLayout>
+            <!--y坐标-->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="Y坐标"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:typeface="serif" />
+
+                <EditText
+                    android:id="@+id/edt_connect_pointY"
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/tv_selector"
+                    android:gravity="center"
+                    android:text="0.00"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:typeface="serif" />
+            </LinearLayout>
+        </LinearLayout>
+        <!--机器人端口-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="比例尺"
+                android:textColor="@color/white"
+                android:textSize="15dp"
+                android:typeface="serif" />
+
+            <EditText
+                android:id="@+id/edt_connect_scale"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:background="@drawable/tv_selector"
+                android:gravity="center"
+                android:text="0.00"
+                android:textColor="@color/white"
+                android:textSize="15dp"
+                android:typeface="serif" />
+        </LinearLayout>
+        <!--机器人端口-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="机器人IP"
+                android:textColor="@color/white"
+                android:textSize="15dp"
+                android:typeface="serif" />
+
+            <EditText
+                android:id="@+id/edt_connect_rbip"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:background="@drawable/tv_selector"
+                android:gravity="center"
+                android:text="0.00"
+                android:textColor="@color/white"
+                android:textSize="15dp"
+                android:typeface="serif" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="机器人端口"
+                android:textColor="@color/white"
+                android:textSize="15dp"
+                android:typeface="serif" />
+
+            <EditText
+                android:id="@+id/edt_connect_rbport"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:background="@drawable/tv_selector"
+                android:gravity="center"
+                android:text="0.00"
+                android:textColor="@color/white"
+                android:textSize="15dp"
+                android:typeface="serif" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_connect_confirm"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:gravity="center"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/setting_tv"
+                android:text="确认"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/tv_connect_cancel"
+                android:background="@drawable/setting_tv"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:gravity="center"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="取消"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

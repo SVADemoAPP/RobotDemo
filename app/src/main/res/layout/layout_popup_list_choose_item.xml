@@ -2,10 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:id="@+id/ll_pop_item"
+    android:orientation="horizontal"
+    android:padding="5dp"
     android:layout_height="40dp">
     <TextView
-        android:id="@+id/tv_id"
+        android:text="neCode:"
+        android:layout_gravity="center"
+        android:textSize="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:layout_gravity="center"
+        android:textSize="15dp"
+        android:id="@+id/tv_neCode"
         android:text="测试"
+        android:singleLine="true"
+        android:ellipsize="middle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </LinearLayout>

@@ -51,6 +51,7 @@
                 android:typeface="serif" />
 
             <EditText
+                android:id="@+id/et_rb_ip"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/tv_selector"
@@ -86,6 +87,7 @@
                 android:typeface="serif" />
 
             <EditText
+                android:id="@+id/et_rb_port"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/tv_selector"
@@ -163,6 +165,7 @@
                 android:orientation="horizontal">
 
                 <EditText
+                    android:id="@+id/et_server_ip"
                     android:layout_width="0dp"
                     android:layout_weight="6"
                     android:layout_height="40dp"
@@ -179,6 +182,7 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content" />
                 <EditText
+                    android:id="@+id/et_server_port"
                     android:layout_width="0dp"
                     android:layout_weight="3"
                     android:layout_height="40dp"

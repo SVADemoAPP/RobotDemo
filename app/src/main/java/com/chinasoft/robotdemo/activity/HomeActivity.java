@@ -1,7 +1,6 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Path;
@@ -10,8 +9,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -24,7 +23,6 @@ import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.PrruModelListAdapter;
 import com.chinasoft.robotdemo.bean.AllPrruInfoResponse;
-import com.chinasoft.robotdemo.bean.BaseReponse;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
@@ -33,7 +31,6 @@ import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
 import com.chinasoft.robotdemo.util.SuperPopupWindow;
-import com.chinasoft.robotdemo.util.WindowChangeUtils;
 import com.chinasoft.robotdemo.view.dialog.ParamsDialog;
 import com.chinasoft.robotdemo.view.dialog.RobotparamDialog;
 import com.google.gson.Gson;
@@ -114,13 +111,12 @@ public class HomeActivity extends BaseActivity {
     private List<PrruModel> prruModelList = new ArrayList<>();
 
     /***xhf***/
-    SuperPopupWindow mSuperPopupWindow;
+    private SuperPopupWindow mSuperPopupWindow;
 
     private Context mContext;
-    private static float Light = 1f;
-    private static float Black = 0.6f;
     private View popupView;
 
+    private  SuperPopupWindow mConnectPopupWindow;
     /***xhf***/
     private Handler mHandler = new Handler() {
         @Override
@@ -322,26 +318,26 @@ public class HomeActivity extends BaseActivity {
     public void onClickEvent(View view) {
         switch (view.getId()) {
             case R.id.tv_setting:
-//                openActivity(SettingActivity.class);
-                if (robotparamDialog == null) {
-                    robotparamDialog = new RobotparamDialog(this, R.style.MyDialogStyle);
-                    robotparamDialog.setOnRobotparamListener(new RobotparamDialog.OnRobotparamListener() {
-                        @Override
-                        public void paramsComplete(String ip, int port, String userId) {
-                            SharedPrefHelper.putString(HomeActivity.this, "robotIp", ip);
-                            SharedPrefHelper.putInt(HomeActivity.this, "robotPort", port);
-                            SharedPrefHelper.putString(HomeActivity.this, "userId", userId);
-                            Constant.robotIp = ip;
-                            Constant.robotPort = port;
-                            Constant.userId = userId;
-                        }
-                    });
-                }
-                robotparamDialog.show();
-                robotparamDialog.setData(SharedPrefHelper.getString(HomeActivity.this, "robotIp",
-                        "192.168.11.1"), SharedPrefHelper.getInt(HomeActivity.this, "robotPort",
-                        1445), SharedPrefHelper.getString(HomeActivity.this, "userId",
-                        "192.168.1.1"));
+                openActivity(SettingActivity.class);
+//                if (robotparamDialog == null) {
+//                    robotparamDialog = new RobotparamDialog(this, R.style.MyDialogStyle);
+//                    robotparamDialog.setOnRobotparamListener(new RobotparamDialog.OnRobotparamListener() {
+//                        @Override
+//                        public void paramsComplete(String ip, int port, String userId) {
+//                            SharedPrefHelper.putString(HomeActivity.this, "robotIp", ip);
+//                            SharedPrefHelper.putInt(HomeActivity.this, "robotPort", port);
+//                            SharedPrefHelper.putString(HomeActivity.this, "userId", userId);
+//                            Constant.robotIp = ip;
+//                            Constant.robotPort = port;
+//                            Constant.userId = userId;
+//                        }
+//                    });
+//                }
+//                robotparamDialog.show();
+//                robotparamDialog.setData(SharedPrefHelper.getString(HomeActivity.this, "robotIp",
+//                        "192.168.11.1"), SharedPrefHelper.getInt(HomeActivity.this, "robotPort",
+//                        1445), SharedPrefHelper.getString(HomeActivity.this, "userId",
+//                        "192.168.1.1"));
                 break;
             case R.id.tv_connect:
                 try {
@@ -381,31 +377,32 @@ public class HomeActivity extends BaseActivity {
                         float[] continueXY = realToMap(nowX, nowY);
                         initStart(continueXY[0], continueXY[1]);
                     } else {
-                        if (paramsDialog == null) {
-                            paramsDialog = new ParamsDialog(this, R.style.MyDialogStyle);
-                            paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
-                                @Override
-                                public void paramsComplete(float x, float y, float scaleRuler) {
-                                    realXo = x;
-                                    realYo = y;
-                                    scale = scaleRuler;
-                                    xo = x * scaleRuler;
-                                    yo = mapHeight - y * scaleRuler;
-                                    SharedPrefHelper.putString(HomeActivity.this, "currentMap", currentMap);
-                                    SharedPrefHelper.putFloat(HomeActivity.this, "scale", scale);
-                                    SharedPrefHelper.putFloat(HomeActivity.this, "xo", xo);
-                                    SharedPrefHelper.putFloat(HomeActivity.this, "yo", yo);
-                                    SharedPrefHelper.putFloat(HomeActivity.this, "realXo", realXo);
-                                    SharedPrefHelper.putFloat(HomeActivity.this, "realYo", realYo);
-                                    initX = nowX;
-                                    initY = nowY;
-                                    SharedPrefHelper.putFloat(HomeActivity.this, "initX", initX);
-                                    SharedPrefHelper.putFloat(HomeActivity.this, "initY", initY);
-                                    initStart(xo, yo);
-                                }
-                            });
-                        }
-                        paramsDialog.show();
+//                        if (paramsDialog == null) {
+//                            paramsDialog = new ParamsDialog(this, R.style.MyDialogStyle);
+//                            paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
+//                                @Override
+//                                public void paramsComplete(float x, float y, float scaleRuler) {
+//                                    realXo = x;
+//                                    realYo = y;
+//                                    scale = scaleRuler;
+//                                    xo = x * scaleRuler;
+//                                    yo = mapHeight - y * scaleRuler;
+//                                    SharedPrefHelper.putString(HomeActivity.this, "currentMap", currentMap);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "scale", scale);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "xo", xo);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "yo", yo);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "realXo", realXo);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "realYo", realYo);
+//                                    initX = nowX;
+//                                    initY = nowY;
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "initX", initX);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "initY", initY);
+//                                    initStart(xo, yo);
+//                                }
+//                            });
+//                        }
+//                        paramsDialog.show();
+                        initConnectPop();
                     }
                 } else {
                     showToast("机器人连接失败！");
@@ -451,7 +448,7 @@ public class HomeActivity extends BaseActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                initPop(prruModelList);
+                                initBeginPop(prruModelList);
                             }
                         });
                         LLog.getLog().e("prruModelList", prruModelList + "");
@@ -496,9 +493,9 @@ public class HomeActivity extends BaseActivity {
     }
 
     /***
-     * 初始化popupwindow
+     * 初始化开始popupwindow
      */
-    private void initPop(List<PrruModel> prruModelList) {
+    private void initBeginPop(List<PrruModel> prruModelList) {
         mSuperPopupWindow = new SuperPopupWindow(mContext, R.layout.layout_popup_list_choose);
 //        mSuperPopupWindow.setFocusable(true);
         mSuperPopupWindow.setOutsideTouchable(true);
@@ -513,32 +510,79 @@ public class HomeActivity extends BaseActivity {
         prruModelListAdapter.setPrruModelListClickListener(new PrruModelListAdapter.OnPrruModelListClickListener() {
             @Override
             public void onClick(PrruModel prruModel) {
-                hidePop();
-                Toast.makeText(HomeActivity.this, prruModel.neId+"", Toast.LENGTH_SHORT).show();
+                hideBeginPop();
+                Toast.makeText(HomeActivity.this, prruModel.neCode+"", Toast.LENGTH_SHORT).show();
                 //todo 回传点击数据
             }
         });
         tv_Cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                hidePop();
+                hideBeginPop();
             }
         });
-        showPop();//默认开始一次
+        showBeginPop();//默认开始一次
     }
 
     /**
      * 显示Popupwindow
      */
-    private void showPop() {
+    private void showBeginPop() {
         mSuperPopupWindow.showPopupWindow();
     }
 
     /**
      * 隐藏Popupwindow
      */
-    private void hidePop() {
+    private void hideBeginPop() {
         mSuperPopupWindow.hidePopupWindow();
     }
 
+
+    /***
+     * 初始化连接popupwindow
+     */
+    private void initConnectPop() {
+        mConnectPopupWindow = new SuperPopupWindow(mContext, R.layout.layout_connect_pop);
+//        mSuperPopupWindow.setFocusable(true);
+        mConnectPopupWindow.setOutsideTouchable(true);
+        mConnectPopupWindow.setAnimotion(R.style.PopAnimation);
+        View mConnectPopupView = mSuperPopupWindow.getPopupView();
+        initConnectPopView(mConnectPopupView);
+        showBeginPop();
+    }
+     private  void initConnectPopView(View view){
+         TextView tvCancel = view.findViewById(R.id.tv_connect_cancel); //取消按钮
+         TextView tvConfirm =view.findViewById(R.id.tv_confirm);        //确定按钮
+         EditText edtPointX=view.findViewById(R.id.edt_connect_pointX); //X坐标
+         EditText edtPointY=view.findViewById(R.id.edt_connect_pointY); //Y坐标
+         EditText edtScale=view.findViewById(R.id.edt_connect_scale);   //比例尺
+         EditText edtRbIp=view.findViewById(R.id.edt_connect_rbip);     //机器人IP
+         EditText edtRbPort=view.findViewById(R.id.edt_connect_rbport); //机器人端口
+         tvCancel.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+                 hideConnectPop();
+             }
+         });
+         tvConfirm.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+                 hideConnectPop();
+             }
+         });
+     }
+    /**
+     * 显示Popupwindow
+     */
+    private void showConnectPop() {
+        mConnectPopupWindow.showPopupWindow();
+    }
+
+    /**
+     * 隐藏Popupwindow
+     */
+    private void hideConnectPop() {
+        mConnectPopupWindow.hidePopupWindow();
+    }
 }

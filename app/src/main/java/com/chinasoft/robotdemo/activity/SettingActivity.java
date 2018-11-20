@@ -128,8 +128,8 @@ private TextView tv_exit,tv_reset,tv_save;
         String serverIp=et_server_ip.getText().toString();
         String serPort=et_server_port.getText().toString();
         SharedPrefHelper.putString(SettingActivity.this, "robotIp", rbIp);
-        SharedPrefHelper.putString(SettingActivity.this, "robotPort", rbPort);
-        SharedPrefHelper.putString(SettingActivity.this, "serverIp", serverIp);
+        SharedPrefHelper.putInt(SettingActivity.this, "robotPort", Integer.valueOf(rbPort));
+        SharedPrefHelper.putString(SettingActivity.this, "userId", serverIp);
         SharedPrefHelper.putString(SettingActivity.this, "serPort", serPort);
         SharedPrefHelper.putBoolean(SettingActivity.this, "https", httpsFlag);
     }

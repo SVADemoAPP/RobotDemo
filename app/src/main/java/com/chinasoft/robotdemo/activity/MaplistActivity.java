@@ -92,8 +92,8 @@ public class MaplistActivity extends BaseActivity {
 
     @Override
     public void dealLogicBeforeInitView() {
-        Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
-        Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
+//        Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
+//        Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
         Constant.interRequestUtil = InterRequestUtil.getInstance(this);
 
         File dir = new File(Constant.mapDirs);

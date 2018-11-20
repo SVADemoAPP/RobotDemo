@@ -52,15 +52,15 @@ public class PrruModelListAdapter extends BaseAdapter{
         if (convertView == null) {
             holder = new PrruModelListAdapter.ViewHolder();
             convertView = LayoutInflater.from(mContext).inflate( R.layout.layout_popup_list_choose_item, parent,false);
-            holder.tv_id = convertView.findViewById(R.id.tv_id);
+            holder.tv_neCode = convertView.findViewById(R.id.tv_neCode);
             holder.ll_pop_item = convertView.findViewById(R.id.ll_pop_item);
             convertView.setTag(holder);
         } else {
             holder = (PrruModelListAdapter.ViewHolder) convertView.getTag();
         }
-        TextView textView = holder.tv_id;
+        TextView textView = holder.tv_neCode;
         LinearLayout ll_item= holder.ll_pop_item;
-        textView.setText(mPrruModelList.get(position).neId);
+        textView.setText(mPrruModelList.get(position).neCode);
         ll_item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,7 +77,7 @@ public class PrruModelListAdapter extends BaseAdapter{
     }
 
     private class ViewHolder {
-        public TextView tv_id;
+        public TextView tv_neCode;
         public LinearLayout ll_pop_item;
 
     }
