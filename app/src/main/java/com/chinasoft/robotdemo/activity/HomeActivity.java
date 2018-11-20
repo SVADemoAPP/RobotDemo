@@ -701,8 +701,8 @@ public class HomeActivity extends BaseActivity {
                 float x = Float.parseFloat(edtPointX.getText().toString());
                 float y = Float.parseFloat(edtPointY.getText().toString());
                 float scale = Float.parseFloat(edtScale.getText().toString());
-                saveRbLocationInfo(x, y, scale);    //存储机器人位置信息
-                connection();                       //进行机器人连接尝试
+//                saveRbLocationInfo();    //存储机器人位置信息
+                connection(x, y, scale);                       //进行机器人连接尝试
             }
         });
     }
@@ -774,7 +774,7 @@ public class HomeActivity extends BaseActivity {
         initStart(xo, yo);
     }
 
-    private void connection() {
+    private void connection(float pointX,float pointY,float scaleRuler) {
         try {
             robotConnect = true;
             LLog.getLog().e("连接机器人", Constant.robotIp + ":" + Constant.robotPort);
@@ -808,6 +808,8 @@ public class HomeActivity extends BaseActivity {
                 realYo = SharedPrefHelper.getFloat(this, "realYo");
                 float[] continueXY = realToMap(nowX, nowY);
                 initStart(continueXY[0], continueXY[1]);
+            }else{
+                    saveRbLocationInfo(pointX,pointY,scaleRuler);
             }
         } else {
             showToast("机器人连接失败！");
