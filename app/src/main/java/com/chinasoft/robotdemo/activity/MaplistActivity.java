@@ -16,6 +16,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.MaplistAdapter;
+import com.chinasoft.robotdemo.bean.AllPrruInfoResponse;
+import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.entity.Floor;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
@@ -24,6 +26,7 @@ import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.FileUtil;
 import com.chinasoft.robotdemo.util.InterRequestUtil;
 import com.chinasoft.robotdemo.util.LLog;
+import com.google.gson.Gson;
 import com.slamtec.slamware.AbstractSlamwarePlatform;
 import com.slamtec.slamware.discovery.AbstractDiscover;
 import com.slamtec.slamware.discovery.BleDevice;
@@ -38,6 +41,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +59,7 @@ public class MaplistActivity extends BaseActivity {
     private String currentMap;
     private TextView tv_next;
 
+    private List<PrruModel> mPrruModelList;
     private DeviceManager deviceManager;
 
     private AbstractDiscover.DiscoveryListener discoveryListener = new AbstractDiscover.DiscoveryListener() {
@@ -162,6 +167,33 @@ public class MaplistActivity extends BaseActivity {
     }
 ////        });
 
+    private void requestPruModel(){
+        Constant.interRequestUtil.getAllPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getAllPrruInfo?mapId=2046", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                LLog.getLog().e("getAllPrruInfo成功", s);
+                AllPrruInfoResponse ap = new Gson().fromJson(s, AllPrruInfoResponse.class);
+//                        P lap=new Gson().fromJson(s,LocAndPrruInfoResponse.class);
+//                        if(lap.code==0) {
+//                            LLog.getLog().prru( "," , prruDataToString(lap.data.prruData));
+//                        }
+                mPrruModelList = ap.data;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                    }
+                });
+                LLog.getLog().e("prruModelList", mPrruModelList + "");
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                LLog.getLog().e("getAllPrruInfo错误", volleyError.toString());
+            }
+        });
+    }
+
 
     private void login(Map<String, String> map) {
         Constant.interRequestUtil.login(Request.Method.POST, Constant.IP_ADDRESS + "/tester/api/app/login", new Response.Listener<JSONObject>() {
@@ -171,6 +203,7 @@ public class MaplistActivity extends BaseActivity {
                         SharedPrefHelper.putString(MaplistActivity.this, "Cookie", response.getString("Cookie"));
                         LLog.getLog().e("登录","成功");
                         showToast("Tester登录成功");
+                        requestPruModel();     //请求PruModelList信息
                         //                        Constant.interRequestUtil.getMapData(
 //                                response.getString("Cookie"), 1,
 //                                Constant.IP_ADDRESS
@@ -276,6 +309,7 @@ public class MaplistActivity extends BaseActivity {
                 }
                 Bundle bundle = new Bundle();
                 bundle.putString("currentMap", currentMap);
+                bundle.putSerializable("PrruModelList",(Serializable) mPrruModelList);
                 openActivity(HomeActivity.class, bundle);
                 finish();
                 break;

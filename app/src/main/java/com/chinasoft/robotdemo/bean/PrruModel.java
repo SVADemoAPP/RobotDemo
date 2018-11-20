@@ -1,10 +1,12 @@
 package com.chinasoft.robotdemo.bean;
 
+import java.io.Serializable;
+
 /**
  * Created by chinasoft_gyr on 2018/11/19.
  */
 
-public class PrruModel {
+public class PrruModel implements Serializable {
     public int id;
     public String neId;
     public String neCode;

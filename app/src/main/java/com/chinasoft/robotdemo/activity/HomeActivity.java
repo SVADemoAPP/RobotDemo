@@ -22,7 +22,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.PrruModelListAdapter;
-import com.chinasoft.robotdemo.bean.AllPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
@@ -46,7 +45,6 @@ import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.RobotShape;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -108,7 +106,7 @@ public class HomeActivity extends BaseActivity {
 
     private boolean flag = false;
 
-    private List<PrruModel> prruModelList = new ArrayList<>();
+//    private List<PrruModel> prruModelList = new ArrayList<>();
 
     private int cStep;
 
@@ -125,7 +123,7 @@ public class HomeActivity extends BaseActivity {
     private Context mContext;
     private View popupView;
 
-    private  SuperPopupWindow mConnectPopupWindow;
+    private SuperPopupWindow mConnectPopupWindow;
     /***xhf***/
     private Handler mHandler = new Handler() {
         @Override
@@ -248,7 +246,7 @@ public class HomeActivity extends BaseActivity {
 //                            c.setX(tf[0]);
 //                            c.setY(tf[1]);
 //                            coorOrbit.add(c);
-                                    CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.blue, HomeActivity.this, "dwf");
+                                    CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.route_color, HomeActivity.this, "dwf");
                                     collectPointShape.setValues(tf[0], tf[1]);
                                     map.addShape(collectPointShape, false);
                                 }
@@ -266,6 +264,7 @@ public class HomeActivity extends BaseActivity {
             }
         }
     };
+    private List<PrruModel> mPrruModelList;
 
     private Float getRsrpByGpp(String gpp, List<PrruSigalModel> prruSigalModelList) {
         for (PrruSigalModel p : prruSigalModelList) {
@@ -305,6 +304,7 @@ public class HomeActivity extends BaseActivity {
 //        mapBitmap= BitmapFactory.decodeResource(getResources(),R.mipmap.f1_100);
 //        map.setMapDrawable(getResources().getDrawable(R.mipmap.f1_100));
         currentMap = getIntent().getExtras().getString("currentMap");
+        mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
         mapBitmap = BitmapFactory.decodeFile(Constant.mapDirs + currentMap);
         map.setMapBitmap(mapBitmap);
         Log.e("msg", "高度：" + mapBitmap.getHeight() + "，宽度：" + mapBitmap.getWidth());
@@ -450,6 +450,7 @@ public class HomeActivity extends BaseActivity {
     public void onClickEvent(View view) {
         switch (view.getId()) {
             case R.id.tv_setting:
+//                startActivity(new Intent(this,SettingActivity.class));
                 openActivity(SettingActivity.class);
 //                if (robotparamDialog == null) {
 //                    robotparamDialog = new RobotparamDialog(this, R.style.MyDialogStyle);
@@ -472,43 +473,7 @@ public class HomeActivity extends BaseActivity {
 //                        "192.168.1.1"));
                 break;
             case R.id.tv_connect:
-                try {
-                    robotConnect = true;
-                    LLog.getLog().e("连接机器人", Constant.robotIp + ":" + Constant.robotPort);
-                    platform = DeviceManager.connect(Constant.robotIp, Constant.robotPort); // 连接到机器人底盘
-
-                    nowPose = platform.getPose();// 当前机器人的位置,
-//            System.out.println(nowPose.getX() + "," + nowPose.getY());
-                    nowX = nowPose.getX();
-                    nowY = nowPose.getY();
-                    initZ = nowPose.getZ();
-//            showToast("初始位置："+initX+","+initY+","+initZ);
-                    if (nowX > 0.1f || nowY > 0.1f) {
-                        if (currentMap.equals(SharedPrefHelper.getString(this, "currentMap", ""))) {
-                            isContinue = true;
-                        } else {
-                            isContinue = false;
-                        }
-                    } else {
-                        isContinue = false;
-                    }
-                } catch (Exception e) {
-                    robotConnect = false;
-                    e.printStackTrace();
-                }
-                if (robotConnect) {
-                    showToast("机器人连接成功！");
-                    if (isContinue) {
-                        scale = SharedPrefHelper.getFloat(this, "scale");
-                        initX = SharedPrefHelper.getFloat(this, "initX");
-                        initY = SharedPrefHelper.getFloat(this, "initY");
-                        xo = SharedPrefHelper.getFloat(this, "xo");
-                        yo = SharedPrefHelper.getFloat(this, "yo");
-                        realXo = SharedPrefHelper.getFloat(this, "realXo");
-                        realYo = SharedPrefHelper.getFloat(this, "realYo");
-                        float[] continueXY = realToMap(nowX, nowY);
-                        initStart(continueXY[0], continueXY[1]);
-                    } else {
+                initConnectPop(); //初始化连接-弹窗
 //                        if (paramsDialog == null) {
 //                            paramsDialog = new ParamsDialog(this, R.style.MyDialogStyle);
 //                            paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
@@ -534,29 +499,30 @@ public class HomeActivity extends BaseActivity {
 //                            });
 //                        }
 //                        paramsDialog.show();
-                        initConnectPop();
-                    }
-                } else {
-                    showToast("机器人连接失败！");
-                }
+
                 break;
             case R.id.iv_operation:
 //                openActivity(SettingActivity.class);
-                if(!robotConnect){
+                if (!robotConnect) {
                     showToast("机器人未连接");
                     return;
                 }
-                if(isPrruCollect){
+                if (isPrruCollect) {
                     try {
                         platform.getCurrentAction().cancel();
-                    }catch (Exception e){
+                    } catch (Exception e) {
 
                     }
-                    isPrruCollect=false;
+                    isPrruCollect = false;
                     iv_operation.setImageResource(R.mipmap.home_start);
                     return;
                 }
-//
+
+                if (mPrruModelList != null && mPrruModelList.size() != 0) {
+                    initBeginPop(mPrruModelList);     //加载弹窗视图
+                }
+
+                //
 //                /**
 //                 * 以下要移动到测试的prruModel
 //                 */
@@ -566,31 +532,30 @@ public class HomeActivity extends BaseActivity {
 //                nowCollectPrru.x=6.6f;
 //                nowCollectPrru.y=3.9f;
 //                //以下写移动逻辑
-
-                Constant.interRequestUtil.getAllPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getAllPrruInfo?mapId=2046", new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String s) {
-                        LLog.getLog().e("getAllPrruInfo成功", s);
-                        AllPrruInfoResponse ap = new Gson().fromJson(s, AllPrruInfoResponse.class);
-//                        P lap=new Gson().fromJson(s,LocAndPrruInfoResponse.class);
-//                        if(lap.code==0) {
-//                            LLog.getLog().prru( "," , prruDataToString(lap.data.prruData));
-//                        }
-                        prruModelList = ap.data;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                initBeginPop(prruModelList);
-                            }
-                        });
-                        LLog.getLog().e("prruModelList", prruModelList + "");
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        LLog.getLog().e("getAllPrruInfo错误", volleyError.toString());
-                    }
-                });
+//                Constant.interRequestUtil.getAllPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getAllPrruInfo?mapId=2046", new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String s) {
+//                        LLog.getLog().e("getAllPrruInfo成功", s);
+//                        AllPrruInfoResponse ap = new Gson().fromJson(s, AllPrruInfoResponse.class);
+////                        P lap=new Gson().fromJson(s,LocAndPrruInfoResponse.class);
+////                        if(lap.code==0) {
+////                            LLog.getLog().prru( "," , prruDataToString(lap.data.prruData));
+////                        }
+//                        prruModelList = ap.data;
+//                        runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//
+//                            }
+//                        });
+//                        LLog.getLog().e("prruModelList", prruModelList + "");
+//                    }
+//                }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError volleyError) {
+//                        LLog.getLog().e("getAllPrruInfo错误", volleyError.toString());
+//                    }
+//                });
 
 
 //                if (flag) {
@@ -643,8 +608,8 @@ public class HomeActivity extends BaseActivity {
             @Override
             public void onClick(PrruModel prruModel) {
                 hideBeginPop();
-                Toast.makeText(HomeActivity.this, prruModel.neCode+"", Toast.LENGTH_SHORT).show();
-                hidePop();
+                Toast.makeText(HomeActivity.this, prruModel.neCode + "", Toast.LENGTH_SHORT).show();
+                hideBeginPop();
                 Toast.makeText(HomeActivity.this, prruModel.neId + "", Toast.LENGTH_SHORT).show();
                 //todo 回传点击数据
                 nowCollectPrru = prruModel;
@@ -694,34 +659,54 @@ public class HomeActivity extends BaseActivity {
      */
     private void initConnectPop() {
         mConnectPopupWindow = new SuperPopupWindow(mContext, R.layout.layout_connect_pop);
-//        mSuperPopupWindow.setFocusable(true);
+        mConnectPopupWindow.setFocusable(true);
         mConnectPopupWindow.setOutsideTouchable(true);
         mConnectPopupWindow.setAnimotion(R.style.PopAnimation);
-        View mConnectPopupView = mSuperPopupWindow.getPopupView();
+        View mConnectPopupView = mConnectPopupWindow.getPopupView();
         initConnectPopView(mConnectPopupView);
-        showBeginPop();
+        showConnectPop();
     }
-     private  void initConnectPopView(View view){
-         TextView tvCancel = view.findViewById(R.id.tv_connect_cancel); //取消按钮
-         TextView tvConfirm =view.findViewById(R.id.tv_confirm);        //确定按钮
-         EditText edtPointX=view.findViewById(R.id.edt_connect_pointX); //X坐标
-         EditText edtPointY=view.findViewById(R.id.edt_connect_pointY); //Y坐标
-         EditText edtScale=view.findViewById(R.id.edt_connect_scale);   //比例尺
-         EditText edtRbIp=view.findViewById(R.id.edt_connect_rbip);     //机器人IP
-         EditText edtRbPort=view.findViewById(R.id.edt_connect_rbport); //机器人端口
-         tvCancel.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View v) {
-                 hideConnectPop();
-             }
-         });
-         tvConfirm.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View v) {
-                 hideConnectPop();
-             }
-         });
-     }
+
+    /**
+     * 初始化连接弹窗视图
+     *
+     * @param view
+     */
+    private void initConnectPopView(View view) {
+        TextView tvCancel = view.findViewById(R.id.tv_connect_cancel);         //取消按钮
+        TextView tvConfirm = view.findViewById(R.id.tv_connect_confirm);        //确定按钮
+        final EditText edtPointX = view.findViewById(R.id.edt_connect_pointX);         //X坐标
+        final EditText edtPointY = view.findViewById(R.id.edt_connect_pointY);         //Y坐标
+        final EditText edtScale = view.findViewById(R.id.edt_connect_scale);           //比例尺
+        EditText edtRbIp = view.findViewById(R.id.edt_connect_rbip);             //机器人IP
+        EditText edtRbPort = view.findViewById(R.id.edt_connect_rbport);         //机器人端口
+        edtScale.setText("100.00");
+        edtScale.setSelection(edtScale.getText().length());
+        edtPointX.setSelection(edtPointX.getText().length());
+        edtPointY.setSelection(edtPointY.getText().length());
+        edtRbIp.setSelection(edtRbIp.getText().length());
+        edtRbPort.setSelection(edtRbPort.getText().length());
+
+        lockEditRobotInfo(edtRbIp, edtRbPort);//判断是否锁定机器人ip&&port填写
+        tvCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideConnectPop();
+            }
+        });
+        tvConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideConnectPop();
+                float x = Float.parseFloat(edtPointX.getText().toString());
+                float y = Float.parseFloat(edtPointY.getText().toString());
+                float scale = Float.parseFloat(edtScale.getText().toString());
+                saveRbLocationInfo(x, y, scale);    //存储机器人位置信息
+                connection();                       //进行机器人连接尝试
+            }
+        });
+    }
+
     /**
      * 显示Popupwindow
      */
@@ -734,5 +719,98 @@ public class HomeActivity extends BaseActivity {
      */
     private void hideConnectPop() {
         mConnectPopupWindow.hidePopupWindow();
+    }
+
+    /**
+     * 锁定填写机器人信息
+     *
+     * @param robotIp   机器人设备ip
+     * @param robotPort 机器人设备端口
+     */
+    private void lockEditRobotInfo(EditText robotIp, EditText robotPort) {
+        if (Constant.robotIp != null && !Constant.robotIp.equals("")) //存在ip信息锁定robotIp填写
+        {
+            robotIp.setText(Constant.robotIp);
+            robotIp.setEnabled(false);
+            robotIp.setTextColor(getResources().getColor(R.color.gray_stroken));
+        } else {
+            robotIp.setEnabled(true);
+            robotIp.setTextColor(getResources().getColor(R.color.white));
+        }
+
+        if (Constant.robotPort != 0)       //存在port信息锁定robotPort填写
+        {
+            robotPort.setText(String.valueOf(Constant.robotPort));
+            robotPort.setEnabled(false);
+            robotPort.setTextColor(getResources().getColor(R.color.gray_stroken));
+        } else {
+            robotPort.setEnabled(true);
+            robotPort.setTextColor(getResources().getColor(R.color.white));
+        }
+    }
+
+    /***
+     *
+     * @param x
+     * @param y
+     * @param scaleRuler
+     */
+    private void saveRbLocationInfo(float x, float y, float scaleRuler) {
+        realXo = x;
+        realYo = y;
+        scale = scaleRuler;
+        xo = x * scaleRuler;
+        yo = mapHeight - y * scaleRuler;
+        SharedPrefHelper.putString(HomeActivity.this, "currentMap", currentMap);
+        SharedPrefHelper.putFloat(HomeActivity.this, "scale", scale);
+        SharedPrefHelper.putFloat(HomeActivity.this, "xo", xo);
+        SharedPrefHelper.putFloat(HomeActivity.this, "yo", yo);
+        SharedPrefHelper.putFloat(HomeActivity.this, "realXo", realXo);
+        SharedPrefHelper.putFloat(HomeActivity.this, "realYo", realYo);
+        initX = nowX;
+        initY = nowY;
+        SharedPrefHelper.putFloat(HomeActivity.this, "initX", initX);
+        SharedPrefHelper.putFloat(HomeActivity.this, "initY", initY);
+        initStart(xo, yo);
+    }
+
+    private void connection() {
+        try {
+            robotConnect = true;
+            LLog.getLog().e("连接机器人", Constant.robotIp + ":" + Constant.robotPort);
+            platform = DeviceManager.connect(Constant.robotIp, Constant.robotPort); // 连接到机器人底盘
+            nowPose = platform.getPose();// 当前机器人的位置,
+            nowX = nowPose.getX();
+            nowY = nowPose.getY();
+            initZ = nowPose.getZ();
+            if (nowX > 0.1f || nowY > 0.1f) {
+                if (currentMap.equals(SharedPrefHelper.getString(this, "currentMap", ""))) {
+                    isContinue = true;
+                } else {
+                    isContinue = false;
+                }
+            } else {
+                isContinue = false;
+            }
+        } catch (Exception e) {
+            robotConnect = false;
+            e.printStackTrace();
+        }
+        if (robotConnect) {
+            showToast("机器人连接成功！");
+            if (isContinue) {
+                scale = SharedPrefHelper.getFloat(this, "scale");
+                initX = SharedPrefHelper.getFloat(this, "initX");
+                initY = SharedPrefHelper.getFloat(this, "initY");
+                xo = SharedPrefHelper.getFloat(this, "xo");
+                yo = SharedPrefHelper.getFloat(this, "yo");
+                realXo = SharedPrefHelper.getFloat(this, "realXo");
+                realYo = SharedPrefHelper.getFloat(this, "realYo");
+                float[] continueXY = realToMap(nowX, nowY);
+                initStart(continueXY[0], continueXY[1]);
+            }
+        } else {
+            showToast("机器人连接失败！");
+        }
     }
 }
