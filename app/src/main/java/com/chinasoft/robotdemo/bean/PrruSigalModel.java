@@ -6,7 +6,7 @@ package com.chinasoft.robotdemo.bean;
 
 public class PrruSigalModel {
     public String gpp;
-    public double rsrp;
+    public float rsrp;
 
     @Override
     public String toString() {

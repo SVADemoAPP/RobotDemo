@@ -110,6 +110,15 @@ public class HomeActivity extends BaseActivity {
 
     private List<PrruModel> prruModelList = new ArrayList<>();
 
+    private int cStep;
+
+    private String nowCollectNeCode;
+
+    private float maxRsrp, xWhenMax, yWhenMax;
+
+    private float[] xyRobotWhenMax;
+
+
     /***xhf***/
     private SuperPopupWindow mSuperPopupWindow;
 
@@ -129,8 +138,8 @@ public class HomeActivity extends BaseActivity {
 //                        Log.e("msg", "x:" + nowPose.getX() + ",y:" + nowPose.getY());
                         nowX = nowPose.getX();
                         nowY = nowPose.getY();
-                        final float logX = nowX + realXo;
-                        final float logY = nowY + realYo;
+                        final float logX = nowX - initX + realXo;
+                        final float logY = nowY - initY + realYo;
                         Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
                             @Override
                             public void onResponse(String s) {
@@ -138,6 +147,11 @@ public class HomeActivity extends BaseActivity {
                                 LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                                 if (lap.code == 0) {
                                     LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData));
+                                    Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
+                                    if (rsrp != null && rsrp - maxRsrp >= 0) {
+                                        xWhenMax = logX - realXo + initX;
+                                        yWhenMax = logY - realYo + initY;
+                                    }
                                 }
                             }
                         }, new Response.ErrorListener() {
@@ -176,6 +190,54 @@ public class HomeActivity extends BaseActivity {
                                 map.addShape(lineShape, false);
                                 lastX = nowX;
                                 lastY = nowY;
+                                if (isPrruCollect) {
+                                    cStep++;
+                                    switch (cStep) {
+                                        case 1:
+                                            LLog.getLog().e("扫描", "1");
+                                            robotMoveTo(nowCollectPrru.x - realXo + initX + 1, nowCollectPrru.y - realYo + initY);
+                                            break;
+                                        case 2:
+                                            LLog.getLog().e("扫描", "2");
+                                            robotMoveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY);
+                                            break;
+                                        case 3:
+                                            LLog.getLog().e("扫描", "3");
+                                            robotMoveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY + 1);
+                                            break;
+                                        case 4:
+                                            LLog.getLog().e("扫描", "4");
+                                            robotMoveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY);
+                                            break;
+                                        case 5:
+                                            LLog.getLog().e("扫描", "5");
+                                            robotMoveTo(nowCollectPrru.x - realXo + initX - 1, nowCollectPrru.y - realYo + initY);
+                                            break;
+                                        case 6:
+                                            LLog.getLog().e("扫描", "6");
+                                            robotMoveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY);
+                                            break;
+                                        case 7:
+                                            LLog.getLog().e("扫描", "7");
+                                            robotMoveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY - 1);
+                                            break;
+                                        case 8:
+                                            LLog.getLog().e("扫描", "8");
+                                            robotMoveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY);
+                                            break;
+                                        case 9:
+                                            LLog.getLog().e("扫描", "9");
+                                            isPrruCollect = false;
+                                            iv_operation.setImageResource(R.mipmap.home_start);
+                                            xyRobotWhenMax = realToMap(xWhenMax, yWhenMax);
+                                            CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, HomeActivity.this, "dwf");
+                                            maxRsrpPointShape.setValues(xyRobotWhenMax[0], xyRobotWhenMax[1]);
+                                            map.addShape(maxRsrpPointShape, false);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
                                 break;
                             case "MoveAction":
                                 locVector = platform.searchPath(forwardLocation).getPoints();
@@ -205,6 +267,14 @@ public class HomeActivity extends BaseActivity {
         }
     };
 
+    private Float getRsrpByGpp(String gpp, List<PrruSigalModel> prruSigalModelList) {
+        for (PrruSigalModel p : prruSigalModelList) {
+            if (gpp.equals(p.gpp)) {
+                return p.rsrp;
+            }
+        }
+        return null;
+    }
 
     @Override
     public void setContentLayout() {
@@ -244,37 +314,38 @@ public class HomeActivity extends BaseActivity {
             @Override
             public void onLongClick(PointF point) {
                 Log.e("long", point.x + "," + point.y);
-                if (isStart) {
+                if (isStart && !isPrruCollect) {
                     float[] dXY = mapToReal(point.x, point.y);
+                    robotCancelAndMoveTo(dXY[0], dXY[1]);
 //                    showToast("目的点："+dXY[0]+","+dXY[1]);
-                    forwardLocation.setX(dXY[0]);
-                    forwardLocation.setY(dXY[1]);
-                    try {
-                        platform.getCurrentAction().cancel();
-                        for (int i = 0, len = coorCount; i < len; i++) {
-                            map.removeShape("coor" + i);
-                        }
-                        locVector = platform.searchPath(forwardLocation).getPoints();
-                        coorCount = locVector.size();
-                        for (int i = 0, len = coorCount; i < len; i++) {
-//                            CoorInMap c=new CoorInMap();
-                            float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
-//                            c.setX(tf[0]);
-//                            c.setY(tf[1]);
-//                            coorOrbit.add(c);
-                            CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.blue, HomeActivity.this, "dwf");
-                            collectPointShape.setValues(tf[0], tf[1]);
-                            map.addShape(collectPointShape, false);
-                        }
-                        platform.moveTo(locVector);
-                        if (mHandler.hasMessages(0)) {
-                            mHandler.removeMessages(0);
-                        }
-                        mHandler.sendEmptyMessageDelayed(0, 2000);
-                    } catch (Exception e) {
-                        showToast("出错了：" + e.toString());
+                    // forwardLocation.setX(dXY[0]);
+                    // forwardLocation.setY(dXY[1]);
+                    // try {
+                    // platform.getCurrentAction().cancel();
+                    // for (int i = 0, len = coorCount; i < len; i++) {
+                    // map.removeShape("coor" + i);
+                    // }
+                    // locVector = platform.searchPath(forwardLocation).getPoints();
+                    // coorCount = locVector.size();
+                    // for (int i = 0, len = coorCount; i < len; i++) {
+// //                            CoorInMap c=new CoorInMap();
+                    // float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
+// //                            c.setX(tf[0]);
+// //                            c.setY(tf[1]);
+// //                            coorOrbit.add(c);
+                    // CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.blue, HomeActivity.this, "dwf");
+                    // collectPointShape.setValues(tf[0], tf[1]);
+                    // map.addShape(collectPointShape, false);
+                    // }
+                    // platform.moveTo(locVector);
+                    // if (mHandler.hasMessages(0)) {
+                    // mHandler.removeMessages(0);
+                    // }
+                    // mHandler.sendEmptyMessageDelayed(0, 2000);
+                    // } catch (Exception e) {
+                    // showToast("出错了：" + e.toString());
 
-                    }
+                    // }
                 }
             }
         });
@@ -287,6 +358,67 @@ public class HomeActivity extends BaseActivity {
         }
         Constant.userId = SharedPrefHelper.getString(HomeActivity.this, "userId", "192.168.1.1");
     }
+
+    private void robotMoveTo(float toX, float toY) {
+        forwardLocation.setX(toX);
+        forwardLocation.setY(toY);
+        try {
+            for (int i = 0, len = coorCount; i < len; i++) {
+                map.removeShape("coor" + i);
+            }
+            locVector = platform.searchPath(forwardLocation).getPoints();
+            coorCount = locVector.size();
+            for (int i = 0, len = coorCount; i < len; i++) {
+//                            CoorInMap c=new CoorInMap();
+                float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
+//                            c.setX(tf[0]);
+//                            c.setY(tf[1]);
+//                            coorOrbit.add(c);
+                CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.blue, HomeActivity.this, "dwf");
+                collectPointShape.setValues(tf[0], tf[1]);
+                map.addShape(collectPointShape, false);
+            }
+            platform.moveTo(locVector);
+            mHandler.sendEmptyMessageDelayed(0, 2000);
+        } catch (Exception e) {
+            showToast("出错了：" + e.toString());
+
+        }
+
+    }
+
+    private void robotCancelAndMoveTo(float toX, float toY) {
+        forwardLocation.setX(toX);
+        forwardLocation.setY(toY);
+        try {
+            platform.getCurrentAction().cancel();
+            for (int i = 0, len = coorCount; i < len; i++) {
+                map.removeShape("coor" + i);
+            }
+            locVector = platform.searchPath(forwardLocation).getPoints();
+            coorCount = locVector.size();
+            for (int i = 0, len = coorCount; i < len; i++) {
+//                            CoorInMap c=new CoorInMap();
+                float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
+//                            c.setX(tf[0]);
+//                            c.setY(tf[1]);
+//                            coorOrbit.add(c);
+                CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.blue, HomeActivity.this, "dwf");
+                collectPointShape.setValues(tf[0], tf[1]);
+                map.addShape(collectPointShape, false);
+            }
+            platform.moveTo(locVector);
+            if (mHandler.hasMessages(0)) {
+                mHandler.removeMessages(0);
+            }
+            mHandler.sendEmptyMessageDelayed(0, 2000);
+        } catch (Exception e) {
+            showToast("出错了：" + e.toString());
+
+        }
+
+    }
+
 
     private void initStart(float x, float y) {
         robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
@@ -410,20 +542,20 @@ public class HomeActivity extends BaseActivity {
                 break;
             case R.id.iv_operation:
 //                openActivity(SettingActivity.class);
-//                if(!robotConnect){
-//                    showToast("机器人未连接");
-//                    return;
-//                }
-//                if(isPrruCollect){
-//                    try {
-//                        platform.getCurrentAction().cancel();
-//                    }catch (Exception e){
-//
-//                    }
-//                    isPrruCollect=false;
-//                    iv_operation.setImageResource(R.mipmap.home_start);
-//                    return;
-//                }
+                if(!robotConnect){
+                    showToast("机器人未连接");
+                    return;
+                }
+                if(isPrruCollect){
+                    try {
+                        platform.getCurrentAction().cancel();
+                    }catch (Exception e){
+
+                    }
+                    isPrruCollect=false;
+                    iv_operation.setImageResource(R.mipmap.home_start);
+                    return;
+                }
 //
 //                /**
 //                 * 以下要移动到测试的prruModel
@@ -431,8 +563,8 @@ public class HomeActivity extends BaseActivity {
 //                isPrruCollect=true;
 //                iv_operation.setImageResource(R.mipmap.home_stop);
 //                nowCollectPrru=new PrruModel();
-//                nowCollectPrru.x=1f;
-//                nowCollectPrru.y=1f;
+//                nowCollectPrru.x=6.6f;
+//                nowCollectPrru.y=3.9f;
 //                //以下写移动逻辑
 
                 Constant.interRequestUtil.getAllPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getAllPrruInfo?mapId=2046", new Response.Listener<String>() {
@@ -503,7 +635,7 @@ public class HomeActivity extends BaseActivity {
         popupView = mSuperPopupWindow.getPopupView();
 
         LinearLayout tv_Cancel = popupView.findViewById(R.id.tv_ll_pop_cancel);
-        ListView poplist =popupView.findViewById(R.id.pop_list);//获取list对象
+        ListView poplist = popupView.findViewById(R.id.pop_list);//获取list对象
         PrruModelListAdapter prruModelListAdapter = new PrruModelListAdapter(mContext, prruModelList);
         poplist.setAdapter(prruModelListAdapter);
         prruModelListAdapter.notifyDataSetChanged();
@@ -512,7 +644,25 @@ public class HomeActivity extends BaseActivity {
             public void onClick(PrruModel prruModel) {
                 hideBeginPop();
                 Toast.makeText(HomeActivity.this, prruModel.neCode+"", Toast.LENGTH_SHORT).show();
+                hidePop();
+                Toast.makeText(HomeActivity.this, prruModel.neId + "", Toast.LENGTH_SHORT).show();
                 //todo 回传点击数据
+                nowCollectPrru = prruModel;
+                isPrruCollect = true;
+                iv_operation.setImageResource(R.mipmap.home_stop);
+//                nowCollectPrru=prruModel;
+                nowCollectNeCode = nowCollectPrru.neCode;
+                maxRsrp = Float.NEGATIVE_INFINITY;
+                xWhenMax = Float.NEGATIVE_INFINITY;
+                yWhenMax = Float.NEGATIVE_INFINITY;
+                if ((nowCollectPrru.x - realXo + initX) == nowX && (nowCollectPrru.y - realYo + initY) == nowY) {
+                    cStep = 1;
+                    LLog.getLog().e("扫描", "1");
+                    robotMoveTo(nowCollectPrru.x - realXo + initX + 1, nowCollectPrru.y - realYo + initY);
+                } else {
+                    cStep = 0;
+                    robotMoveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY);
+                }
             }
         });
         tv_Cancel.setOnClickListener(new View.OnClickListener() {
