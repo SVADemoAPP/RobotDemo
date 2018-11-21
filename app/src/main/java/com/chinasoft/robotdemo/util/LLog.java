@@ -39,16 +39,21 @@ public class LLog {
 
     public void e(String title, String strcontent) {
         Log.e(title, strcontent);
-        write(this.PATH_LOGCAT, "Log" + MyDate.getFileName() + ".txt", title, strcontent);
+        write(this.PATH_LOGCAT+"/Logs", "Log" + MyDate.getFileName() + ".txt", title, strcontent);
     }
 
     public void prru(String title, String strcontent) {
         Log.e(title, strcontent);
-        write(this.PATH_LOGCAT, "Prru" + MyDate.getFileName() + ".txt", title, strcontent);
+        write(this.PATH_LOGCAT+"/Logs_Prru", "Prru" + MyDate.getFileName() + ".txt", title, strcontent);
     }
 
     public void crash(String title, String strcontent) {
         write(this.PATH_LOGCAT, "crash" + MyDate.getFileName() + ".txt", title, strcontent);
+    }
+
+    public void robot(String title, String strcontent) {
+        Log.e(title, strcontent);
+        write(this.PATH_LOGCAT+"/Logs_Robot", "Robot" + MyDate.getFileName() + ".txt", title, strcontent);
     }
 
     private void write(String filePath, String fileName, String title, String strcontent) {

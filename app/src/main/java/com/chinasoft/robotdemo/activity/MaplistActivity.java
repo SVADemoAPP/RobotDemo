@@ -86,7 +86,6 @@ public class MaplistActivity extends BaseActivity {
             } else if (device instanceof MdnsDevice) {
                 Constant.robotIp = ((MdnsDevice) device).getAddr();
                 Constant.robotPort = ((MdnsDevice) device).getPort();
-                SharedPrefHelper.putBoolean(MaplistActivity.this,"ipFlag",true);
             }
         }
     };
@@ -94,7 +93,6 @@ public class MaplistActivity extends BaseActivity {
     @Override
     public void setContentLayout() {
         setContentView(R.layout.activity_maplist);
-        SharedPrefHelper.putBoolean(MaplistActivity.this,"ipFlag",false);
     }
 
     @Override
@@ -103,11 +101,11 @@ public class MaplistActivity extends BaseActivity {
 //        Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
         Constant.interRequestUtil = InterRequestUtil.getInstance(this);
 
-        File dir = new File(Constant.mapDirs);
+        File dir = new File(Constant.sdPath+"/maps/");
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        File mapFile = new File(Constant.mapDirs + "/chinasoft_1f.png");
+        File mapFile = new File(Constant.sdPath + "/maps/chinasoft_1f.png");
         if (!mapFile.exists()) {
             try {
                 mapFile.createNewFile();
@@ -158,10 +156,15 @@ public class MaplistActivity extends BaseActivity {
 //        BlueUtils.getBlueUtils().getInitialization(this);
 ////
 //        BlueUtils.getBlueUtils().startBlue();
-        deviceManager = new DeviceManager(MaplistActivity.this);
-        deviceManager.setListener(discoveryListener);
-//        deviceManager.start(DiscoveryMode.BLE);
-        deviceManager.start(DiscoveryMode.MDNS);
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                deviceManager = new DeviceManager(MaplistActivity.this);
+//                deviceManager.setListener(discoveryListener);
+//                deviceManager.start(DiscoveryMode.MDNS);
+//            }
+//        }).start();
         Map<String, String> map = new HashMap();
         map.put("username", "admin");
         map.put("password", "admin");

@@ -47,6 +47,8 @@ import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.RobotShape;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 public class HomeActivity extends BaseActivity {
@@ -117,6 +119,8 @@ public class HomeActivity extends BaseActivity {
 
     private float[] xyRobotWhenMax;
 
+    private Timer timer=new Timer();
+
 
     /***xhf***/
     private SuperPopupWindow mSuperPopupWindow;
@@ -125,6 +129,23 @@ public class HomeActivity extends BaseActivity {
     private View popupView;
 
     private SuperPopupWindow mConnectPopupWindow;
+
+    private TimerTask task=new TimerTask() {
+        @Override
+        public void run() {
+            if(platform==null){
+                LLog.getLog().robot("no connect","未连接");
+            }else{
+                try {
+                    LLog.getLog().robot("health",""+platform.getRobotHealth().getErrors());
+                }catch (Exception e){
+                    LLog.getLog().robot("error",e.toString());
+                }
+
+            }
+        }
+    };
+
     /***xhf***/
     private Handler mHandler = new Handler() {
         @Override
@@ -285,7 +306,7 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     public void dealLogicBeforeInitView() {
-
+        timer.schedule(task,1000,4000);
     }
 
     @Override
@@ -306,7 +327,10 @@ public class HomeActivity extends BaseActivity {
 //        map.setMapDrawable(getResources().getDrawable(R.mipmap.f1_100));
         currentMap = getIntent().getExtras().getString("currentMap");
         mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
-        mapBitmap = BitmapFactory.decodeFile(Constant.mapDirs + currentMap);
+        mapBitmap = BitmapFactory.decodeFile(Constant.sdPath+"/maps/"
+
+
+                + currentMap);
         map.setMapBitmap(mapBitmap);
         Log.e("msg", "高度：" + mapBitmap.getHeight() + "，宽度：" + mapBitmap.getWidth());
 //        showToast("高度："+mapBitmap.getHeight()+"，宽度："+mapBitmap.getWidth());
@@ -521,6 +545,8 @@ public class HomeActivity extends BaseActivity {
 
                 if (mPrruModelList != null && mPrruModelList.size() != 0) {
                     initBeginPop(mPrruModelList);     //加载弹窗视图
+                }else{
+                    showToast("没有Prru列表");
                 }
 
                 //
@@ -707,20 +733,9 @@ public class HomeActivity extends BaseActivity {
                     float x = Float.parseFloat(edtPointX.getText().toString());
                     float y = Float.parseFloat(edtPointY.getText().toString());
                     float scale = Float.parseFloat(edtScale.getText().toString());
-                    //保存信息
-                    SharedPrefHelper.putFloat(mContext,"scale", Float.parseFloat(edtScale.getText().toString()));
-                    SharedPrefHelper.putFloat(mContext,"realXo", Float.parseFloat(edtPointX.getText().toString()));
-                    SharedPrefHelper.putFloat(mContext,"realYo", Float.parseFloat(edtPointY.getText().toString()));
-                    SharedPrefHelper.putString(mContext,"robotIp",edtRbIp.getText().toString());
-                    SharedPrefHelper.putInt(mContext,"robotPort", Integer.parseInt(edtRbPort.getText().toString()));
-
-
-                    if (Constant.robotIp==null&&Constant.robotPort==0) //判断是否为空 为空则放值
-                    {
-                        Constant.robotIp=edtRbIp.getText().toString();
-                        Constant.robotPort=Integer.valueOf(edtRbPort.getText().toString());
-                    }
-                    connection(x, y, scale);                       //进行机器人连接尝试
+                    String robotIp=edtRbIp.getText().toString();
+                    int robotPort=Integer.parseInt(edtRbPort.getText().toString());
+                    connection(x, y, scale,robotIp,robotPort,edtRbIp.isEnabled());                       //进行机器人连接尝试
                 }
             }
         });
@@ -768,10 +783,10 @@ public class HomeActivity extends BaseActivity {
      * @param port
      */
     private void setDefaultConInfo(EditText x, EditText y, EditText scale, EditText ip, EditText port) {
-        x.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo",0)));
-        y.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo",0)));
-        scale.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "scale",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "scale",0)));
-        ip.setText(SharedPrefHelper.getString(mContext, "robotIp","0.0.0.0"));
+        x.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo")));
+        y.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo")));
+        scale.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "scale")));
+        ip.setText(SharedPrefHelper.getString(mContext, "robotIp"));
         port.setText(String.valueOf(SharedPrefHelper.getInt(mContext, "robotPort",0)));
 
     }
@@ -797,7 +812,7 @@ public class HomeActivity extends BaseActivity {
      * @param robotPort 机器人设备端口
      */
     private void lockEditRobotInfo(EditText robotIp, EditText robotPort) {
-        if (SharedPrefHelper.getBoolean(mContext,"ipFlag")) //存在ip信息锁定robotIp填写
+        if (Constant.robotIp != null && !Constant.robotIp.equals("")) //存在ip信息锁定robotIp填写
         {
             robotIp.setText(Constant.robotIp);
             robotIp.setEnabled(false);
@@ -807,7 +822,7 @@ public class HomeActivity extends BaseActivity {
             robotIp.setTextColor(getResources().getColor(R.color.white));
         }
 
-        if (SharedPrefHelper.getBoolean(mContext,"ipFlag"))       //存在port信息锁定robotPort填写
+        if (Constant.robotPort != 0)       //存在port信息锁定robotPort填写
         {
             robotPort.setText(String.valueOf(Constant.robotPort));
             robotPort.setEnabled(false);
@@ -843,11 +858,11 @@ public class HomeActivity extends BaseActivity {
         initStart(xo, yo);
     }
 
-    private void connection(float pointX, float pointY, float scaleRuler) {
+    private void connection(float pointX, float pointY, float scaleRuler,String robotIp,int robotPort,boolean flag) {
         try {
             robotConnect = true;
-            LLog.getLog().e("连接机器人", Constant.robotIp + ":" + Constant.robotPort);
-            platform = DeviceManager.connect(Constant.robotIp, Constant.robotPort); // 连接到机器人底盘
+            LLog.getLog().e("连接机器人", robotIp + ":" + robotPort);
+            platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
             nowPose = platform.getPose();// 当前机器人的位置,
             nowX = nowPose.getX();
             nowY = nowPose.getY();
@@ -866,6 +881,10 @@ public class HomeActivity extends BaseActivity {
             e.printStackTrace();
         }
         if (robotConnect) {
+            if(flag){
+                SharedPrefHelper.putString(HomeActivity.this,"robotIp",robotIp);
+                SharedPrefHelper.putInt(HomeActivity.this,"robotPort",robotPort);
+            }
             showToast("机器人连接成功！");
             if (isContinue) {
                 scale = SharedPrefHelper.getFloat(this, "scale");
@@ -883,5 +902,11 @@ public class HomeActivity extends BaseActivity {
         } else {
             showToast("机器人连接失败！");
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LLog.getLog().e("destory","destroy");
     }
 }
