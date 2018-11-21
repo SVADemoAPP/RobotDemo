@@ -63,7 +63,7 @@ public class HomeActivity extends BaseActivity {
 
     private int mapWidth, mapHeight;
 
-    private boolean robotConnect = true;
+    private boolean robotConnect = false;
 
     private boolean isStart = false;
 

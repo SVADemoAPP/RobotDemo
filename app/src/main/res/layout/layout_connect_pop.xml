@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
         android:layout_centerInParent="true"
         android:layout_margin="50dp"
         android:background="@mipmap/home_bg_connect_popup"
-        android:layout_width="match_parent"
-        android:layout_height="400dp"
         android:orientation="vertical">
         <!--x y坐标-->
         <LinearLayout
@@ -40,9 +39,10 @@
                     android:layout_marginRight="10dp"
                     android:background="@drawable/tv_selector"
                     android:gravity="center"
-                    android:hint="0.00"
-                    android:textColorHint="@color/gray_stroken"
+                    android:hint=""
+                    android:inputType="number"
                     android:textColor="@color/white"
+                    android:textColorHint="@color/gray_stroken"
                     android:textSize="15dp"
                     android:typeface="serif" />
             </LinearLayout>
@@ -70,9 +70,10 @@
                     android:layout_marginLeft="10dp"
                     android:background="@drawable/tv_selector"
                     android:gravity="center"
-                    android:hint="0.00"
-                    android:textColorHint="@color/gray_stroken"
+                    android:hint=""
+                    android:inputType="number"
                     android:textColor="@color/white"
+                    android:textColorHint="@color/gray_stroken"
                     android:textSize="15dp"
                     android:typeface="serif" />
             </LinearLayout>
@@ -99,9 +100,10 @@
                 android:layout_height="35dp"
                 android:background="@drawable/tv_selector"
                 android:gravity="center"
-                android:hint="0.00"
-                android:textColorHint="@color/gray_stroken"
+                android:hint=""
+                android:inputType="number"
                 android:textColor="@color/white"
+                android:textColorHint="@color/gray_stroken"
                 android:textSize="15dp"
                 android:typeface="serif" />
         </LinearLayout>
@@ -128,10 +130,11 @@
                 android:layout_height="35dp"
                 android:background="@drawable/tv_selector"
                 android:gravity="center"
-                android:text=""
                 android:hint="0.0.0.0"
-                android:textColorHint="@color/gray_stroken"
+                android:inputType="number"
+                android:text=""
                 android:textColor="@color/white"
+                android:textColorHint="@color/gray_stroken"
                 android:textSize="15dp"
                 android:typeface="serif" />
         </LinearLayout>
@@ -158,10 +161,11 @@
                 android:layout_height="35dp"
                 android:background="@drawable/tv_selector"
                 android:gravity="center"
-                android:text=""
                 android:hint="0"
-                android:textColorHint="@color/gray_stroken"
+                android:inputType="number"
+                android:text=""
                 android:textColor="@color/white"
+                android:textColorHint="@color/gray_stroken"
                 android:textSize="15dp"
                 android:typeface="serif" />
         </LinearLayout>
@@ -176,25 +180,25 @@
 
             <TextView
                 android:id="@+id/tv_connect_confirm"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:gravity="center"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/setting_tv"
+                android:gravity="center"
                 android:text="确认"
                 android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/tv_connect_cancel"
-                android:background="@drawable/setting_tv"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:gravity="center"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:layout_weight="1"
+                android:background="@drawable/setting_tv"
+                android:gravity="center"
                 android:text="取消"
                 android:textColor="@color/white" />
         </LinearLayout>
