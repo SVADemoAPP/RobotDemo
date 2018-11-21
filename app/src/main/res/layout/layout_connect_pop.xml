@@ -40,7 +40,8 @@
                     android:layout_marginRight="10dp"
                     android:background="@drawable/tv_selector"
                     android:gravity="center"
-                    android:text="0.00"
+                    android:hint="0.00"
+                    android:textColorHint="@color/gray_stroken"
                     android:textColor="@color/white"
                     android:textSize="15dp"
                     android:typeface="serif" />
@@ -69,7 +70,8 @@
                     android:layout_marginLeft="10dp"
                     android:background="@drawable/tv_selector"
                     android:gravity="center"
-                    android:text="0.00"
+                    android:hint="0.00"
+                    android:textColorHint="@color/gray_stroken"
                     android:textColor="@color/white"
                     android:textSize="15dp"
                     android:typeface="serif" />
@@ -97,7 +99,8 @@
                 android:layout_height="35dp"
                 android:background="@drawable/tv_selector"
                 android:gravity="center"
-                android:text="0.00"
+                android:hint="0.00"
+                android:textColorHint="@color/gray_stroken"
                 android:textColor="@color/white"
                 android:textSize="15dp"
                 android:typeface="serif" />
@@ -125,7 +128,9 @@
                 android:layout_height="35dp"
                 android:background="@drawable/tv_selector"
                 android:gravity="center"
-                android:text="0.00"
+                android:text=""
+                android:hint="0.0.0.0"
+                android:textColorHint="@color/gray_stroken"
                 android:textColor="@color/white"
                 android:textSize="15dp"
                 android:typeface="serif" />
@@ -153,7 +158,9 @@
                 android:layout_height="35dp"
                 android:background="@drawable/tv_selector"
                 android:gravity="center"
-                android:text="0.00"
+                android:text=""
+                android:hint="0"
+                android:textColorHint="@color/gray_stroken"
                 android:textColor="@color/white"
                 android:textSize="15dp"
                 android:typeface="serif" />

@@ -1,6 +1,7 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Path;
@@ -350,12 +351,12 @@ public class HomeActivity extends BaseActivity {
             }
         });
         mapHeight = mapBitmap.getHeight();
-        if (TextUtils.isEmpty(Constant.robotIp)) {
-            Constant.robotIp = SharedPrefHelper.getString(HomeActivity.this, "robotIp", "192.168.11.1");
-        }
-        if (Constant.robotPort == 0) {
-            Constant.robotPort = SharedPrefHelper.getInt(HomeActivity.this, "robotPort", 1445);
-        }
+//        if (TextUtils.isEmpty(Constant.robotIp)) {
+//            Constant.robotIp = SharedPrefHelper.getString(HomeActivity.this, "robotIp", "192.168.11.1");
+//        }
+//        if (Constant.robotPort == 0) {
+//            Constant.robotPort = SharedPrefHelper.getInt(HomeActivity.this, "robotPort", 1445);
+//        }
         Constant.userId = SharedPrefHelper.getString(HomeActivity.this, "userId", "192.168.1.1");
     }
 
@@ -607,26 +608,29 @@ public class HomeActivity extends BaseActivity {
         prruModelListAdapter.setPrruModelListClickListener(new PrruModelListAdapter.OnPrruModelListClickListener() {
             @Override
             public void onClick(PrruModel prruModel) {
-                hideBeginPop();
-                Toast.makeText(HomeActivity.this, prruModel.neCode + "", Toast.LENGTH_SHORT).show();
-                hideBeginPop();
-                Toast.makeText(HomeActivity.this, prruModel.neId + "", Toast.LENGTH_SHORT).show();
-                //todo 回传点击数据
-                nowCollectPrru = prruModel;
-                isPrruCollect = true;
-                iv_operation.setImageResource(R.mipmap.home_stop);
+                if (prruModel.x != 0 && prruModel.x != 0) {  //如果 xy 为空 则不让其点击
+                    hideBeginPop();
+//                    Toast.makeText(HomeActivity.this, prruModel.neId + "", Toast.LENGTH_SHORT).show();
+                    //todo 回传点击数据
+                    nowCollectPrru = prruModel;
+                    isPrruCollect = true;
+                    iv_operation.setImageResource(R.mipmap.home_stop);
 //                nowCollectPrru=prruModel;
-                nowCollectNeCode = nowCollectPrru.neCode;
-                maxRsrp = Float.NEGATIVE_INFINITY;
-                xWhenMax = Float.NEGATIVE_INFINITY;
-                yWhenMax = Float.NEGATIVE_INFINITY;
-                if ((nowCollectPrru.x - realXo + initX) == nowX && (nowCollectPrru.y - realYo + initY) == nowY) {
-                    cStep = 1;
-                    LLog.getLog().e("扫描", "1");
-                    robotMoveTo(nowCollectPrru.x - realXo + initX + 1, nowCollectPrru.y - realYo + initY);
+                    nowCollectNeCode = nowCollectPrru.neCode;
+                    maxRsrp = Float.NEGATIVE_INFINITY;
+                    xWhenMax = Float.NEGATIVE_INFINITY;
+                    yWhenMax = Float.NEGATIVE_INFINITY;
+                    if ((nowCollectPrru.x - realXo + initX) == nowX && (nowCollectPrru.y - realYo + initY) == nowY) {
+                        cStep = 1;
+                        LLog.getLog().e("扫描", "1");
+                        robotMoveTo(nowCollectPrru.x - realXo + initX + 1, nowCollectPrru.y - realYo + initY);
+                    } else {
+                        cStep = 0;
+                        robotMoveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY);
+                    }
+
                 } else {
-                    cStep = 0;
-                    robotMoveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY);
+                    showToast("数据错误！");
                 }
             }
         });
@@ -678,9 +682,10 @@ public class HomeActivity extends BaseActivity {
         final EditText edtPointX = view.findViewById(R.id.edt_connect_pointX);         //X坐标
         final EditText edtPointY = view.findViewById(R.id.edt_connect_pointY);         //Y坐标
         final EditText edtScale = view.findViewById(R.id.edt_connect_scale);           //比例尺
-        EditText edtRbIp = view.findViewById(R.id.edt_connect_rbip);             //机器人IP
-        EditText edtRbPort = view.findViewById(R.id.edt_connect_rbport);         //机器人端口
-        edtScale.setText("100.00");
+        final EditText edtRbIp = view.findViewById(R.id.edt_connect_rbip);             //机器人IP
+        final EditText edtRbPort = view.findViewById(R.id.edt_connect_rbport);         //机器人端口
+        setDefaultConInfo(edtPointX, edtPointY, edtScale, edtRbIp, edtRbPort);       //设置连接信息
+
         edtScale.setSelection(edtScale.getText().length());
         edtPointX.setSelection(edtPointX.getText().length());
         edtPointY.setSelection(edtPointY.getText().length());
@@ -697,14 +702,65 @@ public class HomeActivity extends BaseActivity {
         tvConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                hideConnectPop();
-                float x = Float.parseFloat(edtPointX.getText().toString());
-                float y = Float.parseFloat(edtPointY.getText().toString());
-                float scale = Float.parseFloat(edtScale.getText().toString());
-//                saveRbLocationInfo();    //存储机器人位置信息
-                connection(x, y, scale);                       //进行机器人连接尝试
+                if(judgeEmpty(edtPointX,edtPointY,edtScale,edtRbIp,edtRbPort)) {
+                    hideConnectPop();
+                    float x = Float.parseFloat(edtPointX.getText().toString());
+                    float y = Float.parseFloat(edtPointY.getText().toString());
+                    float scale = Float.parseFloat(edtScale.getText().toString());
+                    connection(x, y, scale);                       //进行机器人连接尝试
+                }
             }
         });
+    }
+
+    /**
+     * 判断机器人信息是否填写完善
+     * @param x
+     * @param y
+     * @param scale
+     * @param ip
+     * @param port
+     * @return
+     */
+    private boolean judgeEmpty(EditText x, EditText y, EditText scale, EditText ip, EditText port) {
+        boolean flag = false;
+        if (x.getText().toString().trim().equals("")) {
+            x.requestFocus();
+            showToast("请输入X值");
+        } else if (y.getText().toString().trim().equals("")) {
+            y.requestFocus();
+            showToast("请输入Y值");
+        } else if (scale.getText().toString().trim().equals("")) {
+            scale.requestFocus();
+            showToast("请输入比例尺");
+        } else if (ip.getText().toString().trim().equals("")) {
+            ip.requestFocus();
+            showToast("请输入机器人地址");
+        } else if (port.getText().toString().trim().equals("")) {
+            port.requestFocus();
+            showToast("请输入机器人地址端口");
+        } else {
+            flag = true;
+        }
+        return flag;
+    }
+
+    /**
+     * 设置默认连接信息
+     *
+     * @param x
+     * @param y
+     * @param scale
+     * @param ip
+     * @param port
+     */
+    private void setDefaultConInfo(EditText x, EditText y, EditText scale, EditText ip, EditText port) {
+        x.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo")));
+        y.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo")));
+        scale.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "scale")));
+        ip.setText(SharedPrefHelper.getString(mContext, "robotIp"));
+        port.setText(SharedPrefHelper.getString(mContext, "robotPort"));
+
     }
 
     /**
@@ -774,7 +830,7 @@ public class HomeActivity extends BaseActivity {
         initStart(xo, yo);
     }
 
-    private void connection(float pointX,float pointY,float scaleRuler) {
+    private void connection(float pointX, float pointY, float scaleRuler) {
         try {
             robotConnect = true;
             LLog.getLog().e("连接机器人", Constant.robotIp + ":" + Constant.robotPort);
@@ -808,8 +864,8 @@ public class HomeActivity extends BaseActivity {
                 realYo = SharedPrefHelper.getFloat(this, "realYo");
                 float[] continueXY = realToMap(nowX, nowY);
                 initStart(continueXY[0], continueXY[1]);
-            }else{
-                    saveRbLocationInfo(pointX,pointY,scaleRuler);
+            } else {
+                saveRbLocationInfo(pointX, pointY, scaleRuler);
             }
         } else {
             showToast("机器人连接失败！");
