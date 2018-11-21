@@ -759,7 +759,7 @@ public class HomeActivity extends BaseActivity {
         y.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo")));
         scale.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "scale")));
         ip.setText(SharedPrefHelper.getString(mContext, "robotIp"));
-        port.setText(SharedPrefHelper.getString(mContext, "robotPort"));
+        port.setText(String.valueOf(SharedPrefHelper.getInt(mContext, "robotPort",0)));
 
     }
 
