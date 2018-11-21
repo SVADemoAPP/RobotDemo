@@ -37,8 +37,17 @@ import com.google.gson.Gson;
 import com.slamtec.slamware.AbstractSlamwarePlatform;
 import com.slamtec.slamware.action.IAction;
 import com.slamtec.slamware.discovery.DeviceManager;
+import com.slamtec.slamware.exceptions.ConnectionFailException;
+import com.slamtec.slamware.exceptions.ConnectionTimeOutException;
+import com.slamtec.slamware.exceptions.InvalidArgumentException;
+import com.slamtec.slamware.exceptions.ParseInvalidException;
+import com.slamtec.slamware.exceptions.RequestFailException;
+import com.slamtec.slamware.exceptions.UnauthorizedRequestException;
+import com.slamtec.slamware.exceptions.UnsupportedCommandException;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Pose;
+import com.slamtec.slamware.robot.PowerStatus;
+import com.slamtec.slamware.robot.SleepMode;
 
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
@@ -119,7 +128,7 @@ public class HomeActivity extends BaseActivity {
 
     private float[] xyRobotWhenMax;
 
-    private Timer timer=new Timer();
+    private Timer timer = new Timer();
 
 
     /***xhf***/
@@ -130,16 +139,18 @@ public class HomeActivity extends BaseActivity {
 
     private SuperPopupWindow mConnectPopupWindow;
 
-    private TimerTask task=new TimerTask() {
+    private TimerTask task = new TimerTask() {
         @Override
         public void run() {
-            if(platform==null){
-                LLog.getLog().robot("no connect","未连接");
-            }else{
+
+            if (platform == null) {
+                LLog.getLog().robot("no connect", "未连接");
+                getRobotInfo();
+            } else {
                 try {
-                    LLog.getLog().robot("health",""+platform.getRobotHealth().getErrors());
-                }catch (Exception e){
-                    LLog.getLog().robot("error",e.toString());
+                    LLog.getLog().robot("health", "" + platform.getRobotHealth().getErrors());
+                } catch (Exception e) {
+                    LLog.getLog().robot("error", e.toString());
                 }
 
             }
@@ -306,7 +317,7 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     public void dealLogicBeforeInitView() {
-        timer.schedule(task,1000,4000);
+        timer.schedule(task, 1000, 4000);
     }
 
     @Override
@@ -327,7 +338,7 @@ public class HomeActivity extends BaseActivity {
 //        map.setMapDrawable(getResources().getDrawable(R.mipmap.f1_100));
         currentMap = getIntent().getExtras().getString("currentMap");
         mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
-        mapBitmap = BitmapFactory.decodeFile(Constant.sdPath+"/maps/"
+        mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/"
 
 
                 + currentMap);
@@ -385,6 +396,7 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void robotMoveTo(float toX, float toY) {
+        getRobotInfo();
         forwardLocation.setX(toX);
         forwardLocation.setY(toY);
         try {
@@ -413,10 +425,12 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void robotCancelAndMoveTo(float toX, float toY) {
+        getRobotInfo();
         forwardLocation.setX(toX);
         forwardLocation.setY(toY);
         try {
             platform.getCurrentAction().cancel();
+
             for (int i = 0, len = coorCount; i < len; i++) {
                 map.removeShape("coor" + i);
             }
@@ -545,7 +559,7 @@ public class HomeActivity extends BaseActivity {
 
                 if (mPrruModelList != null && mPrruModelList.size() != 0) {
                     initBeginPop(mPrruModelList);     //加载弹窗视图
-                }else{
+                } else {
                     showToast("没有Prru列表");
                 }
 
@@ -728,14 +742,27 @@ public class HomeActivity extends BaseActivity {
         tvConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(judgeEmpty(edtPointX,edtPointY,edtScale,edtRbIp,edtRbPort)) {
+                if (judgeEmpty(edtPointX, edtPointY, edtScale, edtRbIp, edtRbPort)) {
                     hideConnectPop();
                     float x = Float.parseFloat(edtPointX.getText().toString());
                     float y = Float.parseFloat(edtPointY.getText().toString());
                     float scale = Float.parseFloat(edtScale.getText().toString());
-                    String robotIp=edtRbIp.getText().toString();
-                    int robotPort=Integer.parseInt(edtRbPort.getText().toString());
-                    connection(x, y, scale,robotIp,robotPort,edtRbIp.isEnabled());                       //进行机器人连接尝试
+
+                    //保存信息
+                    SharedPrefHelper.putFloat(mContext,"scale", Float.parseFloat(edtScale.getText().toString()));
+                    SharedPrefHelper.putFloat(mContext,"realXo", Float.parseFloat(edtPointX.getText().toString()));
+                    SharedPrefHelper.putFloat(mContext,"realYo", Float.parseFloat(edtPointY.getText().toString()));
+                    SharedPrefHelper.putString(mContext,"robotIp",edtRbIp.getText().toString());
+                    SharedPrefHelper.putInt(mContext,"robotPort", Integer.parseInt(edtRbPort.getText().toString()));
+
+                    if (Constant.robotIp==null&&Constant.robotPort==0) //判断是否为空 为空则放值
+                    {
+                        Constant.robotIp=edtRbIp.getText().toString();
+                        Constant.robotPort=Integer.valueOf(edtRbPort.getText().toString());
+                    }
+                    String robotIp = edtRbIp.getText().toString();
+                    int robotPort = Integer.parseInt(edtRbPort.getText().toString());
+                    connection(x, y, scale, robotIp, robotPort, edtRbIp.isEnabled());                       //进行机器人连接尝试
                 }
             }
         });
@@ -743,6 +770,7 @@ public class HomeActivity extends BaseActivity {
 
     /**
      * 判断机器人信息是否填写完善
+     *
      * @param x
      * @param y
      * @param scale
@@ -783,10 +811,10 @@ public class HomeActivity extends BaseActivity {
      * @param port
      */
     private void setDefaultConInfo(EditText x, EditText y, EditText scale, EditText ip, EditText port) {
-        x.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo")));
-        y.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo")));
-        scale.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "scale")));
-        ip.setText(SharedPrefHelper.getString(mContext, "robotIp"));
+        x.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo",0)));
+        y.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo",0)));
+        scale.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "scale",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "scale",0)));
+        ip.setText(SharedPrefHelper.getString(mContext, "robotIp","0.0.0.0"));
         port.setText(String.valueOf(SharedPrefHelper.getInt(mContext, "robotPort",0)));
 
     }
@@ -812,7 +840,7 @@ public class HomeActivity extends BaseActivity {
      * @param robotPort 机器人设备端口
      */
     private void lockEditRobotInfo(EditText robotIp, EditText robotPort) {
-        if (Constant.robotIp != null && !Constant.robotIp.equals("")) //存在ip信息锁定robotIp填写
+        if (SharedPrefHelper.getBoolean(mContext,"ipFlag")) //存在ip信息锁定robotIp填写
         {
             robotIp.setText(Constant.robotIp);
             robotIp.setEnabled(false);
@@ -822,7 +850,7 @@ public class HomeActivity extends BaseActivity {
             robotIp.setTextColor(getResources().getColor(R.color.white));
         }
 
-        if (Constant.robotPort != 0)       //存在port信息锁定robotPort填写
+        if (SharedPrefHelper.getBoolean(mContext,"ipFlag"))       //存在port信息锁定robotPort填写
         {
             robotPort.setText(String.valueOf(Constant.robotPort));
             robotPort.setEnabled(false);
@@ -858,7 +886,7 @@ public class HomeActivity extends BaseActivity {
         initStart(xo, yo);
     }
 
-    private void connection(float pointX, float pointY, float scaleRuler,String robotIp,int robotPort,boolean flag) {
+    private void connection(float pointX, float pointY, float scaleRuler, String robotIp, int robotPort, boolean flag) {
         try {
             robotConnect = true;
             LLog.getLog().e("连接机器人", robotIp + ":" + robotPort);
@@ -881,9 +909,9 @@ public class HomeActivity extends BaseActivity {
             e.printStackTrace();
         }
         if (robotConnect) {
-            if(flag){
-                SharedPrefHelper.putString(HomeActivity.this,"robotIp",robotIp);
-                SharedPrefHelper.putInt(HomeActivity.this,"robotPort",robotPort);
+            if (flag) {
+                SharedPrefHelper.putString(HomeActivity.this, "robotIp", robotIp);
+                SharedPrefHelper.putInt(HomeActivity.this, "robotPort", robotPort);
             }
             showToast("机器人连接成功！");
             if (isContinue) {
@@ -907,6 +935,34 @@ public class HomeActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        LLog.getLog().e("destory","destroy");
+        LLog.getLog().e("destory", "destroy");
+    }
+
+    private void getRobotInfo() {
+        StringBuffer stringBuffer = new StringBuffer();
+        if (platform != null) {
+            try {
+                PowerStatus powerStatus = platform.getPowerStatus();
+                SleepMode sleepMode = powerStatus.getSleepMode();
+                stringBuffer.append("状态------" + sleepMode+"------");
+                stringBuffer.append(platform.getBatteryPercentage()+"%电量");
+                String s = stringBuffer.toString();
+                Log.e("XHF", s);
+            } catch (RequestFailException e) {
+                e.printStackTrace();
+            } catch (ConnectionFailException e) {
+                e.printStackTrace();
+            } catch (ConnectionTimeOutException e) {
+                e.printStackTrace();
+            } catch (UnauthorizedRequestException e) {
+                e.printStackTrace();
+            } catch (UnsupportedCommandException e) {
+                e.printStackTrace();
+            } catch (ParseInvalidException e) {
+                e.printStackTrace();
+            } catch (InvalidArgumentException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -86,6 +86,7 @@ public class MaplistActivity extends BaseActivity {
             } else if (device instanceof MdnsDevice) {
                 Constant.robotIp = ((MdnsDevice) device).getAddr();
                 Constant.robotPort = ((MdnsDevice) device).getPort();
+                SharedPrefHelper.putBoolean(MaplistActivity.this,"ipFlag",true);
             }
         }
     };
@@ -93,6 +94,7 @@ public class MaplistActivity extends BaseActivity {
     @Override
     public void setContentLayout() {
         setContentView(R.layout.activity_maplist);
+        SharedPrefHelper.putBoolean(MaplistActivity.this,"ipFlag",false);
     }
 
     @Override

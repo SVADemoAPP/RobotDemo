@@ -129,6 +129,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:background="@drawable/tv_selector"
+                android:digits="0123456789."
                 android:gravity="center"
                 android:hint="0.0.0.0"
                 android:text=""
