@@ -707,6 +707,19 @@ public class HomeActivity extends BaseActivity {
                     float x = Float.parseFloat(edtPointX.getText().toString());
                     float y = Float.parseFloat(edtPointY.getText().toString());
                     float scale = Float.parseFloat(edtScale.getText().toString());
+                    //保存信息
+                    SharedPrefHelper.putFloat(mContext,"scale", Float.parseFloat(edtScale.getText().toString()));
+                    SharedPrefHelper.putFloat(mContext,"realXo", Float.parseFloat(edtPointX.getText().toString()));
+                    SharedPrefHelper.putFloat(mContext,"realYo", Float.parseFloat(edtPointY.getText().toString()));
+                    SharedPrefHelper.putString(mContext,"robotIp",edtRbIp.getText().toString());
+                    SharedPrefHelper.putInt(mContext,"robotPort", Integer.parseInt(edtRbPort.getText().toString()));
+
+
+                    if (Constant.robotIp==null&&Constant.robotPort==0) //判断是否为空 为空则放值
+                    {
+                        Constant.robotIp=edtRbIp.getText().toString();
+                        Constant.robotPort=Integer.valueOf(edtRbPort.getText().toString());
+                    }
                     connection(x, y, scale);                       //进行机器人连接尝试
                 }
             }
@@ -755,10 +768,10 @@ public class HomeActivity extends BaseActivity {
      * @param port
      */
     private void setDefaultConInfo(EditText x, EditText y, EditText scale, EditText ip, EditText port) {
-        x.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo")));
-        y.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo")));
-        scale.setText(String.valueOf(SharedPrefHelper.getFloat(mContext, "scale")));
-        ip.setText(SharedPrefHelper.getString(mContext, "robotIp"));
+        x.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo",0)));
+        y.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo",0)));
+        scale.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "scale",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "scale",0)));
+        ip.setText(SharedPrefHelper.getString(mContext, "robotIp","0.0.0.0"));
         port.setText(String.valueOf(SharedPrefHelper.getInt(mContext, "robotPort",0)));
 
     }
@@ -784,7 +797,7 @@ public class HomeActivity extends BaseActivity {
      * @param robotPort 机器人设备端口
      */
     private void lockEditRobotInfo(EditText robotIp, EditText robotPort) {
-        if (Constant.robotIp != null && !Constant.robotIp.equals("")) //存在ip信息锁定robotIp填写
+        if (SharedPrefHelper.getBoolean(mContext,"ipFlag")) //存在ip信息锁定robotIp填写
         {
             robotIp.setText(Constant.robotIp);
             robotIp.setEnabled(false);
@@ -794,7 +807,7 @@ public class HomeActivity extends BaseActivity {
             robotIp.setTextColor(getResources().getColor(R.color.white));
         }
 
-        if (Constant.robotPort != 0)       //存在port信息锁定robotPort填写
+        if (SharedPrefHelper.getBoolean(mContext,"ipFlag"))       //存在port信息锁定robotPort填写
         {
             robotPort.setText(String.valueOf(Constant.robotPort));
             robotPort.setEnabled(false);

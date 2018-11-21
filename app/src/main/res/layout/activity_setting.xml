@@ -51,13 +51,14 @@
                 android:typeface="serif" />
 
             <EditText
-                android:inputType="number"
                 android:id="@+id/et_rb_ip"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/tv_selector"
+                android:digits="0123456789."
                 android:gravity="center"
                 android:hint="192.168.11.1"
+                android:inputType="number"
                 android:singleLine="true"
                 android:textColor="@color/white"
                 android:textColorHint="@color/white"
@@ -88,13 +89,13 @@
                 android:typeface="serif" />
 
             <EditText
-                android:inputType="number"
                 android:id="@+id/et_rb_port"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/tv_selector"
                 android:gravity="center"
                 android:hint="1445"
+                android:inputType="number"
                 android:singleLine="true"
                 android:textColor="@color/white"
                 android:textColorHint="@color/white"
@@ -167,32 +168,35 @@
                 android:orientation="horizontal">
 
                 <EditText
-                    android:inputType="number"
                     android:id="@+id/et_server_ip"
                     android:layout_width="0dp"
-                    android:layout_weight="6"
                     android:layout_height="40dp"
+                    android:layout_weight="6"
                     android:background="@drawable/tv_selector"
+                    android:digits="0123456789."
                     android:gravity="center"
-                    android:hint="198.168.11.1"
+                    android:hint="0.0.0.0"
+                    android:inputType="number"
                     android:singleLine="true"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
                     android:textSize="18dp" />
+
                 <ImageView
 
                     android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
                 <EditText
-                    android:inputType="number"
                     android:id="@+id/et_server_port"
                     android:layout_width="0dp"
-                    android:layout_weight="3"
                     android:layout_height="40dp"
+                    android:layout_weight="3"
                     android:background="@drawable/tv_selector"
                     android:gravity="center"
                     android:hint="3880"
+                    android:inputType="number"
                     android:singleLine="true"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
