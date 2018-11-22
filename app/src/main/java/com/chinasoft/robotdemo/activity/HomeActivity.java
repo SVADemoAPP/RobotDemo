@@ -117,7 +117,7 @@ public class HomeActivity extends BaseActivity {
 
     private ImageView iv_operation;
 
-    private RequestShape requestShape;
+    private RequestShape robotShape;
 
     private CompassView cv;
 
@@ -178,6 +178,11 @@ public class HomeActivity extends BaseActivity {
                 case 0:
                     try {
                         nowPose = platform.getPose();
+                        robotDirection=-yawToRotation(nowPose.getYaw());
+                        cv.updateDirection(mapRotate+robotDirection);
+                        Log.e("dir2","dd:"+robotDirection);
+                        robotShape.setView(cv);
+                        map.addShape(robotShape, false);
 //                        Log.e("msg", "x:" + nowPose.getX() + ",y:" + nowPose.getY());
                         nowX = nowPose.getX();
                         nowY = nowPose.getY();
@@ -219,11 +224,11 @@ public class HomeActivity extends BaseActivity {
                         for (int i = 0, len = coorCount; i < len; i++) {
                             map.removeShape("coor" + i);
                         }
-                        requestShape.setValues(String.format(
+                        robotShape.setValues(String.format(
                                 "%.5f:%.5f",
                                 new Object[]{p[0],
                                         p[1]}));
-                        map.addShape(requestShape, false);
+                        map.addShape(robotShape, false);
                         switch (platform.getCurrentAction().getActionName()) {
                             case "":
                                 removeMessages(0);
@@ -358,7 +363,7 @@ public class HomeActivity extends BaseActivity {
         cv.setId(0);
         cv.setImageResource(R.mipmap.icon_robot);
         cv.updateDirection(mapRotate+robotDirection);
-        requestShape = new RequestShape("s", -16776961, cv, HomeActivity.this);
+        robotShape = new RequestShape("s", -16776961, cv, HomeActivity.this);
         desShape = new CustomShape("des", R.color.blue, HomeActivity.this, "dwf", R.mipmap.destination_point);
 
     }
@@ -379,8 +384,8 @@ public class HomeActivity extends BaseActivity {
             public void onRotate(float rotate) {
                 mapRotate=-rotate;
                 cv.updateDirection(mapRotate+robotDirection);
-                requestShape.setView(cv);
-                map.addShape(requestShape, false);
+                robotShape.setView(cv);
+                map.addShape(robotShape, false);
             }
         });
 
@@ -471,6 +476,10 @@ public class HomeActivity extends BaseActivity {
 
     }
 
+    private float yawToRotation(float yaw){
+        return (float) (yaw*180/3.14);
+    }
+
     private void robotCancelAndMoveTo(float toX, float toY) {
         getRobotInfo();
         forwardLocation.setX(toX);
@@ -510,8 +519,8 @@ public class HomeActivity extends BaseActivity {
 
 
     private void initStart(float x, float y) {
-        requestShape.setValues(x, y);
-        map.addShape(requestShape, false);
+        robotShape.setValues(x, y);
+        map.addShape(robotShape, false);
 //        robotShape.setValues(String.format(
 //                "%.5f:%.5f",
 //                new Object[]{x,
@@ -944,10 +953,8 @@ public class HomeActivity extends BaseActivity {
             LLog.getLog().e("连接机器人", robotIp + ":" + robotPort);
             platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
             nowPose = platform.getPose();// 当前机器人的位置,
-            float x=nowPose.getRotation().getYaw();
-            float y=nowPose.getRotation().getRoll();
-            float z=nowPose.getRotation().getPitch();
-            Log.e("forward",x+" "+y+" "+z);
+            robotDirection=-yawToRotation(nowPose.getYaw());
+            Log.e("dir",robotDirection+"");
             nowX = nowPose.getX();
             nowY = nowPose.getY();
             initZ = nowPose.getZ();
