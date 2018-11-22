@@ -283,9 +283,9 @@ public class HomeActivity extends BaseActivity {
                 case 0:
                     try {
                         nowPose = platform.getPose();
-                        robotDirection=-yawToRotation(nowPose.getYaw());
-                        cv.updateDirection(mapRotate+robotDirection);
-                        Log.e("dir2","dd:"+robotDirection);
+                        robotDirection = -yawToRotation(nowPose.getYaw());
+                        cv.updateDirection(mapRotate + robotDirection);
+                        Log.e("dir2", "dd:" + robotDirection);
                         robotShape.setView(cv);
                         map.addShape(robotShape, false);
 //                        Log.e("msg", "x:" + nowPose.getX() + ",y:" + nowPose.getY());
@@ -467,14 +467,14 @@ public class HomeActivity extends BaseActivity {
 //        robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
 
         connection(Constant.firstX, Constant.firstY, Constant.mapScale, Constant.robotIp, Constant.robotPort);
-
+        initRocker();
     }
 
     private void initShape() {
         cv = new CompassView(HomeActivity.this);
         cv.setId(0);
         cv.setImageResource(R.mipmap.icon_robot);
-        cv.updateDirection(mapRotate+robotDirection);
+        cv.updateDirection(mapRotate + robotDirection);
         robotShape = new RequestShape("s", -16776961, cv, HomeActivity.this);
         desShape = new CustomShape("des", R.color.blue, HomeActivity.this, "dwf", R.mipmap.destination_point);
 
@@ -494,8 +494,8 @@ public class HomeActivity extends BaseActivity {
         map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
             @Override
             public void onRotate(float rotate) {
-                mapRotate=-rotate;
-                cv.updateDirection(mapRotate+robotDirection);
+                mapRotate = -rotate;
+                cv.updateDirection(mapRotate + robotDirection);
                 robotShape.setView(cv);
                 map.addShape(robotShape, false);
             }
@@ -588,8 +588,8 @@ public class HomeActivity extends BaseActivity {
 
     }
 
-    private float yawToRotation(float yaw){
-        return (float) (yaw*180/3.14);
+    private float yawToRotation(float yaw) {
+        return (float) (yaw * 180 / 3.14);
     }
 
     private void robotCancelAndMoveTo(float toX, float toY) {
@@ -660,57 +660,46 @@ public class HomeActivity extends BaseActivity {
     @Override
     public void onClickEvent(View view) {
         switch (view.getId()) {
-            case R.id.tv_setting:
-//                startActivity(new Intent(this,SettingActivity.class));
-                openActivity(SettingActivity.class);
-//                if (robotparamDialog == null) {
-//                    robotparamDialog = new RobotparamDialog(this, R.style.MyDialogStyle);
-//                    robotparamDialog.setOnRobotparamListener(new RobotparamDialog.OnRobotparamListener() {
-//                        @Override
-//                        public void paramsComplete(String ip, int port, String userId) {
-//                            SharedPrefHelper.putString(HomeActivity.this, "robotIp", ip);
-//                            SharedPrefHelper.putInt(HomeActivity.this, "robotPort", port);
-//                            SharedPrefHelper.putString(HomeActivity.this, "userId", userId);
-//                            Constant.robotIp = ip;
-//                            Constant.robotPort = port;
-//                            Constant.userId = userId;
-//                        }
-//                    });
-//                }
-//                robotparamDialog.show();
-//                robotparamDialog.setData(SharedPrefHelper.getString(HomeActivity.this, "robotIp",
-//                        "192.168.11.1"), SharedPrefHelper.getInt(HomeActivity.this, "robotPort",
-//                        1445), SharedPrefHelper.getString(HomeActivity.this, "userId",
-//                        "192.168.1.1"));
+            case R.id.tv_home_back:
+                disconnectRobot();//释放机器人连接
+                finish();
+                break;
+            case R.id.home_change_auto: //切换操作模式
+                if (platform!=null)
+                {
+                    try {
+                        platform.getCurrentAction().cancel();
+                    } catch (RequestFailException e) {
+                        e.printStackTrace();
+                    } catch (ConnectionFailException e) {
+                        e.printStackTrace();
+                    } catch (ConnectionTimeOutException e) {
+                        e.printStackTrace();
+                    } catch (UnauthorizedRequestException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedCommandException e) {
+                        e.printStackTrace();
+                    } catch (ParseInvalidException e) {
+                        e.printStackTrace();
+                    } catch (InvalidArgumentException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (mSwitchAutoFlag == true)//切换为手动
+                {
+                    mSwitchAutoFlag = false;
+                    iv_operation.setVisibility(View.GONE);
+                    mRockerView.setVisibility(View.VISIBLE);
+                    mSwitch.setImageResource(R.mipmap.home_robot_hand);
+                } else {                 //切换为自动
+                    mSwitchAutoFlag = true;
+                    iv_operation.setVisibility(View.VISIBLE);
+                    mRockerView.setVisibility(View.GONE);
+                    mSwitch.setImageResource(R.mipmap.home_robot_auto);
+                }
                 break;
             case R.id.tv_connect:
                 initConnectPop(); //初始化连接-弹窗
-//                        if (paramsDialog == null) {
-//                            paramsDialog = new ParamsDialog(this, R.style.MyDialogStyle);
-//                            paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
-//                                @Override
-//                                public void paramsComplete(float x, float y, float scaleRuler) {
-//                                    realXo = x;
-//                                    realYo = y;
-//                                    scale = scaleRuler;
-//                                    xo = x * scaleRuler;
-//                                    yo = mapHeight - y * scaleRuler;
-//                                    SharedPrefHelper.putString(HomeActivity.this, "currentMap", currentMap);
-//                                    SharedPrefHelper.putFloat(HomeActivity.this, "scale", scale);
-//                                    SharedPrefHelper.putFloat(HomeActivity.this, "xo", xo);
-//                                    SharedPrefHelper.putFloat(HomeActivity.this, "yo", yo);
-//                                    SharedPrefHelper.putFloat(HomeActivity.this, "realXo", realXo);
-//                                    SharedPrefHelper.putFloat(HomeActivity.this, "realYo", realYo);
-//                                    initX = nowX;
-//                                    initY = nowY;
-//                                    SharedPrefHelper.putFloat(HomeActivity.this, "initX", initX);
-//                                    SharedPrefHelper.putFloat(HomeActivity.this, "initY", initY);
-//                                    initStart(xo, yo);
-//                                }
-//                            });
-//                        }
-//                        paramsDialog.show();
-
                 break;
             case R.id.iv_operation:
 //                openActivity(SettingActivity.class);
@@ -1065,8 +1054,8 @@ public class HomeActivity extends BaseActivity {
             LLog.getLog().e("连接机器人", robotIp + ":" + robotPort);
             platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
             nowPose = platform.getPose();// 当前机器人的位置,
-            robotDirection=-yawToRotation(nowPose.getYaw());
-            Log.e("dir",robotDirection+"");
+            robotDirection = -yawToRotation(nowPose.getYaw());
+            Log.e("dir", robotDirection + "");
             nowX = nowPose.getX();
             nowY = nowPose.getY();
             initZ = nowPose.getZ();
