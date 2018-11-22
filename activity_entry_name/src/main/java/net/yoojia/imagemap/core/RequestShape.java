@@ -1,5 +1,6 @@
 package net.yoojia.imagemap.core;
 
+import net.yoojia.imagemap.support.CompassView;
 import net.yoojia.imagemap.support.ScaleUtility;
 import net.yoojia.imagemap.util.MatrixConverHelper;
 import android.content.Context;
@@ -14,10 +15,11 @@ public class RequestShape extends Shape {
 	private PointF center;
 	private float radius = 5f;
 	Bitmap bitmap;
-	
+
 	@SuppressWarnings("unused")
 	private Context context;
 	private View view;
+
 
 	@Override
 	public float getCenterX() {
@@ -33,6 +35,11 @@ public class RequestShape extends Shape {
 		super(tag, coverColor);
 		this.view = view;
 		this.context = context;
+		bitmap = convertViewToBitmap(view);
+	}
+
+	public void setView(View view){
+		this.view = view;
 		bitmap = convertViewToBitmap(view);
 	}
 

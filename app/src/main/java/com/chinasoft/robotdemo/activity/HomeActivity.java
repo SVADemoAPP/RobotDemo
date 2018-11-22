@@ -1,14 +1,12 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -16,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -31,6 +28,7 @@ import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
 import com.chinasoft.robotdemo.util.SuperPopupWindow;
+import com.chinasoft.robotdemo.view.CompassView;
 import com.chinasoft.robotdemo.view.dialog.ParamsDialog;
 import com.chinasoft.robotdemo.view.dialog.RobotparamDialog;
 import com.google.gson.Gson;
@@ -59,6 +57,7 @@ import net.yoojia.imagemap.TouchImageView1;
 import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
+import net.yoojia.imagemap.core.RequestShape;
 import net.yoojia.imagemap.core.RobotShape;
 
 import java.util.List;
@@ -67,6 +66,7 @@ import java.util.TimerTask;
 import java.util.Vector;
 
 public class HomeActivity extends BaseActivity {
+
 
     private ImageMap1 map;
 
@@ -90,7 +90,7 @@ public class HomeActivity extends BaseActivity {
 
     private float xo, yo, scale, initX, initY, initZ, realXo, realYo;
 
-    private RobotShape robotShape;
+//    private RobotShape robotShape;
 
     private Location forwardLocation;
 
@@ -122,6 +122,10 @@ public class HomeActivity extends BaseActivity {
 
     private ImageView iv_operation;
 
+    private RequestShape robotShape;
+
+    private CompassView cv;
+
 //    private boolean flag = false;
 
 //    private List<PrruModel> prruModelList = new ArrayList<>();
@@ -147,6 +151,10 @@ public class HomeActivity extends BaseActivity {
     private View popupView;
 
     private SuperPopupWindow mConnectPopupWindow;
+
+    private float mapRotate;
+
+    private float robotDirection;
 
     private boolean mSwitchAutoFlag = true; //默认为自动
     private TimerTask task = new TimerTask() {
@@ -275,6 +283,11 @@ public class HomeActivity extends BaseActivity {
                 case 0:
                     try {
                         nowPose = platform.getPose();
+                        robotDirection=-yawToRotation(nowPose.getYaw());
+                        cv.updateDirection(mapRotate+robotDirection);
+                        Log.e("dir2","dd:"+robotDirection);
+                        robotShape.setView(cv);
+                        map.addShape(robotShape, false);
 //                        Log.e("msg", "x:" + nowPose.getX() + ",y:" + nowPose.getY());
                         nowX = nowPose.getX();
                         nowY = nowPose.getY();
@@ -451,18 +464,46 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     public void dealLogicAfterInitView() {
-        robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
-        desShape = new CustomShape("des", R.color.blue, HomeActivity.this, "dwf", R.mipmap.destination_point);
+//        robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
+
         connection(Constant.firstX, Constant.firstY, Constant.mapScale, Constant.robotIp, Constant.robotPort);
-        initRocker();//初始化手动摇杆
+
     }
 
+    private void initShape() {
+        cv = new CompassView(HomeActivity.this);
+        cv.setId(0);
+        cv.setImageResource(R.mipmap.icon_robot);
+        cv.updateDirection(mapRotate+robotDirection);
+        robotShape = new RequestShape("s", -16776961, cv, HomeActivity.this);
+        desShape = new CustomShape("des", R.color.blue, HomeActivity.this, "dwf", R.mipmap.destination_point);
+
+    }
 
     private void initMap() {
         mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
         mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/"
                 + currentMap);
         map.setMapBitmap(mapBitmap);
+
+//        cDemo=new CompassDemo(this,map);
+//        cDemo.setPosition(100,100);
+        initShape();
+
+
+        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+            @Override
+            public void onRotate(float rotate) {
+                mapRotate=-rotate;
+                cv.updateDirection(mapRotate+robotDirection);
+                robotShape.setView(cv);
+                map.addShape(robotShape, false);
+            }
+        });
+
+//        cDemo = new CompassDemo(this, map);
+//
+//        cDemo.setPosition(100,100);
         Log.e("msg", "高度：" + mapBitmap.getHeight() + "，宽度：" + mapBitmap.getWidth());
 //        showToast("高度："+mapBitmap.getHeight()+"，宽度："+mapBitmap.getWidth());
 //        map.setMapBitmap(BitmapFactory.decodeFile("/sdcard/Tester/成都王府井/成都王府井_3.png"));
@@ -535,7 +576,7 @@ public class HomeActivity extends BaseActivity {
                 orbitShape.setValues(tf[0], tf[1]);
                 map.addShape(orbitShape, false);
             }
-            desXY = realToMap(toX, toX);
+            desXY = realToMap(toX, toY);
             desShape.setValues(desXY[0], desXY[1]);
             map.addShape(desShape, false);
             platform.moveTo(locVector);
@@ -545,6 +586,10 @@ public class HomeActivity extends BaseActivity {
 
         }
 
+    }
+
+    private float yawToRotation(float yaw){
+        return (float) (yaw*180/3.14);
     }
 
     private void robotCancelAndMoveTo(float toX, float toY) {
@@ -569,7 +614,7 @@ public class HomeActivity extends BaseActivity {
                 orbitShape.setValues(tf[0], tf[1]);
                 map.addShape(orbitShape, false);
             }
-            desXY = realToMap(toX, toX);
+            desXY = realToMap(toX, toY);
             desShape.setValues(desXY[0], desXY[1]);
             map.addShape(desShape, false);
             platform.moveTo(locVector);
@@ -586,12 +631,13 @@ public class HomeActivity extends BaseActivity {
 
 
     private void initStart(float x, float y) {
-
-        robotShape.setValues(String.format(
-                "%.5f:%.5f",
-                new Object[]{x,
-                        y}));
-        map.addShape(robotShape, true);
+        robotShape.setValues(x, y);
+        map.addShape(robotShape, false);
+//        robotShape.setValues(String.format(
+//                "%.5f:%.5f",
+//                new Object[]{x,
+//                        y}));
+//        map.addShape(robotShape, true);
         isStart = true;
         forwardLocation = new Location();
         forwardLocation.setZ(initZ);
@@ -614,28 +660,60 @@ public class HomeActivity extends BaseActivity {
     @Override
     public void onClickEvent(View view) {
         switch (view.getId()) {
-            case R.id.tv_home_back:
-                disconnectRobot();//释放机器人连接
-                finish();
-                break;
-            case R.id.home_change_auto: //切换操作模式
-                if (mSwitchAutoFlag == true)//切换为手动
-                {
-                    mSwitchAutoFlag = false;
-                    iv_operation.setVisibility(View.GONE);
-                    mRockerView.setVisibility(View.VISIBLE);
-                    mSwitch.setImageResource(R.mipmap.home_robot_hand);
-                } else {                 //切换为自动
-                    mSwitchAutoFlag = true;
-                    iv_operation.setVisibility(View.VISIBLE);
-                    mRockerView.setVisibility(View.GONE);
-                    mSwitch.setImageResource(R.mipmap.home_robot_auto);
-                }
+            case R.id.tv_setting:
+//                startActivity(new Intent(this,SettingActivity.class));
+                openActivity(SettingActivity.class);
+//                if (robotparamDialog == null) {
+//                    robotparamDialog = new RobotparamDialog(this, R.style.MyDialogStyle);
+//                    robotparamDialog.setOnRobotparamListener(new RobotparamDialog.OnRobotparamListener() {
+//                        @Override
+//                        public void paramsComplete(String ip, int port, String userId) {
+//                            SharedPrefHelper.putString(HomeActivity.this, "robotIp", ip);
+//                            SharedPrefHelper.putInt(HomeActivity.this, "robotPort", port);
+//                            SharedPrefHelper.putString(HomeActivity.this, "userId", userId);
+//                            Constant.robotIp = ip;
+//                            Constant.robotPort = port;
+//                            Constant.userId = userId;
+//                        }
+//                    });
+//                }
+//                robotparamDialog.show();
+//                robotparamDialog.setData(SharedPrefHelper.getString(HomeActivity.this, "robotIp",
+//                        "192.168.11.1"), SharedPrefHelper.getInt(HomeActivity.this, "robotPort",
+//                        1445), SharedPrefHelper.getString(HomeActivity.this, "userId",
+//                        "192.168.1.1"));
                 break;
             case R.id.tv_connect:
                 initConnectPop(); //初始化连接-弹窗
+//                        if (paramsDialog == null) {
+//                            paramsDialog = new ParamsDialog(this, R.style.MyDialogStyle);
+//                            paramsDialog.setOnDialogListener(new ParamsDialog.OnDialogStartCollectListener() {
+//                                @Override
+//                                public void paramsComplete(float x, float y, float scaleRuler) {
+//                                    realXo = x;
+//                                    realYo = y;
+//                                    scale = scaleRuler;
+//                                    xo = x * scaleRuler;
+//                                    yo = mapHeight - y * scaleRuler;
+//                                    SharedPrefHelper.putString(HomeActivity.this, "currentMap", currentMap);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "scale", scale);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "xo", xo);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "yo", yo);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "realXo", realXo);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "realYo", realYo);
+//                                    initX = nowX;
+//                                    initY = nowY;
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "initX", initX);
+//                                    SharedPrefHelper.putFloat(HomeActivity.this, "initY", initY);
+//                                    initStart(xo, yo);
+//                                }
+//                            });
+//                        }
+//                        paramsDialog.show();
+
                 break;
             case R.id.iv_operation:
+//                openActivity(SettingActivity.class);
                 if (!robotConnect) {
                     showToast("机器人未连接");
                     return;
@@ -650,11 +728,62 @@ public class HomeActivity extends BaseActivity {
                     iv_operation.setImageResource(R.mipmap.home_start);
                     return;
                 }
+
                 if (mPrruModelList != null && mPrruModelList.size() != 0) {
                     initBeginPop(mPrruModelList);     //加载弹窗视图
                 } else {
                     showToast("没有Prru列表");
                 }
+
+                //
+//                /**
+//                 * 以下要移动到测试的prruModel
+//                 */
+//                isPrruCollect=true;
+//                iv_operation.setImageResource(R.mipmap.home_stop);
+//                nowCollectPrru=new PrruModel();
+//                nowCollectPrru.x=6.6f;
+//                nowCollectPrru.y=3.9f;
+//                //以下写移动逻辑
+//                Constant.interRequestUtil.getAllPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getAllPrruInfo?mapId=2046", new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String s) {
+//                        LLog.getLog().e("getAllPrruInfo成功", s);
+//                        AllPrruInfoResponse ap = new Gson().fromJson(s, AllPrruInfoResponse.class);
+////                        P lap=new Gson().fromJson(s,LocAndPrruInfoResponse.class);
+////                        if(lap.code==0) {
+////                            LLog.getLog().prru( "," , prruDataToString(lap.data.prruData));
+////                        }
+//                        prruModelList = ap.data;
+//                        runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//
+//                            }
+//                        });
+//                        LLog.getLog().e("prruModelList", prruModelList + "");
+//                    }
+//                }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError volleyError) {
+//                        LLog.getLog().e("getAllPrruInfo错误", volleyError.toString());
+//                    }
+//                });
+
+
+//                if (flag) {
+//                    iv_operation.setImageResource(R.mipmap.home_start);
+//                    tv_status.setText("未连接");
+//                    tv_status.setTextColor(getResources().getColor(R.color.route_color));
+//                    tv_status.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.home_unconnect, 0, 0, 0);
+//                    flag = false;
+//                } else {
+//                    iv_operation.setImageResource(R.mipmap.home_stop);
+//                    tv_status.setText("已连接");
+//                    tv_status.setTextColor(getResources().getColor(R.color.route_color_active));
+//                    tv_status.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.home_connect, 0, 0, 0);
+//                    flag = true;
+//                }
                 break;
             default:
                 break;
@@ -936,6 +1065,8 @@ public class HomeActivity extends BaseActivity {
             LLog.getLog().e("连接机器人", robotIp + ":" + robotPort);
             platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
             nowPose = platform.getPose();// 当前机器人的位置,
+            robotDirection=-yawToRotation(nowPose.getYaw());
+            Log.e("dir",robotDirection+"");
             nowX = nowPose.getX();
             nowY = nowPose.getY();
             initZ = nowPose.getZ();
