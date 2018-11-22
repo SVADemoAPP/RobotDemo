@@ -20,13 +20,13 @@ public class LineShape extends Shape
     private Paint paint;
     private Path path;
 
-    public LineShape(Object tag, int coverColor)
+    public LineShape(Object tag, int coverColor,int stroken,String colorString)
     {
         super(tag, coverColor);
         paint = new Paint();
-        paint.setColor(Color.parseColor("#8bc34a"));
+        paint.setColor(Color.parseColor(colorString));
         paint.setStyle(Style.STROKE);
-        paint.setStrokeWidth(6);
+        paint.setStrokeWidth(stroken);
         paint.setAntiAlias(true);
         paint.setPathEffect(new CornerPathEffect(9.9f));
     }

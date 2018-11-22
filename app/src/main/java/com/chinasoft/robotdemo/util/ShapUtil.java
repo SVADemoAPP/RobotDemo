@@ -31,13 +31,13 @@ public class ShapUtil {
         map.addShape(roundShape_stable, animation);
     }
 
-    public static void addLineShape(String tag, int color, double newLocX, double newLocY, double oldLocX, double oldLocY, boolean isDrawDis, boolean animation, ImageMap1 map) {
-        LineShape lineShape = new LineShape(tag, color);
-        lineShape.setValues((float) newLocX, (float) newLocY, (float) oldLocX, (float) oldLocY);
-        Path path=new Path();
-        path.quadTo((float) oldLocX, (float) oldLocY, (float) newLocX, (float) newLocY);
-        lineShape.setPath(path);
-//        lineShape.isDrawDis(isDrawDis);
-        map.addShape(lineShape, animation);
-    }
+//    public static void addLineShape(String tag, int color, double newLocX, double newLocY, double oldLocX, double oldLocY, boolean isDrawDis, boolean animation, ImageMap1 map) {
+//        LineShape lineShape = new LineShape(tag, color);
+//        lineShape.setValues((float) newLocX, (float) newLocY, (float) oldLocX, (float) oldLocY);
+//        Path path=new Path();
+//        path.quadTo((float) oldLocX, (float) oldLocY, (float) newLocX, (float) newLocY);
+//        lineShape.setPath(path);
+////        lineShape.isDrawDis(isDrawDis);
+//        map.addShape(lineShape, animation);
+////    }
 }

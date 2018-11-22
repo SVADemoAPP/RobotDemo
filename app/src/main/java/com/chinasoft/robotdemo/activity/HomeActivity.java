@@ -52,6 +52,7 @@ import com.slamtec.slamware.robot.SleepMode;
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
 import net.yoojia.imagemap.core.CollectPointShape;
+import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.RobotShape;
 
@@ -130,6 +131,9 @@ public class HomeActivity extends BaseActivity {
 
     private Timer timer = new Timer();
 
+    private CustomShape desShape;
+
+    private float[] desXY;
 
     /***xhf***/
     private SuperPopupWindow mSuperPopupWindow;
@@ -219,6 +223,7 @@ public class HomeActivity extends BaseActivity {
                                 path.lineTo(newF[0], newF[1]);
                                 lineShape.setPath(path);
                                 map.addShape(lineShape, false);
+                                map.removeShape("des");
                                 lastX = nowX;
                                 lastY = nowY;
                                 if (isPrruCollect) {
@@ -279,9 +284,9 @@ public class HomeActivity extends BaseActivity {
 //                            c.setX(tf[0]);
 //                            c.setY(tf[1]);
 //                            coorOrbit.add(c);
-                                    CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.route_color, HomeActivity.this, "dwf");
-                                    collectPointShape.setValues(tf[0], tf[1]);
-                                    map.addShape(collectPointShape, false);
+                                    CustomShape orbitShape = new CustomShape("coor" + i, R.color.route_color, HomeActivity.this, "dwf",R.mipmap.orbit_point);
+                                    orbitShape.setValues(tf[0], tf[1]);
+                                    map.addShape(orbitShape, false);
                                 }
                                 sendEmptyMessageDelayed(0, 2000);
                                 break;
@@ -334,13 +339,14 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     public void dealLogicAfterInitView() {
+        robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
+        desShape =new CustomShape("des", R.color.blue, HomeActivity.this,"dwf",R.mipmap.destination_point);
         connection(Constant.firstX,Constant.firstY,Constant.mapScale,Constant.robotIp,Constant.robotPort);
 
     }
 
 
     private void initMap(){
-        currentMap = getIntent().getExtras().getString("currentMap");
         mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
         mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/"
                 + currentMap);
@@ -413,10 +419,13 @@ public class HomeActivity extends BaseActivity {
 //                            c.setX(tf[0]);
 //                            c.setY(tf[1]);
 //                            coorOrbit.add(c);
-                CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.blue, HomeActivity.this, "dwf");
-                collectPointShape.setValues(tf[0], tf[1]);
-                map.addShape(collectPointShape, false);
+                CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, HomeActivity.this, "dwf",R.mipmap.orbit_point);
+                orbitShape.setValues(tf[0], tf[1]);
+                map.addShape(orbitShape, false);
             }
+            desXY=realToMap(toX, toX);
+            desShape.setValues(desXY[0],desXY[1]);
+            map.addShape(desShape,false);
             platform.moveTo(locVector);
             mHandler.sendEmptyMessageDelayed(0, 2000);
         } catch (Exception e) {
@@ -444,10 +453,13 @@ public class HomeActivity extends BaseActivity {
 //                            c.setX(tf[0]);
 //                            c.setY(tf[1]);
 //                            coorOrbit.add(c);
-                CollectPointShape collectPointShape = new CollectPointShape("coor" + i, R.color.blue, HomeActivity.this, "dwf");
-                collectPointShape.setValues(tf[0], tf[1]);
-                map.addShape(collectPointShape, false);
+                CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, HomeActivity.this, "dwf",R.mipmap.orbit_point);
+                orbitShape.setValues(tf[0], tf[1]);
+                map.addShape(orbitShape, false);
             }
+            desXY=realToMap(toX, toX);
+            desShape.setValues(desXY[0],desXY[1]);
+            map.addShape(desShape,false);
             platform.moveTo(locVector);
             if (mHandler.hasMessages(0)) {
                 mHandler.removeMessages(0);
@@ -462,7 +474,7 @@ public class HomeActivity extends BaseActivity {
 
 
     private void initStart(float x, float y) {
-        robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
+
         robotShape.setValues(String.format(
                 "%.5f:%.5f",
                 new Object[]{x,
@@ -475,7 +487,7 @@ public class HomeActivity extends BaseActivity {
         lastX = nowX;
         lastY = nowY;
         path.moveTo(x, y);
-        lineShape = new LineShape("line", R.color.green);
+        lineShape = new LineShape("line", R.color.green,4,"#00ffba");
     }
 
     private float[] mapToReal(float x, float y) {
@@ -889,6 +901,7 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void connection(float pointX, float pointY, float scaleRuler, String robotIp, int robotPort) {
+        currentMap = getIntent().getExtras().getString("currentMap");
         try {
             robotConnect = true;
             LLog.getLog().e("连接机器人", robotIp + ":" + robotPort);
