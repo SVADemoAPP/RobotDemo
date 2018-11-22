@@ -116,7 +116,7 @@ public class HomeActivity extends BaseActivity {
 
     private ImageView iv_operation;
 
-    private boolean flag = false;
+//    private boolean flag = false;
 
 //    private List<PrruModel> prruModelList = new ArrayList<>();
 
@@ -334,13 +334,15 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     public void dealLogicAfterInitView() {
-//        mapBitmap= BitmapFactory.decodeResource(getResources(),R.mipmap.f1_100);
-//        map.setMapDrawable(getResources().getDrawable(R.mipmap.f1_100));
+        connection(Constant.firstX,Constant.firstY,Constant.mapScale,Constant.robotIp,Constant.robotPort);
+
+    }
+
+
+    private void initMap(){
         currentMap = getIntent().getExtras().getString("currentMap");
         mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
         mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/"
-
-
                 + currentMap);
         map.setMapBitmap(mapBitmap);
         Log.e("msg", "高度：" + mapBitmap.getHeight() + "，宽度：" + mapBitmap.getWidth());
@@ -762,7 +764,7 @@ public class HomeActivity extends BaseActivity {
                     }
                     String robotIp = edtRbIp.getText().toString();
                     int robotPort = Integer.parseInt(edtRbPort.getText().toString());
-                    connection(x, y, scale, robotIp, robotPort, edtRbIp.isEnabled());                       //进行机器人连接尝试
+                    connection(x, y, scale, robotIp, robotPort);                       //进行机器人连接尝试
                 }
             }
         });
@@ -886,7 +888,7 @@ public class HomeActivity extends BaseActivity {
         initStart(xo, yo);
     }
 
-    private void connection(float pointX, float pointY, float scaleRuler, String robotIp, int robotPort, boolean flag) {
+    private void connection(float pointX, float pointY, float scaleRuler, String robotIp, int robotPort) {
         try {
             robotConnect = true;
             LLog.getLog().e("连接机器人", robotIp + ":" + robotPort);
@@ -907,12 +909,14 @@ public class HomeActivity extends BaseActivity {
         } catch (Exception e) {
             robotConnect = false;
             e.printStackTrace();
+            Log.e("msg",e.toString());
         }
         if (robotConnect) {
-            if (flag) {
-                SharedPrefHelper.putString(HomeActivity.this, "robotIp", robotIp);
-                SharedPrefHelper.putInt(HomeActivity.this, "robotPort", robotPort);
-            }
+            initMap();
+//            if (flag) {
+//                SharedPrefHelper.putString(HomeActivity.this, "robotIp", robotIp);
+//                SharedPrefHelper.putInt(HomeActivity.this, "robotPort", robotPort);
+//            }
             showToast("机器人连接成功！");
             if (isContinue) {
                 scale = SharedPrefHelper.getFloat(this, "scale");
@@ -928,7 +932,9 @@ public class HomeActivity extends BaseActivity {
                 saveRbLocationInfo(pointX, pointY, scaleRuler);
             }
         } else {
-            showToast("机器人连接失败！");
+            setResult(-1);
+            finish();
+//            showToast("机器人连接失败！");
         }
     }
 

@@ -3,6 +3,7 @@ package com.chinasoft.robotdemo.activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -58,6 +59,8 @@ public class MaplistActivity extends BaseActivity {
     private MaplistAdapter maplistAdapter;
     private String currentMap;
     private TextView tv_next;
+    private String wifiRobotIp;
+    private int wifiRobotPort;
 
     private List<PrruModel> mPrruModelList;
     private DeviceManager deviceManager;
@@ -84,9 +87,8 @@ public class MaplistActivity extends BaseActivity {
             if (device instanceof BleDevice) {
 //                                    Log.e("msg","aa"+((BleDevice)device).getDevice());
             } else if (device instanceof MdnsDevice) {
-                Constant.robotIp = ((MdnsDevice) device).getAddr();
-                Constant.robotPort = ((MdnsDevice) device).getPort();
-                SharedPrefHelper.putBoolean(MaplistActivity.this,"ipFlag",true);
+                wifiRobotIp = ((MdnsDevice) device).getAddr();
+                wifiRobotPort = ((MdnsDevice) device).getPort();
             }
         }
     };
@@ -94,13 +96,11 @@ public class MaplistActivity extends BaseActivity {
     @Override
     public void setContentLayout() {
         setContentView(R.layout.activity_maplist);
-        SharedPrefHelper.putBoolean(MaplistActivity.this,"ipFlag",false);
     }
 
     @Override
     public void dealLogicBeforeInitView() {
-//        Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
-//        Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
+
         Constant.interRequestUtil = InterRequestUtil.getInstance(this);
 
         File dir = new File(Constant.sdPath+"/maps/");
@@ -314,11 +314,22 @@ public class MaplistActivity extends BaseActivity {
                 if(deviceManager!=null){
                     deviceManager.stop(DiscoveryMode.MDNS);
                 }
+                if(TextUtils.isEmpty(wifiRobotIp)){
+                    Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
+                    Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
+                }else{
+                    Constant.robotIp = wifiRobotIp;
+                    Constant.robotPort = wifiRobotPort;
+                }
+                Constant.firstX=SharedPrefHelper.getFloat(this, "firstX", 0.6f);
+                Constant.firstY=SharedPrefHelper.getFloat(this, "firstY", 0.3f);
+                Constant.mapScale=SharedPrefHelper.getFloat(this, "mapScale", 100f);
+
                 Bundle bundle = new Bundle();
                 bundle.putString("currentMap", currentMap);
                 bundle.putSerializable("PrruModelList",(Serializable) mPrruModelList);
-                openActivity(HomeActivity.class, bundle);
-                finish();
+                openActivityForResult(HomeActivity.class, bundle,1);
+//                finish();
                 break;
             default:
                 break;
@@ -330,6 +341,14 @@ public class MaplistActivity extends BaseActivity {
         super.onDestroy();
         if(deviceManager!=null){
             deviceManager.stop(DiscoveryMode.MDNS);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==1&&resultCode==-1){
+            showToast("机器人连接失败，请修改配置！");
         }
     }
 }

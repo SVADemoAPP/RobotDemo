@@ -12,6 +12,9 @@ import java.util.ArrayList;
  */
 
 public class Constant {
+    public static float firstX;
+    public static float firstY;
+    public static float mapScale;
     public static String robotIp;
     public static int robotPort;
     public static String sdPath;
