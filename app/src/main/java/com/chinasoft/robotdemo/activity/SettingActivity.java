@@ -2,15 +2,13 @@ package com.chinasoft.robotdemo.activity;
 
 import android.graphics.Color;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
-import com.chinasoft.robotdemo.util.Constant;
 
 /**
  * Created by chinasoft_gyr on 2018/11/12.
@@ -18,18 +16,21 @@ import com.chinasoft.robotdemo.util.Constant;
 
 public class SettingActivity extends BaseActivity {
 
-private TextView tv_exit,tv_reset,tv_save;
-    private TextView tv_http;
-    private TextView tv_https;
-    private boolean  httpsFlag;  //false 表示http请求,true 表示https请求
-    private static final String ROBOT_IP="192.168.11.1";    //机器人iP
-    private static final String ROBOT_PORT="1445";          //机器人端口
-    private static final String SERVER_IP="192.168.11.1";   //服务器iP
-    private static final String SERVER_PORT="3880";         //服务器端口
-    private EditText et_rb_ip;
-    private EditText et_rb_port;
-    private EditText et_server_ip;
-    private EditText et_server_port;
+    private TextView mTvExit, mTvReset, mTvSave;
+    private TextView mTvhttp;
+    private TextView mTvHttps;
+    private boolean httpsFlag;  //false 表示http请求,true 表示https请求
+    private static final String ROBOT_IP = "192.168.11.1";    //机器人iP
+    private static final String ROBOT_PORT = "1445";          //机器人端口
+    private static final String SERVER_IP = "192.168.11.1";   //服务器iP
+    private static final String SERVER_PORT = "3880";         //服务器端口
+    private EditText mEdtRbIp;
+    private EditText mEdtRbPort;
+    private EditText mEdtServerIp;
+    private EditText mEdtServerPort;
+    private TextView mEdtSettingScale;
+    private TextView mEdtSettingPointX;
+    private TextView mEdtSettingPointY;
 
     @Override
     public void setContentLayout() {
@@ -43,20 +44,23 @@ private TextView tv_exit,tv_reset,tv_save;
 
     @Override
     public void initView() {
-        tv_exit=findViewById(R.id.tv_exit);
-        tv_reset=findViewById(R.id.tv_reset);
-        tv_save=findViewById(R.id.tv_save);
-        tv_http = findViewById(R.id.tv_http);
-        tv_https = findViewById(R.id.tv_https);
-        et_rb_ip =findViewById(R.id.et_rb_ip);
-        et_rb_port =findViewById(R.id.et_rb_port);
-        et_server_ip =findViewById(R.id.et_server_ip);
-        et_server_port =findViewById(R.id.et_server_port);
-        tv_exit.setOnClickListener(this);
-        tv_reset.setOnClickListener(this);
-        tv_save.setOnClickListener(this);
-        tv_http.setOnClickListener(this);
-        tv_https.setOnClickListener(this);
+        mTvExit = findViewById(R.id.tv_exit);
+        mTvReset = findViewById(R.id.tv_reset);
+        mTvSave = findViewById(R.id.tv_save);
+        mTvhttp = findViewById(R.id.tv_http);
+        mTvHttps = findViewById(R.id.tv_https);
+        mEdtRbIp = findViewById(R.id.et_rb_ip);
+        mEdtRbPort = findViewById(R.id.et_rb_port);
+        mEdtServerIp = findViewById(R.id.et_server_ip);
+        mEdtServerPort = findViewById(R.id.et_server_port);
+        mEdtSettingScale = findViewById(R.id.edt_setting_scale);
+        mEdtSettingPointX = findViewById(R.id.edt_setting_pointX);
+        mEdtSettingPointY = findViewById(R.id.edt_setting_pointY);
+        mTvExit.setOnClickListener(this);
+        mTvReset.setOnClickListener(this);
+        mTvSave.setOnClickListener(this);
+        mTvhttp.setOnClickListener(this);
+        mTvHttps.setOnClickListener(this);
         defaultData();
     }
 
@@ -71,17 +75,17 @@ private TextView tv_exit,tv_reset,tv_save;
                 finish();
                 break;
             case R.id.tv_reset:
-                defaultData();
+                resetData();
                 break;
             case R.id.tv_save:
                 saveData();
                 break;
             case R.id.tv_http:
-                httpsFlag=false;
+                httpsFlag = false;
                 setHttpState(httpsFlag);
                 break;
             case R.id.tv_https:
-                httpsFlag=true;
+                httpsFlag = true;
                 setHttpState(httpsFlag);
                 break;
             default:
@@ -90,47 +94,100 @@ private TextView tv_exit,tv_reset,tv_save;
     }
 
     /**
-     *
      * @param flag 请求状态
      */
-    private  void setHttpState(boolean flag){
-        if(flag){  //https请求方式
-            tv_http.setTextColor(Color.WHITE);
-            tv_https.setTextColor(Color.parseColor("#00b5ff"));
-        }else {    //http请求方式
-            tv_http.setTextColor(Color.parseColor("#00b5ff"));
-            tv_https.setTextColor(Color.WHITE);
+    private void setHttpState(boolean flag) {
+        if (flag) {  //https请求方式
+            mTvhttp.setTextColor(Color.WHITE);
+            mTvHttps.setTextColor(Color.parseColor("#00b5ff"));
+        } else {    //http请求方式
+            mTvhttp.setTextColor(Color.parseColor("#00b5ff"));
+            mTvHttps.setTextColor(Color.WHITE);
         }
     }
+
     /**
      * 设置默认设置
      */
-    private void defaultData(){
-        et_rb_ip.setText(ROBOT_IP);
-        et_rb_ip.setSelection(et_rb_ip.getText().length());
-        et_rb_port.setText(ROBOT_PORT);
-        et_rb_port.setSelection(et_rb_port.getText().length());
-        et_server_ip.setText(SERVER_IP);
-        et_server_ip.setSelection(et_server_ip.getText().length());
-        et_server_port.setText(SERVER_PORT);
-        et_server_port.setSelection(et_server_port.getText().length());
-        httpsFlag=false;
+    private void defaultData() {
+        mEdtRbIp.setText(ROBOT_IP);
+        mEdtRbIp.setSelection(mEdtRbIp.getText().length());
+        mEdtRbPort.setText(ROBOT_PORT);
+        mEdtRbPort.setSelection(mEdtRbPort.getText().length());
+        mEdtServerIp.setText(SERVER_IP);
+        mEdtServerIp.setSelection(mEdtServerIp.getText().length());
+        mEdtServerPort.setText(SERVER_PORT);
+        mEdtServerPort.setSelection(mEdtServerPort.getText().length());
+        mEdtSettingPointX.setText("");
+        mEdtSettingPointY.setText("");
+        mEdtSettingScale.setText("");
+
+        httpsFlag = false;
         setHttpState(httpsFlag);
-        et_rb_ip.requestFocus();
+        mEdtServerIp.requestFocus();
+    }
+
+    /***
+     * 重置数据
+     */
+    private void resetData() {
+        mEdtRbIp.setText("");
+        mEdtRbPort.setText("");
+        mEdtServerIp.setText("");
+        mEdtServerPort.setText("");
+        mEdtSettingPointX.setText("");
+        mEdtSettingPointY.setText("");
+        mEdtSettingScale.setText("");
+        httpsFlag = false;
+        setHttpState(httpsFlag);
+        mEdtServerIp.requestFocus();
     }
 
     /**
      * 保存设置  分别存储shareprefence
      */
-    private void saveData(){
-        String rbIp=et_rb_ip.getText().toString();
-        String rbPort=et_rb_port.getText().toString();
-        String serverIp=et_server_ip.getText().toString();
-        String serPort=et_server_port.getText().toString();
-        SharedPrefHelper.putString(SettingActivity.this, "robotIp", rbIp);
-        SharedPrefHelper.putInt(SettingActivity.this, "robotPort", Integer.valueOf(rbPort));
-        SharedPrefHelper.putString(SettingActivity.this, "userId", serverIp);
-        SharedPrefHelper.putString(SettingActivity.this, "serPort", serPort);
-        SharedPrefHelper.putBoolean(SettingActivity.this, "https", httpsFlag);
+    private void saveData() {
+
+        String rbIp = mEdtRbIp.getText().toString().trim();
+        String rbPort = mEdtRbPort.getText().toString().trim();
+        String serverIp = mEdtServerIp.getText().toString().trim();
+        String serPort = mEdtServerPort.getText().toString().trim();
+        String scale = mEdtSettingScale.getText().toString().trim();
+        String pointX = mEdtSettingPointX.getText().toString().trim();
+        String pointY = mEdtSettingPointY.getText().toString().trim();
+
+        if (rbIp == null || rbIp.equals("")) {
+            mEdtRbIp.requestFocus();
+            mEdtRbIp.setError("请填写机器人IP");
+        } else if (rbPort == null || rbPort.equals("")) {
+            mEdtRbPort.requestFocus();
+            mEdtRbPort.setError("请填写机器人端口");
+        } else if (serverIp == null || serverIp.equals("")) {
+            mEdtServerIp.requestFocus();
+            mEdtServerIp.setError("请填写服务器IP");
+        } else if (serPort == null || serPort.equals("")) {
+            mEdtServerPort.requestFocus();
+            mEdtServerPort.setError("请填写服务器端口");
+        } else if (scale == null || scale.equals("")) {
+            mEdtSettingScale.requestFocus();
+            mEdtSettingScale.setError("请填写地图比例尺");
+        } else if (pointX == null || pointX.equals("")) {
+            mEdtSettingPointX.requestFocus();
+            mEdtSettingPointX.setError("请填写X坐标");
+        } else if (pointY == null || pointY.equals("")) {
+            mEdtSettingPointY.requestFocus();
+            mEdtSettingPointY.setError("请填写机器人IP");
+        } else {
+            SharedPrefHelper.putString(SettingActivity.this, "robotIp", rbIp);
+            SharedPrefHelper.putInt(SettingActivity.this, "robotPort", Integer.valueOf(rbPort));
+            SharedPrefHelper.putString(SettingActivity.this, "userId", serverIp);
+            SharedPrefHelper.putString(SettingActivity.this, "serPort", serPort);
+            SharedPrefHelper.putBoolean(SettingActivity.this, "https", httpsFlag);
+            SharedPrefHelper.putFloat(SettingActivity.this, "", Float.valueOf(pointX));
+            SharedPrefHelper.putFloat(SettingActivity.this, "", Float.valueOf(pointY));
+            SharedPrefHelper.putFloat(SettingActivity.this, "", Float.valueOf(scale));
+            showToast("保存成功");
+        }
+
     }
 }
