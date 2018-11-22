@@ -1,14 +1,12 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -16,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -31,6 +28,7 @@ import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
 import com.chinasoft.robotdemo.util.SuperPopupWindow;
+import com.chinasoft.robotdemo.view.CompassView;
 import com.chinasoft.robotdemo.view.dialog.ParamsDialog;
 import com.chinasoft.robotdemo.view.dialog.RobotparamDialog;
 import com.google.gson.Gson;
@@ -54,6 +52,7 @@ import net.yoojia.imagemap.TouchImageView1;
 import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
+import net.yoojia.imagemap.core.RequestShape;
 import net.yoojia.imagemap.core.RobotShape;
 
 import java.util.List;
@@ -62,6 +61,7 @@ import java.util.TimerTask;
 import java.util.Vector;
 
 public class HomeActivity extends BaseActivity {
+
 
     private ImageMap1 map;
 
@@ -85,7 +85,7 @@ public class HomeActivity extends BaseActivity {
 
     private float xo, yo, scale, initX, initY, initZ, realXo, realYo;
 
-    private RobotShape robotShape;
+//    private RobotShape robotShape;
 
     private Location forwardLocation;
 
@@ -117,6 +117,10 @@ public class HomeActivity extends BaseActivity {
 
     private ImageView iv_operation;
 
+    private RequestShape requestShape;
+
+    private CompassView cv;
+
 //    private boolean flag = false;
 
 //    private List<PrruModel> prruModelList = new ArrayList<>();
@@ -142,6 +146,10 @@ public class HomeActivity extends BaseActivity {
     private View popupView;
 
     private SuperPopupWindow mConnectPopupWindow;
+
+    private float mapRotate;
+
+    private float robotDirection;
 
     private TimerTask task = new TimerTask() {
         @Override
@@ -211,11 +219,11 @@ public class HomeActivity extends BaseActivity {
                         for (int i = 0, len = coorCount; i < len; i++) {
                             map.removeShape("coor" + i);
                         }
-                        robotShape.setValues(String.format(
+                        requestShape.setValues(String.format(
                                 "%.5f:%.5f",
                                 new Object[]{p[0],
                                         p[1]}));
-                        map.addShape(robotShape, false);
+                        map.addShape(requestShape, false);
                         switch (platform.getCurrentAction().getActionName()) {
                             case "":
                                 removeMessages(0);
@@ -284,7 +292,7 @@ public class HomeActivity extends BaseActivity {
 //                            c.setX(tf[0]);
 //                            c.setY(tf[1]);
 //                            coorOrbit.add(c);
-                                    CustomShape orbitShape = new CustomShape("coor" + i, R.color.route_color, HomeActivity.this, "dwf",R.mipmap.orbit_point);
+                                    CustomShape orbitShape = new CustomShape("coor" + i, R.color.route_color, HomeActivity.this, "dwf", R.mipmap.orbit_point);
                                     orbitShape.setValues(tf[0], tf[1]);
                                     map.addShape(orbitShape, false);
                                 }
@@ -339,18 +347,46 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     public void dealLogicAfterInitView() {
-        robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
-        desShape =new CustomShape("des", R.color.blue, HomeActivity.this,"dwf",R.mipmap.destination_point);
-        connection(Constant.firstX,Constant.firstY,Constant.mapScale,Constant.robotIp,Constant.robotPort);
+//        robotShape = new RobotShape("robot", R.color.blue, HomeActivity.this);
+
+        connection(Constant.firstX, Constant.firstY, Constant.mapScale, Constant.robotIp, Constant.robotPort);
 
     }
 
+    private void initShape() {
+        cv = new CompassView(HomeActivity.this);
+        cv.setId(0);
+        cv.setImageResource(R.mipmap.icon_robot);
+        cv.updateDirection(mapRotate+robotDirection);
+        requestShape = new RequestShape("s", -16776961, cv, HomeActivity.this);
+        desShape = new CustomShape("des", R.color.blue, HomeActivity.this, "dwf", R.mipmap.destination_point);
 
-    private void initMap(){
+    }
+
+    private void initMap() {
         mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
         mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/"
                 + currentMap);
         map.setMapBitmap(mapBitmap);
+
+//        cDemo=new CompassDemo(this,map);
+//        cDemo.setPosition(100,100);
+        initShape();
+
+
+        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+            @Override
+            public void onRotate(float rotate) {
+                mapRotate=-rotate;
+                cv.updateDirection(mapRotate+robotDirection);
+                requestShape.setView(cv);
+                map.addShape(requestShape, false);
+            }
+        });
+
+//        cDemo = new CompassDemo(this, map);
+//
+//        cDemo.setPosition(100,100);
         Log.e("msg", "高度：" + mapBitmap.getHeight() + "，宽度：" + mapBitmap.getWidth());
 //        showToast("高度："+mapBitmap.getHeight()+"，宽度："+mapBitmap.getWidth());
 //        map.setMapBitmap(BitmapFactory.decodeFile("/sdcard/Tester/成都王府井/成都王府井_3.png"));
@@ -419,13 +455,13 @@ public class HomeActivity extends BaseActivity {
 //                            c.setX(tf[0]);
 //                            c.setY(tf[1]);
 //                            coorOrbit.add(c);
-                CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, HomeActivity.this, "dwf",R.mipmap.orbit_point);
+                CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, HomeActivity.this, "dwf", R.mipmap.orbit_point);
                 orbitShape.setValues(tf[0], tf[1]);
                 map.addShape(orbitShape, false);
             }
-            desXY=realToMap(toX, toX);
-            desShape.setValues(desXY[0],desXY[1]);
-            map.addShape(desShape,false);
+            desXY = realToMap(toX, toY);
+            desShape.setValues(desXY[0], desXY[1]);
+            map.addShape(desShape, false);
             platform.moveTo(locVector);
             mHandler.sendEmptyMessageDelayed(0, 2000);
         } catch (Exception e) {
@@ -453,13 +489,13 @@ public class HomeActivity extends BaseActivity {
 //                            c.setX(tf[0]);
 //                            c.setY(tf[1]);
 //                            coorOrbit.add(c);
-                CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, HomeActivity.this, "dwf",R.mipmap.orbit_point);
+                CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, HomeActivity.this, "dwf", R.mipmap.orbit_point);
                 orbitShape.setValues(tf[0], tf[1]);
                 map.addShape(orbitShape, false);
             }
-            desXY=realToMap(toX, toX);
-            desShape.setValues(desXY[0],desXY[1]);
-            map.addShape(desShape,false);
+            desXY = realToMap(toX, toY);
+            desShape.setValues(desXY[0], desXY[1]);
+            map.addShape(desShape, false);
             platform.moveTo(locVector);
             if (mHandler.hasMessages(0)) {
                 mHandler.removeMessages(0);
@@ -474,12 +510,13 @@ public class HomeActivity extends BaseActivity {
 
 
     private void initStart(float x, float y) {
-
-        robotShape.setValues(String.format(
-                "%.5f:%.5f",
-                new Object[]{x,
-                        y}));
-        map.addShape(robotShape, true);
+        requestShape.setValues(x, y);
+        map.addShape(requestShape, false);
+//        robotShape.setValues(String.format(
+//                "%.5f:%.5f",
+//                new Object[]{x,
+//                        y}));
+//        map.addShape(robotShape, true);
         isStart = true;
         forwardLocation = new Location();
         forwardLocation.setZ(initZ);
@@ -487,7 +524,7 @@ public class HomeActivity extends BaseActivity {
         lastX = nowX;
         lastY = nowY;
         path.moveTo(x, y);
-        lineShape = new LineShape("line", R.color.green,4,"#00ffba");
+        lineShape = new LineShape("line", R.color.green, 4, "#00ffba");
     }
 
     private float[] mapToReal(float x, float y) {
@@ -763,16 +800,16 @@ public class HomeActivity extends BaseActivity {
                     float scale = Float.parseFloat(edtScale.getText().toString());
 
                     //保存信息
-                    SharedPrefHelper.putFloat(mContext,"scale", Float.parseFloat(edtScale.getText().toString()));
-                    SharedPrefHelper.putFloat(mContext,"realXo", Float.parseFloat(edtPointX.getText().toString()));
-                    SharedPrefHelper.putFloat(mContext,"realYo", Float.parseFloat(edtPointY.getText().toString()));
-                    SharedPrefHelper.putString(mContext,"robotIp",edtRbIp.getText().toString());
-                    SharedPrefHelper.putInt(mContext,"robotPort", Integer.parseInt(edtRbPort.getText().toString()));
+                    SharedPrefHelper.putFloat(mContext, "scale", Float.parseFloat(edtScale.getText().toString()));
+                    SharedPrefHelper.putFloat(mContext, "realXo", Float.parseFloat(edtPointX.getText().toString()));
+                    SharedPrefHelper.putFloat(mContext, "realYo", Float.parseFloat(edtPointY.getText().toString()));
+                    SharedPrefHelper.putString(mContext, "robotIp", edtRbIp.getText().toString());
+                    SharedPrefHelper.putInt(mContext, "robotPort", Integer.parseInt(edtRbPort.getText().toString()));
 
-                    if (Constant.robotIp==null&&Constant.robotPort==0) //判断是否为空 为空则放值
+                    if (Constant.robotIp == null && Constant.robotPort == 0) //判断是否为空 为空则放值
                     {
-                        Constant.robotIp=edtRbIp.getText().toString();
-                        Constant.robotPort=Integer.valueOf(edtRbPort.getText().toString());
+                        Constant.robotIp = edtRbIp.getText().toString();
+                        Constant.robotPort = Integer.valueOf(edtRbPort.getText().toString());
                     }
                     String robotIp = edtRbIp.getText().toString();
                     int robotPort = Integer.parseInt(edtRbPort.getText().toString());
@@ -825,11 +862,11 @@ public class HomeActivity extends BaseActivity {
      * @param port
      */
     private void setDefaultConInfo(EditText x, EditText y, EditText scale, EditText ip, EditText port) {
-        x.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo",0)));
-        y.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo",0)));
-        scale.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "scale",0))).equals("0.0")?"":String.valueOf(SharedPrefHelper.getFloat(mContext, "scale",0)));
-        ip.setText(SharedPrefHelper.getString(mContext, "robotIp","0.0.0.0"));
-        port.setText(String.valueOf(SharedPrefHelper.getInt(mContext, "robotPort",0)));
+        x.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo", 0))).equals("0.0") ? "" : String.valueOf(SharedPrefHelper.getFloat(mContext, "realXo", 0)));
+        y.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo", 0))).equals("0.0") ? "" : String.valueOf(SharedPrefHelper.getFloat(mContext, "realYo", 0)));
+        scale.setText((String.valueOf(SharedPrefHelper.getFloat(mContext, "scale", 0))).equals("0.0") ? "" : String.valueOf(SharedPrefHelper.getFloat(mContext, "scale", 0)));
+        ip.setText(SharedPrefHelper.getString(mContext, "robotIp", "0.0.0.0"));
+        port.setText(String.valueOf(SharedPrefHelper.getInt(mContext, "robotPort", 0)));
 
     }
 
@@ -854,7 +891,7 @@ public class HomeActivity extends BaseActivity {
      * @param robotPort 机器人设备端口
      */
     private void lockEditRobotInfo(EditText robotIp, EditText robotPort) {
-        if (SharedPrefHelper.getBoolean(mContext,"ipFlag")) //存在ip信息锁定robotIp填写
+        if (SharedPrefHelper.getBoolean(mContext, "ipFlag")) //存在ip信息锁定robotIp填写
         {
             robotIp.setText(Constant.robotIp);
             robotIp.setEnabled(false);
@@ -864,7 +901,7 @@ public class HomeActivity extends BaseActivity {
             robotIp.setTextColor(getResources().getColor(R.color.white));
         }
 
-        if (SharedPrefHelper.getBoolean(mContext,"ipFlag"))       //存在port信息锁定robotPort填写
+        if (SharedPrefHelper.getBoolean(mContext, "ipFlag"))       //存在port信息锁定robotPort填写
         {
             robotPort.setText(String.valueOf(Constant.robotPort));
             robotPort.setEnabled(false);
@@ -907,6 +944,10 @@ public class HomeActivity extends BaseActivity {
             LLog.getLog().e("连接机器人", robotIp + ":" + robotPort);
             platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
             nowPose = platform.getPose();// 当前机器人的位置,
+            float x=nowPose.getRotation().getYaw();
+            float y=nowPose.getRotation().getRoll();
+            float z=nowPose.getRotation().getPitch();
+            Log.e("forward",x+" "+y+" "+z);
             nowX = nowPose.getX();
             nowY = nowPose.getY();
             initZ = nowPose.getZ();
@@ -922,7 +963,7 @@ public class HomeActivity extends BaseActivity {
         } catch (Exception e) {
             robotConnect = false;
             e.printStackTrace();
-            Log.e("msg",e.toString());
+            Log.e("msg", e.toString());
         }
         if (robotConnect) {
             initMap();
@@ -963,8 +1004,8 @@ public class HomeActivity extends BaseActivity {
             try {
                 PowerStatus powerStatus = platform.getPowerStatus();
                 SleepMode sleepMode = powerStatus.getSleepMode();
-                stringBuffer.append("状态------" + sleepMode+"------");
-                stringBuffer.append(platform.getBatteryPercentage()+"%电量");
+                stringBuffer.append("状态------" + sleepMode + "------");
+                stringBuffer.append(platform.getBatteryPercentage() + "%电量");
                 String s = stringBuffer.toString();
                 Log.e("XHF", s);
             } catch (RequestFailException e) {
