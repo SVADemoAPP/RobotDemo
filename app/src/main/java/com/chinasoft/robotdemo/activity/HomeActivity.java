@@ -300,10 +300,9 @@ public class HomeActivity extends BaseActivity {
                                 LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                                 if (lap.code == 0) {
                                     LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData));
-                                    Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
-                                    if (rsrp != null && rsrp - maxRsrp >= 0) {
-                                        xWhenMax = logX - realXo + initX;
-                                        yWhenMax = logY - realYo + initY;
+                                    if(isPrruCollect) {
+                                        Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
+                                        recordMaxRsrp(rsrp,logX,logY);
                                     }
                                 }
                             }
@@ -383,10 +382,12 @@ public class HomeActivity extends BaseActivity {
                                             LLog.getLog().e("扫描", "9");
                                             isPrruCollect = false;
                                             iv_operation.setImageResource(R.mipmap.home_start);
-                                            xyRobotWhenMax = realToMap(xWhenMax, yWhenMax);
-                                            CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, HomeActivity.this, "dwf");
-                                            maxRsrpPointShape.setValues(xyRobotWhenMax[0], xyRobotWhenMax[1]);
-                                            map.addShape(maxRsrpPointShape, false);
+                                            if(maxRsrp>-1000f) {
+                                                xyRobotWhenMax = realToMap(xWhenMax, yWhenMax);
+                                                CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, HomeActivity.this, "dwf");
+                                                maxRsrpPointShape.setValues(xyRobotWhenMax[0], xyRobotWhenMax[1]);
+                                                map.addShape(maxRsrpPointShape, false);
+                                            }
                                             break;
                                         default:
                                             break;
@@ -424,6 +425,15 @@ public class HomeActivity extends BaseActivity {
     private TextView tv_home_back;
     private ImageView mSwitch;
     private RockerView mRockerView;
+
+
+    //防止多个请求同时响应产生的线程不安全问题
+    private synchronized void recordMaxRsrp(Float rsrp,float logX,float logY){
+        if (rsrp != null && rsrp - maxRsrp >= 0) {
+            xWhenMax = logX - realXo + initX;
+            yWhenMax = logY - realYo + initY;
+        }
+    }
 
     private Float getRsrpByGpp(String gpp, List<PrruSigalModel> prruSigalModelList) {
         for (PrruSigalModel p : prruSigalModelList) {
