@@ -27,6 +27,7 @@ import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
+import com.chinasoft.robotdemo.util.RobotMoveUtils;
 import com.chinasoft.robotdemo.util.SuperPopupWindow;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.chinasoft.robotdemo.view.dialog.ParamsDialog;
@@ -1184,51 +1185,52 @@ public class HomeActivity extends BaseActivity {
         mRockerView = (RockerView) findViewById(R.id.home_rockerView);
         // 设置回调模式
         mRockerView.setCallBackMode(RockerView.CallBackMode.CALL_BACK_MODE_STATE_CHANGE);
-        // 监听摇动方向
-//        mRockerView.setOnAngleChangeListener(new RockerView.OnAngleChangeListener() {
-//            @Override
-//            public void onStart() {
-//                //开始的方法
-//            }
-//
-//            @Override
-//            public void angle(double v) {
-//                //角度
-//                double v1 = Math.toRadians(v);
-//                Log.e("XHF","v1="+v);
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//                //停止
-//            }
-//        });
-        mRockerView.setOnShakeListener(RockerView.DirectionMode.DIRECTION_8, new RockerView.OnShakeListener() {
+         //监听摇动方向
+        mRockerView.setOnAngleChangeListener(new RockerView.OnAngleChangeListener() {
             @Override
             public void onStart() {
-                Log.e("XHF", "Start");
-                //开始循环监听状态值
-                mMoveTimer = new Timer();
-                mMoveTimer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        mMoveHandler.sendEmptyMessage(moveCode);
-                    }
-                }, 1000, 500);
+                //开始的方法
+//                RobotMoveUtils.goStraight(0);
             }
 
             @Override
-            public void direction(RockerView.Direction direction) {
-                handRobotMove(direction);
-                Log.e("XHF", "摇动方向 : " + getDirection(direction));
+            public void angle(double v) {
+                //角度
+               RobotMoveUtils.setRobotMove(platform,RobotMoveUtils.fuzzyDirection(v), (HomeActivity) mContext);
             }
 
             @Override
             public void onFinish() {
-                Log.e("XHF", "Finish");
-                mMoveTimer.cancel();
+                RobotMoveUtils.goStraight(0);
+                //停止
             }
         });
+//        mRockerView.setOnShakeListener(RockerView.DirectionMode.DIRECTION_8, new RockerView.OnShakeListener() {
+//            @Override
+//            public void onStart() {
+//                Log.e("XHF", "Start");
+//                //开始循环监听状态值
+//                mMoveTimer = new Timer();
+//                mMoveTimer.schedule(new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        mMoveHandler.sendEmptyMessage(moveCode);
+//                    }
+//                }, 1000, 500);
+//            }
+//
+//            @Override
+//            public void direction(RockerView.Direction direction) {
+//                handRobotMove(direction);
+//                Log.e("XHF", "摇动方向 : " + getDirection(direction));
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                Log.e("XHF", "Finish");
+//                mMoveTimer.cancel();
+//            }
+//        });
     }
 
     /**
