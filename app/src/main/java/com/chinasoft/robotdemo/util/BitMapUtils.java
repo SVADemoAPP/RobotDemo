@@ -41,7 +41,7 @@ public class BitMapUtils {
         Bitmap quality = null;
         try {
             fos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, fos);  //测试 标准80 现在返回50
+            bitmap.compress(Bitmap.CompressFormat.PNG, 10, fos);  //测试 标准80 现在返回50
             ins = new ByteArrayInputStream(fos.toByteArray());
             quality = BitmapFactory.decodeStream(ins);
             ins.close();

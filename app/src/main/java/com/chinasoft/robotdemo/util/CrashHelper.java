@@ -3,6 +3,7 @@ package com.chinasoft.robotdemo.util;
 import android.content.Context;
 import android.os.Looper;
 import android.widget.Toast;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,6 +13,13 @@ public class CrashHelper implements UncaughtExceptionHandler {
     private static CrashHelper sInstance = null;
     private Context mContext;
     private UncaughtExceptionHandler mDefaultHandler;
+
+
+    public static int getLineNumber(Exception e) {
+        StackTraceElement[] trace = e.getStackTrace();
+        if (trace == null || trace.length == 0) return -1; //
+        return trace[0].getLineNumber();
+    }
 
     public static CrashHelper getInstance() {
         if (sInstance == null) {

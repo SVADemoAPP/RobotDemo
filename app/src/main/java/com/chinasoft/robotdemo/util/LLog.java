@@ -38,13 +38,14 @@ public class LLog {
     }
 
     public void e(String title, String strcontent) {
+        strcontent +="----"+CrashHelper.getLineNumber(new Exception())+"行";//xhf 增加一行代码
         Log.e(title, strcontent);
-        write(this.PATH_LOGCAT+"/Logs", "Log" + MyDate.getFileName() + ".txt", title, strcontent);
+        write(this.PATH_LOGCAT + "/Logs", "Log" + MyDate.getFileName() + ".txt", title, strcontent);
     }
 
     public void prru(String title, String strcontent) {
         Log.e(title, strcontent);
-        write(this.PATH_LOGCAT+"/Logs_Prru", "Prru" + MyDate.getFileName() + ".txt", title, strcontent);
+        write(this.PATH_LOGCAT + "/Logs_Prru", "Prru" + MyDate.getFileName() + ".txt", title, strcontent);
     }
 
     public void crash(String title, String strcontent) {
@@ -53,7 +54,7 @@ public class LLog {
 
     public void robot(String title, String strcontent) {
         Log.e(title, strcontent);
-        write(this.PATH_LOGCAT+"/Logs_Robot", "Robot" + MyDate.getFileName() + ".txt", title, strcontent);
+        write(this.PATH_LOGCAT + "/Logs_Robot", "Robot" + MyDate.getFileName() + ".txt", title, strcontent);
     }
 
     private void write(String filePath, String fileName, String title, String strcontent) {
@@ -61,7 +62,7 @@ public class LLog {
         Throwable th;
         makeFilePath(filePath, fileName);
         String strFilePath = new StringBuilder(String.valueOf(filePath)).append("/").append(fileName).toString();
-        String strContent = MyDate.getDateEN() + " "+title +" "+ strcontent + "\r\n";
+        String strContent = MyDate.getDateEN() + " " + title + " " + strcontent + "\r\n";
         RandomAccessFile raf = null;
         try {
             File file = new File(strFilePath);

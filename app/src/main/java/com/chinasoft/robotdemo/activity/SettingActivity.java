@@ -9,6 +9,7 @@ import android.widget.Toast;
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
+import com.chinasoft.robotdemo.util.LLog;
 
 /**
  * Created by chinasoft_gyr on 2018/11/12.
@@ -97,6 +98,7 @@ public class SettingActivity extends BaseActivity {
      * @param flag 请求状态
      */
     private void setHttpState(boolean flag) {
+        LLog.getLog().e("测试", "测试1");
         if (flag) {  //https请求方式
             mTvhttp.setTextColor(Color.WHITE);
             mTvHttps.setTextColor(Color.parseColor("#00b5ff"));
@@ -110,19 +112,25 @@ public class SettingActivity extends BaseActivity {
      * 设置默认设置
      */
     private void defaultData() {
-        mEdtRbIp.setText(ROBOT_IP);
-        mEdtRbIp.setSelection(mEdtRbIp.getText().length());
-        mEdtRbPort.setText(ROBOT_PORT);
-        mEdtRbPort.setSelection(mEdtRbPort.getText().length());
-        mEdtServerIp.setText(SERVER_IP);
-        mEdtServerIp.setSelection(mEdtServerIp.getText().length());
-        mEdtServerPort.setText(SERVER_PORT);
-        mEdtServerPort.setSelection(mEdtServerPort.getText().length());
-        mEdtSettingPointX.setText("");
-        mEdtSettingPointY.setText("");
-        mEdtSettingScale.setText("");
-
-        httpsFlag = false;
+//        mEdtRbIp.setText(ROBOT_IP);
+//        mEdtRbIp.setSelection(mEdtRbIp.getText().length());
+//        mEdtRbPort.setText(ROBOT_PORT);
+//        mEdtRbPort.setSelection(mEdtRbPort.getText().length());
+//        mEdtServerIp.setText(SERVER_IP);
+//        mEdtServerIp.setSelection(mEdtServerIp.getText().length());
+//        mEdtServerPort.setText(SERVER_PORT);
+//        mEdtServerPort.setSelection(mEdtServerPort.getText().length());
+//        mEdtSettingPointX.setText("");
+//        mEdtSettingPointY.setText("");
+//        mEdtSettingScale.setText("");
+        mEdtRbIp.setText(SharedPrefHelper.getString(SettingActivity.this, "robotIp", "0.0.0.0"));
+        mEdtRbPort.setText(String.valueOf(SharedPrefHelper.getInt(SettingActivity.this, "robotPort", 0)));
+        mEdtServerIp.setText(SharedPrefHelper.getString(SettingActivity.this, "userId", "0.0.0.0"));
+        mEdtServerPort.setText(String.valueOf(SharedPrefHelper.getInt(SettingActivity.this, "serPort", 0)));
+        mEdtSettingPointX.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstX", 0f)));
+        mEdtSettingPointY.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstY", 0f)));
+        mEdtSettingScale.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "mapScale", 0f)));
+        httpsFlag = SharedPrefHelper.getBoolean(SettingActivity.this, "https", false);
         setHttpState(httpsFlag);
         mEdtServerIp.requestFocus();
     }
@@ -181,11 +189,11 @@ public class SettingActivity extends BaseActivity {
             SharedPrefHelper.putString(SettingActivity.this, "robotIp", rbIp);
             SharedPrefHelper.putInt(SettingActivity.this, "robotPort", Integer.valueOf(rbPort));
             SharedPrefHelper.putString(SettingActivity.this, "userId", serverIp);
-            SharedPrefHelper.putString(SettingActivity.this, "serPort", serPort);
+            SharedPrefHelper.putInt(SettingActivity.this, "serPort", Integer.parseInt(serPort));
             SharedPrefHelper.putBoolean(SettingActivity.this, "https", httpsFlag);
-            SharedPrefHelper.putFloat(SettingActivity.this, "", Float.valueOf(pointX));
-            SharedPrefHelper.putFloat(SettingActivity.this, "", Float.valueOf(pointY));
-            SharedPrefHelper.putFloat(SettingActivity.this, "", Float.valueOf(scale));
+            SharedPrefHelper.putFloat(SettingActivity.this, "firstX", Float.valueOf(pointX));
+            SharedPrefHelper.putFloat(SettingActivity.this, "firstY", Float.valueOf(pointY));
+            SharedPrefHelper.putFloat(SettingActivity.this, "mapScale", Float.valueOf(scale));
             showToast("保存成功");
         }
 

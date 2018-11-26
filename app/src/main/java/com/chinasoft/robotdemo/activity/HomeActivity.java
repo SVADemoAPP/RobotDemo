@@ -50,6 +50,7 @@ import com.slamtec.slamware.exceptions.UnsupportedCommandException;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Pose;
 import com.slamtec.slamware.robot.PowerStatus;
+import com.slamtec.slamware.robot.Rotation;
 import com.slamtec.slamware.robot.SleepMode;
 
 import net.yoojia.imagemap.ImageMap1;
@@ -163,7 +164,7 @@ public class HomeActivity extends BaseActivity {
 
             if (platform == null) {
                 LLog.getLog().robot("no connect", "未连接");
-                getRobotInfo();
+//                getRobotInfo();
             } else {
                 try {
                     LLog.getLog().robot("health", "" + platform.getRobotHealth().getErrors());
@@ -187,6 +188,7 @@ public class HomeActivity extends BaseActivity {
                     switch (msg.what) {
                         case 101:
                             platform.moveBy(MoveDirection.FORWARD);
+//                        platform.rotateTo(new Rotation((float) Math.PI/4));
                             break;
                         case 102:
                             platform.moveBy(MoveDirection.BACKWARD);
@@ -219,7 +221,7 @@ public class HomeActivity extends BaseActivity {
                                     }
                                 }
                             }).start();
-
+//                            getRobotInfo();
                             break;
                         case 104:
                             new Thread(new Runnable() {
@@ -249,6 +251,7 @@ public class HomeActivity extends BaseActivity {
                                     }
                                 }
                             }).start();
+                            getRobotInfo();
                             break;
                     }
                 } catch (RequestFailException e) {
@@ -300,9 +303,9 @@ public class HomeActivity extends BaseActivity {
                                 LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                                 if (lap.code == 0) {
                                     LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData));
-                                    if(isPrruCollect) {
+                                    if (isPrruCollect) {
                                         Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
-                                        recordMaxRsrp(rsrp,logX,logY);
+                                        recordMaxRsrp(rsrp, logX, logY);
                                     }
                                 }
                             }
@@ -382,7 +385,7 @@ public class HomeActivity extends BaseActivity {
                                             LLog.getLog().e("扫描", "9");
                                             isPrruCollect = false;
                                             iv_operation.setImageResource(R.mipmap.home_start);
-                                            if(maxRsrp>-1000f) {
+                                            if (maxRsrp > -10000f) {
                                                 xyRobotWhenMax = realToMap(xWhenMax, yWhenMax);
                                                 CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, HomeActivity.this, "dwf");
                                                 maxRsrpPointShape.setValues(xyRobotWhenMax[0], xyRobotWhenMax[1]);
@@ -428,10 +431,11 @@ public class HomeActivity extends BaseActivity {
 
 
     //防止多个请求同时响应产生的线程不安全问题
-    private synchronized void recordMaxRsrp(Float rsrp,float logX,float logY){
+    private synchronized void recordMaxRsrp(Float rsrp, float logX, float logY) {
         if (rsrp != null && rsrp - maxRsrp >= 0) {
             xWhenMax = logX - realXo + initX;
             yWhenMax = logY - realYo + initY;
+            maxRsrp = rsrp;
         }
     }
 
@@ -563,7 +567,8 @@ public class HomeActivity extends BaseActivity {
 //        if (Constant.robotPort == 0) {
 //            Constant.robotPort = SharedPrefHelper.getInt(HomeActivity.this, "robotPort", 1445);
 //        }
-        Constant.userId = SharedPrefHelper.getString(HomeActivity.this, "userId", "192.168.1.1");
+//        Constant.userId = SharedPrefHelper.getString(HomeActivity.this, "userId", "192.168.2.24");
+//        Constant.userId = "190.168.2.24";
     }
 
     private void robotMoveTo(float toX, float toY) {
@@ -589,7 +594,7 @@ public class HomeActivity extends BaseActivity {
             desXY = realToMap(toX, toY);
             desShape.setValues(desXY[0], desXY[1]);
             map.addShape(desShape, false);
-            platform.moveTo(locVector);
+            platform.moveTo(new Location(toX, toY, initZ));
             mHandler.sendEmptyMessageDelayed(0, 2000);
         } catch (Exception e) {
             showToast("出错了：" + e.toString());
@@ -627,7 +632,7 @@ public class HomeActivity extends BaseActivity {
             desXY = realToMap(toX, toY);
             desShape.setValues(desXY[0], desXY[1]);
             map.addShape(desShape, false);
-            platform.moveTo(locVector);
+            platform.moveTo(new Location(toX, toY, initZ));
             if (mHandler.hasMessages(0)) {
                 mHandler.removeMessages(0);
             }
@@ -655,7 +660,7 @@ public class HomeActivity extends BaseActivity {
         lastX = nowX;
         lastY = nowY;
         path.moveTo(x, y);
-        lineShape = new LineShape("line", R.color.green, 4, "#00ffba");
+        lineShape = new LineShape("line", R.color.green, 2, "#00ffba");
     }
 
     private float[] mapToReal(float x, float y) {
@@ -675,8 +680,7 @@ public class HomeActivity extends BaseActivity {
                 finish();
                 break;
             case R.id.home_change_auto: //切换操作模式
-                if (platform!=null)
-                {
+                if (platform != null) {
                     try {
                         platform.getCurrentAction().cancel();
                     } catch (RequestFailException e) {
@@ -1121,9 +1125,12 @@ public class HomeActivity extends BaseActivity {
         if (platform != null) {
             try {
                 PowerStatus powerStatus = platform.getPowerStatus();
+                Pose pose = platform.getPose();
                 SleepMode sleepMode = powerStatus.getSleepMode();
                 stringBuffer.append("状态------" + sleepMode + "------");
-                stringBuffer.append(platform.getBatteryPercentage() + "%电量");
+                stringBuffer.append(platform.getBatteryPercentage() + "%电量" + "------");
+                stringBuffer.append("Yaw=" + pose.getYaw() + "------");
+                stringBuffer.append("Roll=" + pose.getRoll() + "------");
                 String s = stringBuffer.toString();
                 Log.e("XHF", s);
             } catch (RequestFailException e) {
@@ -1178,6 +1185,24 @@ public class HomeActivity extends BaseActivity {
         // 设置回调模式
         mRockerView.setCallBackMode(RockerView.CallBackMode.CALL_BACK_MODE_STATE_CHANGE);
         // 监听摇动方向
+//        mRockerView.setOnAngleChangeListener(new RockerView.OnAngleChangeListener() {
+//            @Override
+//            public void onStart() {
+//                //开始的方法
+//            }
+//
+//            @Override
+//            public void angle(double v) {
+//                //角度
+//                double v1 = Math.toRadians(v);
+//                Log.e("XHF","v1="+v);
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                //停止
+//            }
+//        });
         mRockerView.setOnShakeListener(RockerView.DirectionMode.DIRECTION_8, new RockerView.OnShakeListener() {
             @Override
             public void onStart() {

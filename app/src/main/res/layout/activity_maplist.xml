@@ -30,9 +30,26 @@
     <ListView
         android:id="@+id/lv_maplist"
         android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="100dp"
+        android:layout_marginTop="150dp"
         android:listSelector="#00000000" />
+
+    <TextView
+        android:id="@+id/tv_setting"
+        android:layout_width="75dp"
+        android:layout_height="24dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="60dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginRight="7dp"
+        android:background="@drawable/maplist_next_press"
+        android:gravity="center"
+        android:text="设置"
+        android:textColor="@color/white"
+        android:textSize="12dp" />
+
 </RelativeLayout>
 
