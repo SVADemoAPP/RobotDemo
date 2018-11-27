@@ -80,6 +80,7 @@ public class SettingActivity extends BaseActivity {
                 break;
             case R.id.tv_save:
                 saveData();
+                finish();
                 break;
             case R.id.tv_http:
                 httpsFlag = false;
@@ -123,9 +124,9 @@ public class SettingActivity extends BaseActivity {
 //        mEdtSettingPointX.setText("");
 //        mEdtSettingPointY.setText("");
 //        mEdtSettingScale.setText("");
-        mEdtRbIp.setText(SharedPrefHelper.getString(SettingActivity.this, "robotIp", "0.0.0.0"));
+        mEdtRbIp.setText(SharedPrefHelper.getString(SettingActivity.this, "robotIp", ""));
         mEdtRbPort.setText(String.valueOf(SharedPrefHelper.getInt(SettingActivity.this, "robotPort", 0)));
-        mEdtServerIp.setText(SharedPrefHelper.getString(SettingActivity.this, "userId", "0.0.0.0"));
+        mEdtServerIp.setText(SharedPrefHelper.getString(SettingActivity.this, "userId", ""));
         mEdtServerPort.setText(String.valueOf(SharedPrefHelper.getInt(SettingActivity.this, "serPort", 0)));
         mEdtSettingPointX.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstX", 0f)));
         mEdtSettingPointY.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstY", 0f)));

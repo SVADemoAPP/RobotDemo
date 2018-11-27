@@ -2,6 +2,7 @@ package com.chinasoft.robotdemo.activity;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -53,7 +54,6 @@ import java.util.Map;
  */
 
 public class MaplistActivity extends BaseActivity {
-
     private ListView lv_maplist;
     private List<String> mapList = new ArrayList();
     private MaplistAdapter maplistAdapter;
@@ -61,7 +61,6 @@ public class MaplistActivity extends BaseActivity {
     private TextView tv_next;
     private String wifiRobotIp;
     private int wifiRobotPort;
-
     private List<PrruModel> mPrruModelList;
     private DeviceManager deviceManager;
 
@@ -101,9 +100,6 @@ public class MaplistActivity extends BaseActivity {
 
     @Override
     public void dealLogicBeforeInitView() {
-
-        Constant.interRequestUtil = InterRequestUtil.getInstance(this);
-
         File dir = new File(Constant.sdPath + "/maps/");
         if (!dir.exists()) {
             dir.mkdirs();
@@ -124,6 +120,9 @@ public class MaplistActivity extends BaseActivity {
         }
         maplistAdapter = new MaplistAdapter(this, mapList);
         currentMap = mapList.get(0);
+        showProgressDialog("地图识别中...");
+        Constant.mapBitmap= BitmapFactory.decodeFile(Constant.sdPath + "/maps/"+ currentMap);
+        dismissProgressDialog();
     }
 
     @Override
@@ -136,7 +135,6 @@ public class MaplistActivity extends BaseActivity {
 //        BlueUtils.getBlueUtils().setFindBlue(new BlueUtils.FindBlue() {
 //            @Override
 //            public void getBlues(BluetoothDevice bluetoothDevice) {
-//
 //                final BleDevice device = new BleDevice(bluetoothDevice);
 //                boolean f= device.canBeFoundWith(DiscoveryMode.MDNS);
 //                String wifiSSID = "LampSite";
@@ -159,9 +157,7 @@ public class MaplistActivity extends BaseActivity {
 //            }
 //        });
 //        BlueUtils.getBlueUtils().getInitialization(this);
-////
 //        BlueUtils.getBlueUtils().startBlue();
-
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
@@ -175,7 +171,6 @@ public class MaplistActivity extends BaseActivity {
         map.put("password", "admin");
         login(map);
     }
-////        });
 
     private void requestPruModel() {
         Constant.interRequestUtil.getAllPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getAllPrruInfo?mapId=2046", new Response.Listener<String>() {
@@ -183,17 +178,7 @@ public class MaplistActivity extends BaseActivity {
             public void onResponse(String s) {
                 LLog.getLog().e("getAllPrruInfo成功", s);
                 AllPrruInfoResponse ap = new Gson().fromJson(s, AllPrruInfoResponse.class);
-//                        P lap=new Gson().fromJson(s,LocAndPrruInfoResponse.class);
-//                        if(lap.code==0) {
-//                            LLog.getLog().prru( "," , prruDataToString(lap.data.prruData));
-//                        }
                 mPrruModelList = ap.data;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                    }
-                });
                 LLog.getLog().e("prruModelList", mPrruModelList + "");
             }
         }, new Response.ErrorListener() {
@@ -214,75 +199,6 @@ public class MaplistActivity extends BaseActivity {
                         LLog.getLog().e("登录", "成功");
                         showToast("Tester登录成功");
                         requestPruModel();     //请求PruModelList信息
-                        //                        Constant.interRequestUtil.getMapData(
-//                                response.getString("Cookie"), 1,
-//                                Constant.IP_ADDRESS
-//                                        + "/tester/api/app/getMapDataByIp",
-//                                new Response.Listener<JSONObject>() {
-//                                    public void onResponse(JSONObject jsonobj) {
-//                                        Log.e("地图数据",
-//                                                jsonobj.toString());
-//                                        try {
-//                                            JSONArray array = jsonobj
-//                                                    .getJSONArray("data");
-//                                            int i = 0;
-//                                            while (i < array.length()) {
-//                                                try {
-//                                                    Floor f = new Floor();
-//                                                    JSONObject o = array
-//                                                            .getJSONObject(i);
-//                                                    f.setFloor(o
-//                                                            .getString("floor"));
-//                                                    f.setPath(o
-//                                                            .getString("path"));
-//                                                    f.setPlace(o
-//                                                            .getString("place"));
-//                                                    f.setXo(Float.valueOf(
-//                                                            o.getString("xo"))
-//                                                            .floatValue());
-//                                                    f.setYo(Float.valueOf(
-//                                                            o.getString("yo"))
-//                                                            .floatValue());
-//                                                    f.setScale(Float
-//                                                            .valueOf(
-//                                                                    o.getString("scale"))
-//                                                            .floatValue());
-//                                                    f.setUpdateTime(o
-//                                                            .getString("updateTime"));
-//                                                    f.setCoordinate(o
-//                                                            .getString("coordinate"));
-//                                                    f.setImgWidth(o
-//                                                            .getInt("imgWidth"));
-//                                                    f.setImgHeight(o
-//                                                            .getInt("imgHeight"));
-//                                                    f.setAngle((float) o
-//                                                            .getInt("angle"));
-//                                                    f.setId(o.getString("id"));
-//                                                    f.setMapId(o
-//                                                            .getString("mapId"));
-//                                                    f.setSiteId(o
-//                                                            .getInt("siteId"));
-//                                                    Constant.mapData.add(f);
-//                                                    i++;
-//                                                } catch (JSONException e) {
-//                                                    return;
-//                                                }
-//                                            }
-//                                            for (Floor f : Constant.mapData) {
-//                                                if (f.getMapId().equals("2046")) {
-//                                                    Constant.currentFloor = f;
-//                                                    break;
-//                                                }
-//                                            }
-//                                        } catch (Exception e2) {
-//                                        }
-//                                    }
-//                                }, new Response.ErrorListener() {
-//                                    public void onErrorResponse(
-//                                            VolleyError error) {
-//                                    }
-//                                });
-
                         return;
                     }
                 } catch (JSONException e) {
@@ -306,6 +222,9 @@ public class MaplistActivity extends BaseActivity {
                 currentMap = map;
                 maplistAdapter.setCurrentMap(currentMap);
                 maplistAdapter.notifyDataSetChanged();
+                showProgressDialog("切换中...");
+                Constant.mapBitmap= BitmapFactory.decodeFile(Constant.sdPath + "/maps/"+ currentMap);
+                dismissProgressDialog();
             }
         });
     }
@@ -320,33 +239,35 @@ public class MaplistActivity extends BaseActivity {
                 if (deviceManager != null) {
                     deviceManager.stop(DiscoveryMode.MDNS);
                 }
-                if (TextUtils.isEmpty(wifiRobotIp)) {
-                    Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
-                    Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
-                } else {
-                    Constant.robotIp = wifiRobotIp;
-                    Constant.robotPort = wifiRobotPort;
-                }
-                Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.6f);
-                Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.3f);
-                Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
-
-
-                //xhf
-                Constant.userId = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
+                initGlobalParams();
                 if (Constant.userId.equals("")) {
                     showToast("请在设置中设置UserId");
                 } else {
                     Bundle bundle = new Bundle();
                     bundle.putString("currentMap", currentMap);
                     bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
-                    openActivityForResult(HomeActivity.class, bundle, 1);
+                    openActivity(PrrucollectActivity.class, bundle);
                 }
-//                finish();
                 break;
             default:
                 break;
         }
+    }
+
+    private void initGlobalParams(){
+        if (TextUtils.isEmpty(wifiRobotIp)) {
+            Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
+            Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
+        } else {
+            Constant.robotIp = wifiRobotIp;
+            Constant.robotPort = wifiRobotPort;
+        }
+        Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.6f);
+        Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.3f);
+        Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
+        Constant.updatePeriod=SharedPrefHelper.getLong(this, "updatePeriod", 1000);
+        Constant.userId = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
+        Constant.lineSpace = SharedPrefHelper.getFloat(this, "lineSpace", 0.3f);
     }
 
     @Override
@@ -357,11 +278,4 @@ public class MaplistActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == -1) {
-            showToast("机器人连接失败，请修改配置！");
-        }
-    }
 }

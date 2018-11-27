@@ -38,7 +38,6 @@ public class LLog {
     }
 
     public void e(String title, String strcontent) {
-        strcontent +="----"+CrashHelper.getLineNumber(new Exception())+"行";//xhf 增加一行代码
         Log.e(title, strcontent);
         write(this.PATH_LOGCAT + "/Logs", "Log" + MyDate.getFileName() + ".txt", title, strcontent);
     }
