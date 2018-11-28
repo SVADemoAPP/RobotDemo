@@ -48,11 +48,13 @@ import com.slamtec.slamware.exceptions.ParseInvalidException;
 import com.slamtec.slamware.exceptions.RequestFailException;
 import com.slamtec.slamware.exceptions.UnauthorizedRequestException;
 import com.slamtec.slamware.exceptions.UnsupportedCommandException;
+import com.slamtec.slamware.robot.CompositeMap;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Pose;
 import com.slamtec.slamware.robot.PowerStatus;
 import com.slamtec.slamware.robot.Rotation;
 import com.slamtec.slamware.robot.SleepMode;
+import com.slamtec.slamware.sdp.CompositeMapHelper;
 
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
@@ -1068,6 +1070,14 @@ public class HomeActivity extends BaseActivity {
             robotConnect = true;
             LLog.getLog().e("连接机器人", robotIp + ":" + robotPort);
             platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
+
+
+            //设置雷达地图
+            CompositeMapHelper compositeMapHelper = new CompositeMapHelper();
+            String path = Constant.sdPath + "/maps/U9.stcm";
+            CompositeMap compositeMap = compositeMapHelper.loadFile(path);
+            platform.setCompositeMap(compositeMap,nowPose);
+
             nowPose = platform.getPose();// 当前机器人的位置,
             robotDirection = -yawToRotation(nowPose.getYaw());
             Log.e("dir", robotDirection + "");

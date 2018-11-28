@@ -32,7 +32,8 @@ public class SettingActivity extends BaseActivity {
     private TextView mEdtSettingScale;
     private TextView mEdtSettingPointX;
     private TextView mEdtSettingPointY;
-
+    private TextView mEdtSettingCurrentPointX;
+    private TextView mEdtSettingCurrentPointY;
     @Override
     public void setContentLayout() {
         setContentView(R.layout.activity_setting);
@@ -57,6 +58,8 @@ public class SettingActivity extends BaseActivity {
         mEdtSettingScale = findViewById(R.id.edt_setting_scale);
         mEdtSettingPointX = findViewById(R.id.edt_setting_pointX);
         mEdtSettingPointY = findViewById(R.id.edt_setting_pointY);
+        mEdtSettingCurrentPointX = findViewById(R.id.edt_setting_current_pointX);
+        mEdtSettingCurrentPointY = findViewById(R.id.edt_setting_current_pointY);
         mTvExit.setOnClickListener(this);
         mTvReset.setOnClickListener(this);
         mTvSave.setOnClickListener(this);
@@ -129,6 +132,8 @@ public class SettingActivity extends BaseActivity {
         mEdtServerPort.setText(String.valueOf(SharedPrefHelper.getInt(SettingActivity.this, "serPort", 0)));
         mEdtSettingPointX.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstX", 0f)));
         mEdtSettingPointY.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstY", 0f)));
+        mEdtSettingCurrentPointX.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "currentX", 0f)));
+        mEdtSettingCurrentPointY.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "currentY", 0f)));
         mEdtSettingScale.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "mapScale", 0f)));
         httpsFlag = SharedPrefHelper.getBoolean(SettingActivity.this, "https", false);
         setHttpState(httpsFlag);

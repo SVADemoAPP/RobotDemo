@@ -10,7 +10,7 @@
         android:id="@+id/rl_settitle"
         android:layout_width="match_parent"
         android:layout_height="67dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="0dp"
         android:background="@mipmap/setting_titlebg">
 
         <TextView
@@ -35,7 +35,7 @@
         android:layout_below="@+id/rl_settitle"
         android:layout_marginLeft="25dp"
         android:layout_marginRight="25dp"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -218,7 +218,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/rl_set_rb_port"
         android:orientation="vertical">
-        <!--x y坐标-->
+        <!--初始x y坐标-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -236,7 +236,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="X坐标"
+                    android:text="初始X坐标"
                     android:textColor="@color/white"
                     android:textSize="15dp"
                     android:typeface="serif" />
@@ -266,13 +266,81 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:text="Y坐标"
+                    android:text="初始Y坐标"
                     android:textColor="@color/white"
                     android:textSize="15dp"
                     android:typeface="serif" />
 
                 <EditText
                     android:id="@+id/edt_setting_pointY"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/tv_selector"
+                    android:gravity="center"
+                    android:hint=""
+                    android:inputType="numberDecimal"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/gray_stroken"
+                    android:textSize="17dp"
+                    android:typeface="serif" />
+            </LinearLayout>
+        </LinearLayout>
+        <!--当前x y坐标-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal">
+            <!--x坐标-->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="当前X坐标"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:typeface="serif" />
+
+                <EditText
+                    android:id="@+id/edt_setting_current_pointX"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@drawable/tv_selector"
+                    android:gravity="center"
+                    android:hint=""
+                    android:inputType="numberDecimal"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/gray_stroken"
+                    android:textSize="17dp"
+                    android:typeface="serif" />
+            </LinearLayout>
+            <!--y坐标-->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="当前Y坐标"
+                    android:textColor="@color/white"
+                    android:textSize="15dp"
+                    android:typeface="serif" />
+
+                <EditText
+                    android:id="@+id/edt_setting_current_pointY"
                     android:layout_width="match_parent"
                     android:layout_height="36dp"
                     android:layout_marginLeft="10dp"

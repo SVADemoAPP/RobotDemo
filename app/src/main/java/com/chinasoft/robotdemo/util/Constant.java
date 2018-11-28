@@ -19,6 +19,9 @@ public class Constant {
     public static int robotPort;
     public static String sdPath;
 
+    public static float  currentX;
+    public static float  currentY;
+
     public static String mapDirs="/sdcard/robotdemo/maps/";
 
     public static final String APP_VERSION = "ICS LBS Tester V200R002C17";

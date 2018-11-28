@@ -331,6 +331,9 @@ public class MaplistActivity extends BaseActivity {
                 Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.3f);
                 Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
 
+                Constant.currentX = SharedPrefHelper.getFloat(this, "currentX", 0.6f);
+                Constant.currentY = SharedPrefHelper.getFloat(this, "currentY", 0.3f);
+
 
                 //xhf
                 Constant.userId = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
