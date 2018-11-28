@@ -22,8 +22,6 @@ public interface OnRobotListener {
 
     void positionChange(float x,float y,float direc);
 
-    void moveFinish();
-
-    void forceFinish(float x,float y);
+    void moveFinish(float x,float y,float direc,boolean isForce);
 
 }

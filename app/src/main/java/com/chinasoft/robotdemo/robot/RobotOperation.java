@@ -33,14 +33,14 @@ public class RobotOperation {
                 onRobotListener.notifyPrru(nowX, nowY);
                 if(isMoving) {
                     robotDirection = yawToDirec(nowPose.getYaw());
-                    onRobotListener.positionChange(nowX,nowY,robotDirection);
                     switch (platform.getCurrentAction().getStatus().toString()) {
                         case RUNNING:
+                            onRobotListener.positionChange(nowX,nowY,robotDirection);
                             onRobotListener.refreshOrbits(platform.searchPath(forwardLocation).getPoints());
                             break;
                         case FINISHED:
                             isMoving=false;
-                            onRobotListener.moveFinish();
+                            onRobotListener.moveFinish(nowX,nowY,robotDirection,false);
                             break;
                         default:
                             break;
@@ -122,6 +122,7 @@ public class RobotOperation {
 
     //取消当前action
     public void cancelAction(){
+        isMoving=false;
         try {
             platform.getCurrentAction().cancel();
         } catch (Exception e) {
@@ -133,7 +134,10 @@ public class RobotOperation {
         cancelAction();
         try {
             nowPose = platform.getPose();
-            onRobotListener.forceFinish(nowPose.getX(),nowPose.getY());
+            nowX = nowPose.getX();
+            nowY = nowPose.getY();
+            robotDirection = yawToDirec(nowPose.getYaw());
+            onRobotListener.moveFinish(nowX,nowY,robotDirection,true);
         } catch (Exception e) {
             errorDisconnect(e.toString());
         }

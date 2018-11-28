@@ -5,12 +5,10 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -25,18 +23,20 @@ import com.chinasoft.robotdemo.robot.OnRobotListener;
 import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
+import com.chinasoft.robotdemo.util.RobotMoveUtils;
 import com.chinasoft.robotdemo.util.SuperPopupWindow;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.google.gson.Gson;
 import com.kongqw.rockerlibrary.view.RockerView;
 import com.slamtec.slamware.robot.Location;
-
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
 import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.RequestShape;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 import java.util.Vector;
@@ -46,14 +46,14 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private int mapHeight;
     private boolean isStart = false;
     private boolean isPrruCollect = false;
-    private boolean isPrruFind = false;
+    private boolean isAutoFind = false;
     private PrruModel nowCollectPrru;
     private float xo, yo, scale, initX, initY, initZ, realXo, realYo;
     private int coorCount = 0;
     private Path path;
     private LineShape lineShape;
     private float lastX, lastY, nowX, nowY;
-    private float[] newF,desF;
+    private float[] newF,desF,pXY;
     private String currentMap;
     private TextView tv_setting;
     private ImageView iv_operation;
@@ -70,25 +70,10 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private float mapRotate;
     private float robotDirection;
     private RobotOperation ro;
-
     private boolean mSwitchAutoFlag = true; //默认为自动
-//    private TimerTask task = new TimerTask() {
-//        @Override
-//        public void run() {
-//
-//            if (platform == null) {
-//                LLog.getLog().robot("no connect", "未连接");
-////                getRobotInfo();
-//            } else {
-//                try {
-//                    LLog.getLog().robot("health", "" + platform.getRobotHealth().getErrors());
-//                } catch (Exception e) {
-//                    LLog.getLog().robot("error", e.toString());
-//                }
-//
-//            }
-//        }
-//    };
+
+    private ImageView iv_collect;
+    private TextView tv_forcestop;
 
 //    private int moveCode;   //
 //    private Handler mMoveHandler = new Handler() {
@@ -192,6 +177,10 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         iv_operation.setOnClickListener(this);
         tv_home_back.setOnClickListener(this);
         mSwitch.setOnClickListener(this);
+        iv_collect=findViewById(R.id.iv_collect);
+        iv_collect.setOnClickListener(this);
+        tv_forcestop=findViewById(R.id.tv_forcestop);
+        tv_forcestop.setOnClickListener(this);
     }
 
     @Override
@@ -220,14 +209,13 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 mapRotate = -rotate;
                 cv.updateDirection(mapRotate + robotDirection);
                 robotShape.setView(cv);
-//                map.addShape(robotShape, false);
             }
         });
 
         map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
             @Override
             public void onLongClick(PointF point) {
-                if (isStart && !isPrruFind) {
+                if (isStart && !isAutoFind) {
                     float[] realXY = mapToReal(point.x, point.y);
                     ro.cancelAndMoveTo(realXY[0], realXY[1]);
                     desShape.setValues(point.x, point.y);
@@ -239,9 +227,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     }
 
 
-    private float yawToRotation(float yaw) {
-        return (float) (yaw * 180 / 3.14);
-    }
 
 
     private void initStart(float x, float y) {
@@ -271,7 +256,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 finish();
                 break;
             case R.id.home_change_auto: //切换操作模式
-                ro.cancelAction();
+                ro.forceStop();
                 if (mSwitchAutoFlag == true)//切换为手动
                 {
                     mSwitchAutoFlag = false;
@@ -286,9 +271,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 }
                 break;
             case R.id.iv_operation:
-                if (isPrruFind) {
+                if (isAutoFind) {
                     ro.forceStop();
-                    isPrruFind = false;
+                    isAutoFind = false;
                     iv_operation.setImageResource(R.mipmap.home_start);
                     return;
                 }
@@ -298,10 +283,21 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                     showToast("没有Prru列表");
                 }
                 break;
+            case  R.id.iv_collect:
+                if(isPrruCollect){
+                    isPrruCollect=false;
+                    iv_collect.setImageResource(R.mipmap.home_start);
+                }else{
+                    isPrruCollect=true;
+                    iv_collect.setImageResource(R.mipmap.home_stop);
+                }
+                break;
+            case  R.id.tv_forcestop:
+                ro.forceStop();
+                break;
             default:
                 break;
         }
-
     }
 
     private String prruDataToString(List<PrruSigalModel> prruSigalModelList) {
@@ -341,7 +337,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                     desF=realToMap(nowCollectPrru.x-realXo,nowCollectPrru.y-realYo);
                     desShape.setValues(desF[0], desF[1]);
                     map.addShape(desShape, false);
-                    isPrruFind = true;
+                    isAutoFind = true;
                     iv_operation.setImageResource(R.mipmap.home_stop);
                     nowCollectNeCode = nowCollectPrru.neCode;
                     maxRsrp = Float.NEGATIVE_INFINITY;
@@ -385,38 +381,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     }
 
 
-    /**
-     * 判断机器人信息是否填写完善
-     *
-     * @param x
-     * @param y
-     * @param scale
-     * @param ip
-     * @param port
-     * @return
-     */
-    private boolean judgeEmpty(EditText x, EditText y, EditText scale, EditText ip, EditText port) {
-        boolean flag = false;
-        if (x.getText().toString().trim().equals("")) {
-            x.requestFocus();
-            showToast("请输入X值");
-        } else if (y.getText().toString().trim().equals("")) {
-            y.requestFocus();
-            showToast("请输入Y值");
-        } else if (scale.getText().toString().trim().equals("")) {
-            scale.requestFocus();
-            showToast("请输入比例尺");
-        } else if (ip.getText().toString().trim().equals("")) {
-            ip.requestFocus();
-            showToast("请输入机器人地址");
-        } else if (port.getText().toString().trim().equals("")) {
-            port.requestFocus();
-            showToast("请输入机器人地址端口");
-        } else {
-            flag = true;
-        }
-        return flag;
-    }
 
 
     /***
@@ -460,9 +424,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
      */
     private void initRocker() {
         mRockerView = findViewById(R.id.home_rockerView);
-        // 设置回调模式
-        mRockerView.setCallBackMode(RockerView.CallBackMode.CALL_BACK_MODE_STATE_CHANGE);
-        //监听摇动方向
+//        // 设置回调模式
+//        mRockerView.setCallBackMode(RockerView.CallBackMode.CALL_BACK_MODE_STATE_CHANGE);
+//        //监听摇动方向
 //        mRockerView.setOnAngleChangeListener(new RockerView.OnAngleChangeListener() {
 //            @Override
 //            public void onStart() {
@@ -473,7 +437,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 //            @Override
 //            public void angle(double v) {
 //                //角度
-//               RobotMoveUtils.setRobotMove(platform,RobotMoveUtils.fuzzyDirection(v), (HomeActivity) mContext);
+////               RobotMoveUtils.setRobotMove(platform,RobotMoveUtils.fuzzyDirection(v), (HomeActivity) mContext);
 //            }
 //
 //            @Override
@@ -482,32 +446,26 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 //                //停止
 //            }
 //        });
-        mRockerView.setOnShakeListener(RockerView.DirectionMode.DIRECTION_8, new RockerView.OnShakeListener() {
-            @Override
-            public void onStart() {
-                Log.e("XHF", "Start");
-                //开始循环监听状态值
-//                mMoveTimer = new Timer();
-//                mMoveTimer.schedule(new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        mMoveHandler.sendEmptyMessage(moveCode);
-//                    }
-//                }, 1000, 500);
-            }
-
-            @Override
-            public void direction(RockerView.Direction direction) {
-//                handRobotMove(direction);
-                Log.e("XHF", "摇动方向 : " + getDirection(direction));
-            }
-
-            @Override
-            public void onFinish() {
-                Log.e("XHF", "Finish");
-//                mMoveTimer.cancel();
-            }
-        });
+//        mRockerView.setOnShakeListener(RockerView.DirectionMode.DIRECTION_8, new RockerView.OnShakeListener() {
+//            @Override
+//            public void onStart() {
+//                Log.e("XHF", "Start");
+//                //开始循环监听状态值
+////                mMoveT？
+//            }
+//
+//            @Override
+//            public void direction(RockerView.Direction direction) {
+////                handRobotMove(direction);
+//                Log.e("XHF", "摇动方向 : " + getDirection(direction));
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                Log.e("XHF", "Finish");
+////                mMoveTimer.cancel();
+//            }
+//        });
     }
 
     /**
@@ -580,7 +538,20 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 //        }
 //    }
 
-    private void prruCollect() {
+    private long lastClickTime;
+
+    @Override
+    public void onBackPressed() {
+        long nowClickTime=System.currentTimeMillis();
+        if(nowClickTime-lastClickTime>2000){
+            lastClickTime=nowClickTime;
+            showToast("再点一次回退");
+        }else{
+            finish();
+        }
+    }
+
+    private void autoFind() {
         cStep++;
         switch (cStep) {
             case 1:
@@ -588,6 +559,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 ro.moveTo(nowCollectPrru.x - realXo + initX + 0.5f, nowCollectPrru.y - realYo + initY);
                 break;
             case 2:
+                LLog.getLog().e("扫描", "2");
                 ro.moveTo(nowCollectPrru.x - realXo + initX, nowCollectPrru.y - realYo + initY);
                 break;
             case 3:
@@ -616,7 +588,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 break;
             case 9:
                 LLog.getLog().e("扫描", "9");
-                isPrruFind = false;
+                isAutoFind = false;
                 arriveDes();
                 iv_operation.setImageResource(R.mipmap.home_start);
                 if (maxRsrp > -10000f) {
@@ -638,13 +610,24 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
     }
 
-    //到达目的点取消终点图标与完成路过线
+    //到达目的点
     private void arriveDes(){
         newF = realToMap(nowX, nowY);
         path.lineTo(newF[0], newF[1]);
         lineShape.setPath(path);
         map.addShape(lineShape, false);
+        lastX = nowX;
+        lastY = nowY;
         map.removeShape("des");
+        updateRobotByReal();
+    }
+
+    //根据实际坐标更新机器人图标
+    private synchronized void updateRobotByReal(){
+        pXY = realToMap(nowX, nowY);
+        cv.updateDirection(mapRotate + robotDirection);
+        robotShape.setView(cv);
+        robotShape.setValues(pXY[0], pXY[1]);
     }
 
     @Override
@@ -710,7 +693,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                 if (lap.code == 0) {
                     LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData));
-                    if (isPrruFind) {
+                    if (isAutoFind) {
                         Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
                         recordMaxRsrp(rsrp, logX, logY);
                     }
@@ -728,6 +711,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     public void positionChange(float x, float y, float direc) {
         nowX = x;
         nowY = y;
+        robotDirection = direc;
         if (Math.sqrt((nowX - lastX) * (nowX - lastX) + (nowY - lastY) * (nowY - lastY)) > Constant.lineSpace) {
 //                            Log.e("handler","的点点滴滴顶顶顶顶顶顶顶顶顶大等等");
             newF = realToMap(nowX, nowY);
@@ -737,35 +721,20 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             lastX = nowX;
             lastY = nowY;
         }
-        float[] p = realToMap(x, y);
-        robotDirection = direc;
-        cv.updateDirection(mapRotate + robotDirection);
-        robotShape.setView(cv);
-        robotShape.setValues(p[0], p[1]);
+        updateRobotByReal();
     }
 
     @Override
-    public void moveFinish() {
-        for (int i = 0, len = coorCount; i < len; i++) {
-            map.removeShape("coor" + i);
-        }
-        lastX = nowX;
-        lastY = nowY;
-        if(isPrruFind) {
-            prruCollect();
+    public void moveFinish(float x, float y, float direc,boolean isForce) {
+        nowX=x;
+        nowY=y;
+        robotDirection=direc;
+        clearOrbits();
+        if(isAutoFind&&!isForce) {
+            autoFind();
         }else{
             arriveDes();
         }
-    }
-
-    @Override
-    public void forceFinish(float x, float y) {
-        nowX=x;
-        nowY=y;
-        clearOrbits();
-        lastX = nowX;
-        lastY = nowY;
-        arriveDes();
     }
 
 
