@@ -54,7 +54,7 @@
         android:layout_alignParentRight="true"
         android:layout_marginBottom="250dp"
         android:layout_marginRight="18dp"
-        android:background="@drawable/home_setting"
+        android:background="@drawable/prru_setting"
         android:gravity="center"
         android:paddingRight="3dp"
         android:text="P\nP\nR\nU"

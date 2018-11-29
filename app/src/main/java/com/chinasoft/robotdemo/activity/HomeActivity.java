@@ -179,105 +179,105 @@ public class HomeActivity extends BaseActivity {
         }
     };
 
-    private int moveCode;   //
+//    private int moveCode;   //
 
 
-    private Handler mMoveHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (platform != null) {
-                try {
-                    switch (msg.what) {
-                        case 101:
-                            platform.moveBy(MoveDirection.FORWARD);
-//                        platform.rotateTo(new Rotation((float) Math.PI/4));
-                            break;
-                        case 102:
-                            platform.moveBy(MoveDirection.BACKWARD);
-                            break;
-                        case 103:
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        moveCode = 100;
-                                        IMoveAction iMoveAction = platform.moveBy(MoveDirection.TURN_LEFT);
-                                        iMoveAction.waitUntilDone();
-                                        moveCode = 101;
-                                    } catch (RequestFailException e) {
-                                        e.printStackTrace();
-                                    } catch (ConnectionFailException e) {
-                                        e.printStackTrace();
-                                    } catch (ConnectionTimeOutException e) {
-                                        e.printStackTrace();
-                                    } catch (UnauthorizedRequestException e) {
-                                        e.printStackTrace();
-                                    } catch (UnsupportedCommandException e) {
-                                        e.printStackTrace();
-                                    } catch (ParseInvalidException e) {
-                                        e.printStackTrace();
-                                    } catch (InvalidArgumentException e) {
-                                        e.printStackTrace();
-                                    } catch (OperationFailException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }).start();
+//    private Handler mMoveHandler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//            if (platform != null) {
+//                try {
+//                    switch (msg.what) {
+//                        case 101:
+//                            platform.moveBy(MoveDirection.FORWARD);
+////                        platform.rotateTo(new Rotation((float) Math.PI/4));
+//                            break;
+//                        case 102:
+//                            platform.moveBy(MoveDirection.BACKWARD);
+//                            break;
+//                        case 103:
+//                            new Thread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    try {
+//                                        moveCode = 100;
+//                                        IMoveAction iMoveAction = platform.moveBy(MoveDirection.TURN_LEFT);
+//                                        iMoveAction.waitUntilDone();
+//                                        moveCode = 101;
+//                                    } catch (RequestFailException e) {
+//                                        e.printStackTrace();
+//                                    } catch (ConnectionFailException e) {
+//                                        e.printStackTrace();
+//                                    } catch (ConnectionTimeOutException e) {
+//                                        e.printStackTrace();
+//                                    } catch (UnauthorizedRequestException e) {
+//                                        e.printStackTrace();
+//                                    } catch (UnsupportedCommandException e) {
+//                                        e.printStackTrace();
+//                                    } catch (ParseInvalidException e) {
+//                                        e.printStackTrace();
+//                                    } catch (InvalidArgumentException e) {
+//                                        e.printStackTrace();
+//                                    } catch (OperationFailException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                            }).start();
+////                            getRobotInfo();
+//                            break;
+//                        case 104:
+//                            new Thread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    try {
+//                                        moveCode = 100;
+//                                        IMoveAction iMoveAction = platform.moveBy(MoveDirection.TURN_RIGHT);
+//                                        iMoveAction.waitUntilDone();
+//                                        moveCode = 101;
+//                                    } catch (RequestFailException e) {
+//                                        e.printStackTrace();
+//                                    } catch (ConnectionFailException e) {
+//                                        e.printStackTrace();
+//                                    } catch (ConnectionTimeOutException e) {
+//                                        e.printStackTrace();
+//                                    } catch (UnauthorizedRequestException e) {
+//                                        e.printStackTrace();
+//                                    } catch (UnsupportedCommandException e) {
+//                                        e.printStackTrace();
+//                                    } catch (ParseInvalidException e) {
+//                                        e.printStackTrace();
+//                                    } catch (InvalidArgumentException e) {
+//                                        e.printStackTrace();
+//                                    } catch (OperationFailException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                            }).start();
 //                            getRobotInfo();
-                            break;
-                        case 104:
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        moveCode = 100;
-                                        IMoveAction iMoveAction = platform.moveBy(MoveDirection.TURN_RIGHT);
-                                        iMoveAction.waitUntilDone();
-                                        moveCode = 101;
-                                    } catch (RequestFailException e) {
-                                        e.printStackTrace();
-                                    } catch (ConnectionFailException e) {
-                                        e.printStackTrace();
-                                    } catch (ConnectionTimeOutException e) {
-                                        e.printStackTrace();
-                                    } catch (UnauthorizedRequestException e) {
-                                        e.printStackTrace();
-                                    } catch (UnsupportedCommandException e) {
-                                        e.printStackTrace();
-                                    } catch (ParseInvalidException e) {
-                                        e.printStackTrace();
-                                    } catch (InvalidArgumentException e) {
-                                        e.printStackTrace();
-                                    } catch (OperationFailException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }).start();
-                            getRobotInfo();
-                            break;
-                    }
-                } catch (RequestFailException e) {
-                    e.printStackTrace();
-                } catch (ConnectionFailException e) {
-                    e.printStackTrace();
-                } catch (ConnectionTimeOutException e) {
-                    e.printStackTrace();
-                } catch (UnauthorizedRequestException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedCommandException e) {
-                    e.printStackTrace();
-                } catch (ParseInvalidException e) {
-                    e.printStackTrace();
-                } catch (InvalidArgumentException e) {
-                    e.printStackTrace();
-                } catch (OperationFailException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-    Timer mMoveTimer;
+//                            break;
+//                    }
+//                } catch (RequestFailException e) {
+//                    e.printStackTrace();
+//                } catch (ConnectionFailException e) {
+//                    e.printStackTrace();
+//                } catch (ConnectionTimeOutException e) {
+//                    e.printStackTrace();
+//                } catch (UnauthorizedRequestException e) {
+//                    e.printStackTrace();
+//                } catch (UnsupportedCommandException e) {
+//                    e.printStackTrace();
+//                } catch (ParseInvalidException e) {
+//                    e.printStackTrace();
+//                } catch (InvalidArgumentException e) {
+//                    e.printStackTrace();
+//                } catch (OperationFailException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    };
+//    Timer mMoveTimer;
 
 
     /***xhf***/
@@ -1119,7 +1119,7 @@ public class HomeActivity extends BaseActivity {
                 saveRbLocationInfo(pointX, pointY, scaleRuler);
             }
         } else {
-            setResult(-1);
+            showToast("机器人连接失败！");
             finish();
 //            showToast("机器人连接失败！");
         }
@@ -1196,30 +1196,30 @@ public class HomeActivity extends BaseActivity {
         // 设置回调模式
         mRockerView.setCallBackMode(RockerView.CallBackMode.CALL_BACK_MODE_STATE_CHANGE);
          //监听摇动方向
-        mRockerView.setOnAngleChangeListener(new RockerView.OnAngleChangeListener() {
-            @Override
-            public void onStart() {
-                //开始的方法
-//                RobotMoveUtils.goStraight(0);
-            }
-
-            @Override
-            public void angle(double v) {
-                //角度
-               RobotMoveUtils.setRobotMove(platform,RobotMoveUtils.fuzzyDirection(v), (HomeActivity) mContext);
-            }
-
-            @Override
-            public void onFinish() {
-                RobotMoveUtils.goStraight(0);
-                //停止
-            }
-        });
-//        mRockerView.setOnShakeListener(RockerView.DirectionMode.DIRECTION_8, new RockerView.OnShakeListener() {
+//        mRockerView.setOnAngleChangeListener(new RockerView.OnAngleChangeListener() {
 //            @Override
 //            public void onStart() {
-//                Log.e("XHF", "Start");
-//                //开始循环监听状态值
+//                //开始的方法
+////                RobotMoveUtils.goStraight(0);
+//            }
+//
+//            @Override
+//            public void angle(double v) {
+//                //角度
+//               RobotMoveUtils.setRobotMove(platform,RobotMoveUtils.fuzzyDirection(v), (HomeActivity) mContext);
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                RobotMoveUtils.goStraight(0);
+//                //停止
+//            }
+//        });
+        mRockerView.setOnShakeListener(RockerView.DirectionMode.DIRECTION_8, new RockerView.OnShakeListener() {
+            @Override
+            public void onStart() {
+                Log.e("XHF", "Start");
+                //开始循环监听状态值
 //                mMoveTimer = new Timer();
 //                mMoveTimer.schedule(new TimerTask() {
 //                    @Override
@@ -1227,20 +1227,20 @@ public class HomeActivity extends BaseActivity {
 //                        mMoveHandler.sendEmptyMessage(moveCode);
 //                    }
 //                }, 1000, 500);
-//            }
-//
-//            @Override
-//            public void direction(RockerView.Direction direction) {
+            }
+
+            @Override
+            public void direction(RockerView.Direction direction) {
 //                handRobotMove(direction);
-//                Log.e("XHF", "摇动方向 : " + getDirection(direction));
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//                Log.e("XHF", "Finish");
+                Log.e("XHF", "摇动方向 : " + getDirection(direction));
+            }
+
+            @Override
+            public void onFinish() {
+                Log.e("XHF", "Finish");
 //                mMoveTimer.cancel();
-//            }
-//        });
+            }
+        });
     }
 
     /**
@@ -1282,36 +1282,36 @@ public class HomeActivity extends BaseActivity {
         return directName;
     }
 
-    private void handRobotMove(RockerView.Direction direction) {
-        if (platform != null) {
-            switch (direction) {
-                case DIRECTION_UP:
-                    moveCode = 101;
-                    break;
-                case DIRECTION_DOWN:
-                    moveCode = 102;
-                    break;
-                case DIRECTION_LEFT:
-                    moveCode = 103;
-                    break;
-                case DIRECTION_RIGHT:
-                    moveCode = 104;
-                    break;
-                case DIRECTION_CENTER:
-                    break;
-                case DIRECTION_UP_LEFT:
-                    break;
-                case DIRECTION_UP_RIGHT:
-                    break;
-                case DIRECTION_DOWN_LEFT:
-                    break;
-                case DIRECTION_DOWN_RIGHT:
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+//    private void handRobotMove(RockerView.Direction direction) {
+//        if (platform != null) {
+//            switch (direction) {
+//                case DIRECTION_UP:
+//                    moveCode = 101;
+//                    break;
+//                case DIRECTION_DOWN:
+//                    moveCode = 102;
+//                    break;
+//                case DIRECTION_LEFT:
+//                    moveCode = 103;
+//                    break;
+//                case DIRECTION_RIGHT:
+//                    moveCode = 104;
+//                    break;
+//                case DIRECTION_CENTER:
+//                    break;
+//                case DIRECTION_UP_LEFT:
+//                    break;
+//                case DIRECTION_UP_RIGHT:
+//                    break;
+//                case DIRECTION_DOWN_LEFT:
+//                    break;
+//                case DIRECTION_DOWN_RIGHT:
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//    }
 
     private void robotMove1() {
 

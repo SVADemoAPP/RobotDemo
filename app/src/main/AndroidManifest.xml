@@ -35,6 +35,12 @@
         <activity android:name=".activity.HomeActivity">
         </activity>
 
+        <activity android:name=".activity.PrrufindActivity">
+        </activity>
+
+        <activity android:name=".activity.PrrucollectActivity">
+        </activity>
+
         <activity android:name=".activity.SettingActivity">
     </activity>
 

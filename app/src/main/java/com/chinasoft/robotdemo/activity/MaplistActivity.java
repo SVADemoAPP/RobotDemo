@@ -2,6 +2,7 @@ package com.chinasoft.robotdemo.activity;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -53,7 +54,6 @@ import java.util.Map;
  */
 
 public class MaplistActivity extends BaseActivity {
-
     private ListView lv_maplist;
     private List<String> mapList = new ArrayList();
     private MaplistAdapter maplistAdapter;
@@ -124,6 +124,9 @@ public class MaplistActivity extends BaseActivity {
         }
         maplistAdapter = new MaplistAdapter(this, mapList);
         currentMap = mapList.get(0);
+        showProgressDialog("地图识别中...");
+        Constant.mapBitmap= BitmapFactory.decodeFile(Constant.sdPath + "/maps/"+ currentMap);
+        dismissProgressDialog();
     }
 
     @Override
@@ -306,6 +309,9 @@ public class MaplistActivity extends BaseActivity {
                 currentMap = map;
                 maplistAdapter.setCurrentMap(currentMap);
                 maplistAdapter.notifyDataSetChanged();
+                showProgressDialog("切换中...");
+                Constant.mapBitmap= BitmapFactory.decodeFile(Constant.sdPath + "/maps/"+ currentMap);
+                dismissProgressDialog();
             }
         });
     }
@@ -320,30 +326,14 @@ public class MaplistActivity extends BaseActivity {
                 if (deviceManager != null) {
                     deviceManager.stop(DiscoveryMode.MDNS);
                 }
-                if (TextUtils.isEmpty(wifiRobotIp)) {
-                    Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
-                    Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
-                } else {
-                    Constant.robotIp = wifiRobotIp;
-                    Constant.robotPort = wifiRobotPort;
-                }
-                Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.6f);
-                Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.3f);
-                Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
-
-                Constant.currentX = SharedPrefHelper.getFloat(this, "currentX", 0.6f);
-                Constant.currentY = SharedPrefHelper.getFloat(this, "currentY", 0.3f);
-
-
-                //xhf
-                Constant.userId = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
+                initGlobalParams();
                 if (Constant.userId.equals("")) {
                     showToast("请在设置中设置UserId");
                 } else {
                     Bundle bundle = new Bundle();
                     bundle.putString("currentMap", currentMap);
                     bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
-                    openActivityForResult(HomeActivity.class, bundle, 1);
+                    openActivity(PrrucollectActivity.class, bundle);
                 }
 //                finish();
                 break;
@@ -351,6 +341,22 @@ public class MaplistActivity extends BaseActivity {
                 break;
         }
     }
+
+private void initGlobalParams(){
+    if (TextUtils.isEmpty(wifiRobotIp)) {
+        Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
+        Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
+    } else {
+        Constant.robotIp = wifiRobotIp;
+        Constant.robotPort = wifiRobotPort;
+    }
+    Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.6f);
+    Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.3f);
+    Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
+    Constant.userId = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
+    Constant.updatePeriod=SharedPrefHelper.getLong(this, "updatePeriod", 1000);
+    Constant.lineSpace=SharedPrefHelper.getFloat(this, "lineSpace", 0.3f);
+}
 
     @Override
     protected void onDestroy() {
