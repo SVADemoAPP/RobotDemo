@@ -32,24 +32,57 @@
         android:layout_width="200dp"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="150dp"
         android:layout_marginTop="150dp"
         android:listSelector="#00000000" />
 
+
     <TextView
         android:id="@+id/tv_setting"
-        android:layout_width="75dp"
-        android:layout_height="24dp"
+        android:layout_width="220dp"
+        android:layout_height="40dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="60dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginRight="7dp"
-        android:background="@drawable/maplist_next_press"
-        android:gravity="center"
-        android:text="设置"
+        android:layout_marginBottom="35dp"
         android:textColor="@color/white"
-        android:textSize="12dp" />
+        android:text="设置"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@drawable/tv_setting"
+        android:textSize="20dp"/>
+
+    <LinearLayout
+        android:layout_width="280dp"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:layout_above="@+id/tv_setting"
+        android:layout_marginBottom="10dp"
+        android:layout_centerHorizontal="true">
+        <TextView
+            android:id="@+id/tv_modecollect"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:textColor="@color/white"
+            android:text="pRRU采集"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:background="@mipmap/tv_mode_unselect"
+            android:textSize="20dp"/>
+        <TextView
+            android:layout_marginLeft="10dp"
+            android:id="@+id/tv_modefind"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:textColor="@color/white"
+            android:text="pRRU查找"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:background="@mipmap/tv_mode_unselect"
+            android:textSize="20dp"/>
+
+    </LinearLayout>
 
 </RelativeLayout>
 

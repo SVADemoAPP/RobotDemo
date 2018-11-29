@@ -57,42 +57,40 @@ public class MaplistActivity extends BaseActivity {
     private ListView lv_maplist;
     private List<String> mapList = new ArrayList();
     private MaplistAdapter maplistAdapter;
-    private String currentMap;
-    private TextView tv_next;
-    private String wifiRobotIp;
-    private int wifiRobotPort;
-
+    private String currentMap,wifiRobotIp;
+    private int wifiRobotPort,mode;
     private List<PrruModel> mPrruModelList;
     private DeviceManager deviceManager;
+    private TextView tv_modecollect, tv_modefind,tv_setting,tv_next;
 
-    private AbstractDiscover.DiscoveryListener discoveryListener = new AbstractDiscover.DiscoveryListener() {
-        @Override
-        public void onStartDiscovery(AbstractDiscover abstractDiscover) {
-            LLog.getLog().e("discoveryListener", "onStartDiscovery");
-        }
+//    private AbstractDiscover.DiscoveryListener discoveryListener = new AbstractDiscover.DiscoveryListener() {
+//        @Override
+//        public void onStartDiscovery(AbstractDiscover abstractDiscover) {
+//            LLog.getLog().e("discoveryListener", "onStartDiscovery");
+//        }
+//
+//        @Override
+//        public void onStopDiscovery(AbstractDiscover abstractDiscover) {
+//            LLog.getLog().e("discoveryListener", "onStopDiscovery");
+//        }
+//
+//        @Override
+//        public void onDiscoveryError(AbstractDiscover abstractDiscover, String s) {
+//            LLog.getLog().e("discoveryListener", "错误：" + s);
+//        }
+//
+//        @Override
+//        public void onDeviceFound(AbstractDiscover abstractDiscover, Device device) {
+//            LLog.getLog().e("discoveryListener", "找到device：" + device.toString());
+//            if (device instanceof BleDevice) {
+////                                    Log.e("msg","aa"+((BleDevice)device).getDevice());
+//            } else if (device instanceof MdnsDevice) {
+//                wifiRobotIp = ((MdnsDevice) device).getAddr();
+//                wifiRobotPort = ((MdnsDevice) device).getPort();
+//            }
+//        }
+//    };
 
-        @Override
-        public void onStopDiscovery(AbstractDiscover abstractDiscover) {
-            LLog.getLog().e("discoveryListener", "onStopDiscovery");
-        }
-
-        @Override
-        public void onDiscoveryError(AbstractDiscover abstractDiscover, String s) {
-            LLog.getLog().e("discoveryListener", "错误：" + s);
-        }
-
-        @Override
-        public void onDeviceFound(AbstractDiscover abstractDiscover, Device device) {
-            LLog.getLog().e("discoveryListener", "找到device：" + device.toString());
-            if (device instanceof BleDevice) {
-//                                    Log.e("msg","aa"+((BleDevice)device).getDevice());
-            } else if (device instanceof MdnsDevice) {
-                wifiRobotIp = ((MdnsDevice) device).getAddr();
-                wifiRobotPort = ((MdnsDevice) device).getPort();
-            }
-        }
-    };
-    private TextView mTvSetting;
 
     @Override
     public void setContentLayout() {
@@ -125,7 +123,7 @@ public class MaplistActivity extends BaseActivity {
         maplistAdapter = new MaplistAdapter(this, mapList);
         currentMap = mapList.get(0);
         showProgressDialog("地图识别中...");
-        Constant.mapBitmap= BitmapFactory.decodeFile(Constant.sdPath + "/maps/"+ currentMap);
+        Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
         dismissProgressDialog();
     }
 
@@ -133,9 +131,13 @@ public class MaplistActivity extends BaseActivity {
     public void initView() {
         lv_maplist = findViewById(R.id.lv_maplist);
         tv_next = findViewById(R.id.tv_next);
-        mTvSetting = findViewById(R.id.tv_setting);
+        tv_setting = findViewById(R.id.tv_setting);
+        tv_modecollect = findViewById(R.id.tv_modecollect);
+        tv_modefind = findViewById(R.id.tv_modefind);
         tv_next.setOnClickListener(this);
-        mTvSetting.setOnClickListener(this);
+        tv_setting.setOnClickListener(this);
+        tv_modecollect.setOnClickListener(this);
+        tv_modefind.setOnClickListener(this);
 //        BlueUtils.getBlueUtils().setFindBlue(new BlueUtils.FindBlue() {
 //            @Override
 //            public void getBlues(BluetoothDevice bluetoothDevice) {
@@ -310,7 +312,7 @@ public class MaplistActivity extends BaseActivity {
                 maplistAdapter.setCurrentMap(currentMap);
                 maplistAdapter.notifyDataSetChanged();
                 showProgressDialog("切换中...");
-                Constant.mapBitmap= BitmapFactory.decodeFile(Constant.sdPath + "/maps/"+ currentMap);
+                Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
                 dismissProgressDialog();
             }
         });
@@ -323,6 +325,10 @@ public class MaplistActivity extends BaseActivity {
                 openActivity(SettingActivity.class);
                 break;
             case R.id.tv_next:
+                if (mode == 0) {
+                    showToast("必须选择模式");
+                    return;
+                }
                 if (deviceManager != null) {
                     deviceManager.stop(DiscoveryMode.MDNS);
                 }
@@ -333,30 +339,43 @@ public class MaplistActivity extends BaseActivity {
                     Bundle bundle = new Bundle();
                     bundle.putString("currentMap", currentMap);
                     bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
-                    openActivity(PrrucollectActivity.class, bundle);
+                    if (mode == 1) {
+                        openActivity(PrrucollectActivity.class, bundle);
+                    } else if (mode == 2) {
+                        openActivity(PrrufindActivity.class, bundle);
+                    }
                 }
-//                finish();
+                break;
+            case R.id.tv_modecollect:
+                mode = 1;
+                tv_modecollect.setBackgroundResource(R.mipmap.tv_mode_select);
+                tv_modefind.setBackgroundResource(R.mipmap.tv_mode_unselect);
+                break;
+            case R.id.tv_modefind:
+                mode = 2;
+                tv_modecollect.setBackgroundResource(R.mipmap.tv_mode_unselect);
+                tv_modefind.setBackgroundResource(R.mipmap.tv_mode_select);
                 break;
             default:
                 break;
         }
     }
 
-private void initGlobalParams(){
-    if (TextUtils.isEmpty(wifiRobotIp)) {
-        Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
-        Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
-    } else {
-        Constant.robotIp = wifiRobotIp;
-        Constant.robotPort = wifiRobotPort;
+    private void initGlobalParams() {
+        if (TextUtils.isEmpty(wifiRobotIp)) {
+            Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
+            Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
+        } else {
+            Constant.robotIp = wifiRobotIp;
+            Constant.robotPort = wifiRobotPort;
+        }
+        Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.6f);
+        Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.3f);
+        Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
+        Constant.userId = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
+        Constant.updatePeriod = SharedPrefHelper.getLong(this, "updatePeriod", 1000);
+        Constant.lineSpace = SharedPrefHelper.getFloat(this, "lineSpace", 0.3f);
     }
-    Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.6f);
-    Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.3f);
-    Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
-    Constant.userId = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
-    Constant.updatePeriod=SharedPrefHelper.getLong(this, "updatePeriod", 1000);
-    Constant.lineSpace=SharedPrefHelper.getFloat(this, "lineSpace", 0.3f);
-}
 
     @Override
     protected void onDestroy() {
