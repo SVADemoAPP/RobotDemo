@@ -18,4 +18,5 @@
     <color name="purple_dark">#442b87</color>
     <color name="route_color">#fcff0000</color>
     <color name="route_color_active">#f800ff00</color>
+    <color name="userid_add">#00ffba</color>
 </resources>

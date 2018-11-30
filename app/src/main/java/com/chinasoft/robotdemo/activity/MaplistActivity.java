@@ -58,7 +58,8 @@ public class MaplistActivity extends BaseActivity {
     private List<String> mapList = new ArrayList();
     private MaplistAdapter maplistAdapter;
     private String currentMap,wifiRobotIp;
-    private int wifiRobotPort,mode;
+    private int wifiRobotPort;
+    private int mode=1;
     private List<PrruModel> mPrruModelList;
     private DeviceManager deviceManager;
     private TextView tv_modecollect, tv_modefind,tv_setting,tv_next;
@@ -111,6 +112,19 @@ public class MaplistActivity extends BaseActivity {
             try {
                 mapFile.createNewFile();
                 FileUtil.writeBytesToFile(this.getAssets().open("U9.png"), mapFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        File stcmDir = new File(Constant.sdPath + "/stcms/");
+        if (!stcmDir.exists()) {
+            stcmDir.mkdirs();
+        }
+        File stcmFile = new File(Constant.sdPath + "/stcms/U9.stcm");
+        if (!stcmFile.exists()) {
+            try {
+                stcmFile.createNewFile();
+                FileUtil.writeBytesToFile(this.getAssets().open("U9.stcm"), stcmFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -325,10 +339,10 @@ public class MaplistActivity extends BaseActivity {
                 openActivity(SettingActivity.class);
                 break;
             case R.id.tv_next:
-                if (mode == 0) {
-                    showToast("必须选择模式");
-                    return;
-                }
+//                if (mode == 0) {
+//                    showToast("必须选择模式");
+//                    return;
+//                }
                 if (deviceManager != null) {
                     deviceManager.stop(DiscoveryMode.MDNS);
                 }
@@ -338,10 +352,10 @@ public class MaplistActivity extends BaseActivity {
                 } else {
                     Bundle bundle = new Bundle();
                     bundle.putString("currentMap", currentMap);
-                    bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
                     if (mode == 1) {
                         openActivity(PrrucollectActivity.class, bundle);
                     } else if (mode == 2) {
+                        bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
                         openActivity(PrrufindActivity.class, bundle);
                     }
                 }

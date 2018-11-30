@@ -24,6 +24,6 @@ public interface OnRobotListener {
 
     void moveFinish(float x,float y,float direc,boolean isForce);
 
-    void showBattery(int percent);
+//    void showBattery(int percent);
 
 }

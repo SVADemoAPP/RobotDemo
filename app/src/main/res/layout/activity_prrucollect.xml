@@ -33,7 +33,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/tv_prrusetting"
+        android:id="@+id/tv_useridsetting"
         android:layout_width="32dp"
         android:layout_height="130dp"
         android:layout_alignParentBottom="true"
@@ -43,7 +43,7 @@
         android:background="@drawable/prru_setting"
         android:gravity="center"
         android:padding="5dp"
-        android:text="P\nR\nR\nU\n列表"
+        android:text="u\ns\ne\nr\nId"
         android:textColor="@color/white"
         android:textSize="13dp"
         android:textStyle="bold" />
@@ -62,12 +62,12 @@
                 android:layout_width="92dp"
                 android:layout_height="92dp"
                 android:layout_gravity="center"
-                android:visibility="gone"
                 kongqw:areaBackground="@mipmap/default_area_bg"
                 kongqw:rockerBackground="@mipmap/default_rocker_bg"
                 kongqw:rockerRadius="24dp" />
 
             <ImageView
+                android:visibility="gone"
                 android:id="@+id/iv_operation"
                 android:layout_width="92dp"
                 android:layout_height="92dp"
@@ -83,7 +83,7 @@
         android:layout_toLeftOf="@+id/ll_rd"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="24dp"
-        android:text="自动"
+        android:text="手动"
         android:textColor="@color/white"
         android:gravity="center"
         android:textStyle="bold"
@@ -118,27 +118,27 @@
         android:layout_marginTop="5dp"
         android:src="@mipmap/iv_collectoff" />
 
-    <LinearLayout
-        android:id="@+id/ll_battery"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
-        <ImageView
-            android:id="@+id/iv_battery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/battery_100"/>
-        <TextView
-            android:id="@+id/tv_battery"
-            android:layout_marginLeft="2dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="100%"
-            android:textColor="@color/white"/>
-    </LinearLayout>
+    <!--<LinearLayout-->
+        <!--android:id="@+id/ll_battery"-->
+        <!--android:layout_marginLeft="15dp"-->
+        <!--android:layout_marginTop="15dp"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:gravity="center"-->
+        <!--android:orientation="horizontal">-->
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_battery"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:src="@mipmap/battery_100"/>-->
+        <!--<TextView-->
+            <!--android:id="@+id/tv_battery"-->
+            <!--android:layout_marginLeft="2dp"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="100%"-->
+            <!--android:textColor="@color/white"/>-->
+    <!--</LinearLayout>-->
 
 </RelativeLayout>
 

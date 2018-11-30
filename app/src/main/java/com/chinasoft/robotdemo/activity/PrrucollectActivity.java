@@ -3,17 +3,16 @@ package com.chinasoft.robotdemo.activity;
 import android.content.Context;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
-import com.chinasoft.robotdemo.adapter.PrruModelListAdapter;
+import com.chinasoft.robotdemo.adapter.UserIdAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
@@ -23,7 +22,8 @@ import com.chinasoft.robotdemo.robot.OnRobotListener;
 import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
-import com.chinasoft.robotdemo.util.SuperPopupWindow;
+import com.chinasoft.robotdemo.view.MyListView;
+import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.google.gson.Gson;
 import com.kongqw.rockerlibrary.view.RockerView;
@@ -36,6 +36,7 @@ import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.RequestShape;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -69,13 +70,16 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private boolean mSwitchAutoFlag = true; //默认为自动
 
     private ImageView iv_collect;
-    private TextView tv_forcestop,tv_prrusetting;
+    private TextView tv_forcestop,tv_useridsetting,popup_confirm,popup_cancel;
+    private MyListView lv_userid;
+    private UserIdAdapter userIdAdapter;
+    private List<String> userIdList=new ArrayList<>();
 
-    private boolean showBattery=true;
-    private LinearLayout ll_battery;
-    private ImageView iv_battery;
-    private TextView tv_battery;
-    private int nowPercentPic=-1;
+//    private boolean showBattery=true;
+//    private LinearLayout ll_battery;
+//    private ImageView iv_battery;
+//    private TextView tv_battery;
+//    private int nowPercentPic=-1;
 
 //    private int moveCode;   //
 //    private Handler mMoveHandler = new Handler() {
@@ -133,7 +137,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 //    Timer mMoveTimer;
 
 
-    private List<PrruModel> mPrruModelList;
+//    private List<PrruModel> mPrruModelList;
     private TextView tv_home_back;
     private TextView mSwitch;
     private RockerView mRockerView;
@@ -176,31 +180,31 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         mSwitch = findViewById(R.id.tv_switch);
         iv_collect=findViewById(R.id.iv_collect);
         tv_forcestop=findViewById(R.id.tv_forcestop);
-        tv_prrusetting=findViewById(R.id.tv_prrusetting);
+        tv_useridsetting=findViewById(R.id.tv_useridsetting);
         iv_operation.setOnClickListener(this);
         tv_home_back.setOnClickListener(this);
         mSwitch.setOnClickListener(this);
         iv_collect.setOnClickListener(this);
         tv_forcestop.setOnClickListener(this);
-        tv_prrusetting.setOnClickListener(this);
-        ll_battery=findViewById(R.id.ll_battery);
-        iv_battery=findViewById(R.id.iv_battery);
-        tv_battery=findViewById(R.id.tv_battery);
+        tv_useridsetting.setOnClickListener(this);
+//        ll_battery=findViewById(R.id.ll_battery);
+//        iv_battery=findViewById(R.id.iv_battery);
+//        tv_battery=findViewById(R.id.tv_battery);
     }
 
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
-        ro.startOperation();
+//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+//        ro.startOperation();
         initRocker();
-        if(showBattery){
-            ro.setShowBattery(true);
-            ll_battery.setVisibility(View.VISIBLE);
-        }else{
-            ro.setShowBattery(false);
-            ll_battery.setVisibility(View.GONE);
-        }
+//        if(showBattery){
+//            ro.setShowBattery(true);
+//            ll_battery.setVisibility(View.VISIBLE);
+//        }else{
+//            ro.setShowBattery(false);
+//            ll_battery.setVisibility(View.GONE);
+//        }
     }
 
     private void initShape() {
@@ -213,28 +217,28 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     }
 
     private void initMap() {
-        mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
+//        mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
         map.setMapBitmap(Constant.mapBitmap);
         initShape();
-        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
-            @Override
-            public void onRotate(float rotate) {
-                mapRotate = -rotate;
-                cv.updateDirection(mapRotate + robotDirection);
-                robotShape.setView(cv);
-            }
-        });
-        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
-            @Override
-            public void onLongClick(PointF point) {
-                if (isStart && !isAutoFind) {
-                    rXY = mapToReal(point.x, point.y);
-                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
-                    desShape.setValues(point.x, point.y);
-                    map.addShape(desShape, false);
-                }
-            }
-        });
+//        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+//            @Override
+//            public void onRotate(float rotate) {
+//                mapRotate = -rotate;
+//                cv.updateDirection(mapRotate + robotDirection);
+//                robotShape.setView(cv);
+//            }
+//        });
+//        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
+//            @Override
+//            public void onLongClick(PointF point) {
+//                if (isStart && !isAutoFind) {
+//                    rXY = mapToReal(point.x, point.y);
+//                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
+//                    desShape.setValues(point.x, point.y);
+//                    map.addShape(desShape, false);
+//                }
+//            }
+//        });
         mapHeight = Constant.mapBitmap.getHeight();
     }
 
@@ -268,62 +272,66 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 finish();
                 break;
             case R.id.tv_switch: //切换操作模式
-                ro.forceStop();
-                if (mSwitchAutoFlag == true)//切换为手动
-                {
-                    mSwitchAutoFlag = false;
-                    iv_operation.setVisibility(View.GONE);
-                    mRockerView.setVisibility(View.VISIBLE);
-                    mSwitch.setText("手动");
-                } else {                 //切换为自动
-                    mSwitchAutoFlag = true;
-                    iv_operation.setVisibility(View.VISIBLE);
-                    mRockerView.setVisibility(View.GONE);
-                    mSwitch.setText("自动");
-                }
+//                ro.forceStop();
+//                if (mSwitchAutoFlag == true)//切换为手动
+//                {
+//                    mSwitchAutoFlag = false;
+//                    iv_operation.setVisibility(View.GONE);
+//                    mRockerView.setVisibility(View.VISIBLE);
+//                    mSwitch.setText("手动");
+//                } else {                 //切换为自动
+//                    mSwitchAutoFlag = true;
+//                    iv_operation.setVisibility(View.VISIBLE);
+//                    mRockerView.setVisibility(View.GONE);
+//                    mSwitch.setText("自动");
+//                }
                 break;
             case R.id.iv_operation:
-                if (isAutoFind) {
-                    ro.forceStop();
-                    isAutoFind = false;
-                    iv_operation.setImageResource(R.mipmap.home_start);
-                    return;
-                }else{
-                    if(nowCollectPrru==null){
-                        showToast("请先选择Prru");
-                        return;
-                    }
-                    desF=realToMap(nowCollectPrru.x,nowCollectPrru.y);
-                    desShape.setValues(desF[0], desF[1]);
-                    map.addShape(desShape, false);
-                    isAutoFind = true;
-                    iv_operation.setImageResource(R.mipmap.home_stop);
-                    nowCollectNeCode = nowCollectPrru.neCode;
-                    maxRsrp = Float.NEGATIVE_INFINITY;
-                    xWhenMax = Float.NEGATIVE_INFINITY;
-                    yWhenMax = Float.NEGATIVE_INFINITY;
-                    if (nowCollectPrru.x  == nowX && nowCollectPrru.y == nowY) {
-                        cStep = 1;
-                        LLog.getLog().e("扫描", "1");
-                        ro.moveTo(nowCollectPrru.x  + 0.5f, nowCollectPrru.y );
-                    } else {
-                        cStep = 0;
-                        ro.moveTo(nowCollectPrru.x, nowCollectPrru.y );
-                    }
-                }
+//                if (isAutoFind) {
+//                    ro.forceStop();
+//                    isAutoFind = false;
+//                    iv_operation.setImageResource(R.mipmap.home_start);
+//                    return;
+//                }else{
+//                    if(nowCollectPrru==null){
+//                        showToast("请先选择Prru");
+//                        return;
+//                    }
+//                    desF=realToMap(nowCollectPrru.x,nowCollectPrru.y);
+//                    desShape.setValues(desF[0], desF[1]);
+//                    map.addShape(desShape, false);
+//                    isAutoFind = true;
+//                    iv_operation.setImageResource(R.mipmap.home_stop);
+//                    nowCollectNeCode = nowCollectPrru.neCode;
+//                    maxRsrp = Float.NEGATIVE_INFINITY;
+//                    xWhenMax = Float.NEGATIVE_INFINITY;
+//                    yWhenMax = Float.NEGATIVE_INFINITY;
+//                    if (nowCollectPrru.x  == nowX && nowCollectPrru.y == nowY) {
+//                        cStep = 1;
+//                        LLog.getLog().e("扫描", "1");
+//                        ro.moveTo(nowCollectPrru.x  + 0.5f, nowCollectPrru.y );
+//                    } else {
+//                        cStep = 0;
+//                        ro.moveTo(nowCollectPrru.x, nowCollectPrru.y );
+//                    }
+//                }
                 break;
-            case R.id.tv_prrusetting:
-                if (mPrruModelList != null && mPrruModelList.size() != 0) {
-                    initBeginPop(mPrruModelList);     //加载弹窗视图
-                } else {
-                    showToast("没有Prru列表");
+            case R.id.tv_useridsetting:
+                if(isPrruCollect){
+                    showToast("请先关闭采集");
+                    return;
                 }
+                initUserIdPop();
                 break;
             case  R.id.iv_collect:
                 if(isPrruCollect){
                     isPrruCollect=false;
                     iv_collect.setImageResource(R.mipmap.iv_collectoff);
                 }else{
+                    if(TextUtils.isEmpty(Constant.userId)){
+                        showToast("至少配置一个userId");
+                        return;
+                    }
                     isPrruCollect=true;
                     iv_collect.setImageResource(R.mipmap.iv_collecton);
 //                    Vector vector = new Vector();
@@ -356,6 +364,12 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             case  R.id.tv_forcestop:
                 ro.forceStop();
                 break;
+            case R.id.popup_confirm:
+                hideUserIdPop();
+                break;
+            case R.id.popup_cancel:
+                hideUserIdPop();
+                break;
             default:
                 break;
         }
@@ -375,49 +389,73 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     /***
      * 初始化开始popupwindow
      */
-    private void initBeginPop(List<PrruModel> prruModelList) {
-        mSuperPopupWindow = new SuperPopupWindow(mContext, R.layout.layout_popup_list_choose);
+    private void initUserIdPop() {
+        userIdList.clear();
+        if(Constant.userId!=null){
+            for(String str:Constant.userId.split(";")){
+                userIdList.add(str);
+            }
+        }
+        userIdList.add("123");
+        userIdList.add("222");
+        userIdList.add("123");
+        userIdList.add("222");
+        userIdList.add("123");
+        userIdList.add("222");
+        if(mSuperPopupWindow==null) {
+            mSuperPopupWindow = new SuperPopupWindow(mContext, R.layout.popup_userid);
 //        mSuperPopupWindow.setFocusable(true);
-        mSuperPopupWindow.setOutsideTouchable(true);
-        mSuperPopupWindow.setAnimotion(R.style.PopAnimation);
-        popupView = mSuperPopupWindow.getPopupView();
+            mSuperPopupWindow.setOutsideTouchable(true);
+            mSuperPopupWindow.setAnimotion(R.style.PopAnimation);
+            popupView = mSuperPopupWindow.getPopupView();
+            popup_confirm = popupView.findViewById(R.id.popup_confirm);
+            popup_cancel = popupView.findViewById(R.id.popup_cancel);
+            lv_userid=popupView.findViewById(R.id.lv_userid);
 
-        LinearLayout tv_Cancel = popupView.findViewById(R.id.tv_ll_pop_cancel);
-        ListView poplist = popupView.findViewById(R.id.pop_list);//获取list对象
-        PrruModelListAdapter prruModelListAdapter = new PrruModelListAdapter(mContext, prruModelList);
-        poplist.setAdapter(prruModelListAdapter);
-        prruModelListAdapter.notifyDataSetChanged();
-        prruModelListAdapter.setPrruModelListClickListener(new PrruModelListAdapter.OnPrruModelListClickListener() {
-            @Override
-            public void onClick(PrruModel prruModel) {
-                if (prruModel.x != 0 && prruModel.y != 0) {  //如果 xy 为空 则不让其点击
-                    hideBeginPop();
-                    nowCollectPrru = prruModel;
-                } else {
-                    showToast("坐标数据错误！");
-                }
-            }
-        });
-        tv_Cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideBeginPop();
-            }
-        });
-        showBeginPop();//默认开始一次
+            userIdAdapter=new UserIdAdapter(this,userIdList);
+            lv_userid.setAdapter(userIdAdapter);
+            popup_confirm.setOnClickListener(this);
+            popup_cancel.setOnClickListener(this);
+        }else{
+
+        }
+        showUserIdPop();
+//        LinearLayout tv_Cancel = popupView.findViewById(R.id.tv_ll_pop_cancel);
+//        ListView poplist = popupView.findViewById(R.id.pop_list);//获取list对象
+//        PrruModelListAdapter prruModelListAdapter = new PrruModelListAdapter(mContext, prruModelList);
+//        poplist.setAdapter(prruModelListAdapter);
+//        prruModelListAdapter.notifyDataSetChanged();
+//        prruModelListAdapter.setPrruModelListClickListener(new PrruModelListAdapter.OnPrruModelListClickListener() {
+//            @Override
+//            public void onClick(PrruModel prruModel) {
+//                if (prruModel.x != 0 && prruModel.y != 0) {  //如果 xy 为空 则不让其点击
+//                    hideBeginPop();
+//                    nowCollectPrru = prruModel;
+//                } else {
+//                    showToast("坐标数据错误！");
+//                }
+//            }
+//        });
+//        tv_Cancel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                hideBeginPop();
+//            }
+//        });
+
     }
 
     /**
      * 显示Popupwindow
      */
-    private void showBeginPop() {
+    private void showUserIdPop() {
         mSuperPopupWindow.showPopupWindow();
     }
 
     /**
      * 隐藏Popupwindow
      */
-    private void hideBeginPop() {
+    private void hideUserIdPop() {
         mSuperPopupWindow.hidePopupWindow();
     }
 
@@ -707,7 +745,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
         final float logX = x ;
         final float logY = y ;
-        final String[] userIds = Constant.userId.split(",");
+        final String[] userIds = Constant.userId.split(";");
         for(int i = 0; i < userIds.length; i++){
             final String ip = userIds[i];
             Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ip + "&mapId=1", new Response.Listener<String>() {
@@ -763,34 +801,34 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
     }
 
-    @Override
-    public void showBattery(int percent) {
-        tv_battery.setText(percent+"%");
-        if(percent>90){
-            if(nowPercentPic!=100) {
-                nowPercentPic = 100;
-                iv_battery.setImageResource(R.mipmap.battery_100);
-            }
-        }else if(percent>60){
-            if(nowPercentPic!=75) {
-                nowPercentPic = 75;
-                iv_battery.setImageResource(R.mipmap.battery_75);
-            }
-        }else if(percent>35){
-            if(nowPercentPic!=50) {
-                nowPercentPic = 50;
-                iv_battery.setImageResource(R.mipmap.battery_50);
-            }
-        }else if(percent>10){
-            if(nowPercentPic!=25) {
-                nowPercentPic = 25;
-                iv_battery.setImageResource(R.mipmap.battery_25);
-            }
-        }else {
-            if(nowPercentPic!=0) {
-                nowPercentPic = 0;
-                iv_battery.setImageResource(R.mipmap.battery_0);
-            }
-        }
-    }
+//    @Override
+//    public void showBattery(int percent) {
+//        tv_battery.setText(percent+"%");
+//        if(percent>90){
+//            if(nowPercentPic!=100) {
+//                nowPercentPic = 100;
+//                iv_battery.setImageResource(R.mipmap.battery_100);
+//            }
+//        }else if(percent>60){
+//            if(nowPercentPic!=75) {
+//                nowPercentPic = 75;
+//                iv_battery.setImageResource(R.mipmap.battery_75);
+//            }
+//        }else if(percent>35){
+//            if(nowPercentPic!=50) {
+//                nowPercentPic = 50;
+//                iv_battery.setImageResource(R.mipmap.battery_50);
+//            }
+//        }else if(percent>10){
+//            if(nowPercentPic!=25) {
+//                nowPercentPic = 25;
+//                iv_battery.setImageResource(R.mipmap.battery_25);
+//            }
+//        }else {
+//            if(nowPercentPic!=0) {
+//                nowPercentPic = 0;
+//                iv_battery.setImageResource(R.mipmap.battery_0);
+//            }
+//        }
+//    }
 }

@@ -110,7 +110,7 @@ public class SettingActivity extends BaseActivity {
     private void defaultData() {
         mEdtRbIp.setText(SharedPrefHelper.getString(SettingActivity.this, "robotIp", ""));
         mEdtRbPort.setText(String.valueOf(SharedPrefHelper.getInt(SettingActivity.this, "robotPort", 0)));
-        mEdtServerIp.setText(SharedPrefHelper.getString(SettingActivity.this, "userId", ""));
+        mEdtServerIp.setText(SharedPrefHelper.getString(SettingActivity.this, "userId", "190.168.2.25,190.168.2.4,190.168.2.22,190.168.2.28,190.168.2.13,190.168.2.16,190.168.2.17,190.168.2.18,190.168.2.27,190.168.2.1"));
         mEdtServerPort.setText(String.valueOf(SharedPrefHelper.getInt(SettingActivity.this, "serPort", 0)));
         mEdtSettingPointX.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstX", 0f)));
         mEdtSettingPointY.setText(String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstY", 0f)));

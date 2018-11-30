@@ -36,7 +36,7 @@ public class RobotOperation {
     private Handler handler;
     private final String RUNNING="RUNNING";
     private final String FINISHED="FINISHED";
-    private boolean isMoving,isShowBattery;
+    private boolean isMoving;
     private String currentMap;
     private Context context;
 
@@ -47,9 +47,9 @@ public class RobotOperation {
                 nowPose = platform.getPose();
                 nowX = nowPose.getX();
                 nowY = nowPose.getY();
-                if(isShowBattery){
-                    onRobotListener.showBattery(platform.getBatteryPercentage());
-                }
+//                if(isShowBattery){
+//                    onRobotListener.showBattery(platform.getBatteryPercentage());
+//                }
                 onRobotListener.notifyPrru(nowX, nowY);
                 if(isMoving) {
                     robotDirection = yawToDirec(nowPose.getYaw());
@@ -116,9 +116,9 @@ public class RobotOperation {
                     pose.setY(Constant.firstY);
                     pose.setZ(nowPose.getZ());
                     pose.setYaw(0);
-//                    if(!initCompositeMap(pose)){
+                    if(!initCompositeMap(pose)){
                         platform.setPose(pose);
-//                    }
+                    }
                     robotDirection=0;
                     onRobotListener.connectSuccess(Constant.firstX, Constant.firstY, robotDirection,false);
             }
@@ -186,9 +186,9 @@ public class RobotOperation {
     }
 
 
-    public void setShowBattery(boolean flag) {
-        isShowBattery = flag;
-    }
+//    public void setShowBattery(boolean flag) {
+//        isShowBattery = flag;
+//    }
 
 
     //取消当前action

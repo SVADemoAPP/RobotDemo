@@ -1,11 +1,8 @@
 package com.chinasoft.robotdemo.util;
 
-import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.Switch;
 
-import com.chinasoft.robotdemo.activity.HomeActivity;
 import com.slamtec.slamware.AbstractSlamwarePlatform;
 import com.slamtec.slamware.action.MoveDirection;
 import com.slamtec.slamware.exceptions.ConnectionFailException;
@@ -95,68 +92,68 @@ public class RobotMoveUtils {
 
     }
 
-    /**
-     * @param
-     * @param direction
-     */
-    public static void setRobotMove(AbstractSlamwarePlatform platform, final int direction, final HomeActivity context) {
-        mPlatform = platform;
-        if (temp == direction) {
-            return;
-        }
-        temp = direction;
-        if (mPlatform != null) {
-            try {
-                handler.removeCallbacks(task);
-                mPlatform.getCurrentAction().cancel();
-                switch (direction) {
-                    case ROBOT_GO_FORWORD:
-                        mPlatform.rotateTo(new Rotation(0f)).waitUntilDone();
-                        break;
-                    case ROBOT_GO_BACK:
-                        mPlatform.rotateTo(new Rotation((float) -Math.PI)).waitUntilDone();
-                        break;
-                    case ROBOT_GO_LEFT:
-                        mPlatform.rotateTo(new Rotation((float) (Math.PI / 2))).waitUntilDone();
-                        break;
-                    case ROBOT_GO_RIGHT:
-                        mPlatform.rotateTo(new Rotation((float) (-Math.PI / 2))).waitUntilDone();
-                        break;
-                    case ROBOT_GO_FORWORD_LEFT:
-                        mPlatform.rotateTo(new Rotation((float) (Math.PI / 4))).waitUntilDone();
-                        break;
-                    case ROBOT_GO_FORWORD_RIGHT:
-                        mPlatform.rotateTo(new Rotation((float) (-Math.PI / 4))).waitUntilDone();
-                        break;
-                    case ROBOT_GO_BACK_LEFT:
-                        mPlatform.rotateTo(new Rotation((float) (3 * Math.PI / 4))).waitUntilDone();
-                        break;
-                    case ROBOT_GO_BACK_RIGHT:
-                        mPlatform.rotateTo(new Rotation((float) (-3 * Math.PI / 4))).waitUntilDone();
-                        break;
-                }
-
-            } catch (RequestFailException e) {
-                e.printStackTrace();
-            } catch (ConnectionFailException e) {
-                e.printStackTrace();
-            } catch (ConnectionTimeOutException e) {
-                e.printStackTrace();
-            } catch (UnauthorizedRequestException e) {
-                e.printStackTrace();
-            } catch (UnsupportedCommandException e) {
-                e.printStackTrace();
-            } catch (ParseInvalidException e) {
-                e.printStackTrace();
-            } catch (InvalidArgumentException e) {
-                e.printStackTrace();
-            } catch (OperationFailException e) {
-                e.printStackTrace();
-            }
-            goStraight(direction);
-        }
-
-    }
+//    /**
+//     * @param
+//     * @param direction
+//     */
+//    public static void setRobotMove(AbstractSlamwarePlatform platform, final int direction, final HomeActivity context) {
+//        mPlatform = platform;
+//        if (temp == direction) {
+//            return;
+//        }
+//        temp = direction;
+//        if (mPlatform != null) {
+//            try {
+//                handler.removeCallbacks(task);
+//                mPlatform.getCurrentAction().cancel();
+//                switch (direction) {
+//                    case ROBOT_GO_FORWORD:
+//                        mPlatform.rotateTo(new Rotation(0f)).waitUntilDone();
+//                        break;
+//                    case ROBOT_GO_BACK:
+//                        mPlatform.rotateTo(new Rotation((float) -Math.PI)).waitUntilDone();
+//                        break;
+//                    case ROBOT_GO_LEFT:
+//                        mPlatform.rotateTo(new Rotation((float) (Math.PI / 2))).waitUntilDone();
+//                        break;
+//                    case ROBOT_GO_RIGHT:
+//                        mPlatform.rotateTo(new Rotation((float) (-Math.PI / 2))).waitUntilDone();
+//                        break;
+//                    case ROBOT_GO_FORWORD_LEFT:
+//                        mPlatform.rotateTo(new Rotation((float) (Math.PI / 4))).waitUntilDone();
+//                        break;
+//                    case ROBOT_GO_FORWORD_RIGHT:
+//                        mPlatform.rotateTo(new Rotation((float) (-Math.PI / 4))).waitUntilDone();
+//                        break;
+//                    case ROBOT_GO_BACK_LEFT:
+//                        mPlatform.rotateTo(new Rotation((float) (3 * Math.PI / 4))).waitUntilDone();
+//                        break;
+//                    case ROBOT_GO_BACK_RIGHT:
+//                        mPlatform.rotateTo(new Rotation((float) (-3 * Math.PI / 4))).waitUntilDone();
+//                        break;
+//                }
+//
+//            } catch (RequestFailException e) {
+//                e.printStackTrace();
+//            } catch (ConnectionFailException e) {
+//                e.printStackTrace();
+//            } catch (ConnectionTimeOutException e) {
+//                e.printStackTrace();
+//            } catch (UnauthorizedRequestException e) {
+//                e.printStackTrace();
+//            } catch (UnsupportedCommandException e) {
+//                e.printStackTrace();
+//            } catch (ParseInvalidException e) {
+//                e.printStackTrace();
+//            } catch (InvalidArgumentException e) {
+//                e.printStackTrace();
+//            } catch (OperationFailException e) {
+//                e.printStackTrace();
+//            }
+//            goStraight(direction);
+//        }
+//
+//    }
 
     /***
      * 走直线

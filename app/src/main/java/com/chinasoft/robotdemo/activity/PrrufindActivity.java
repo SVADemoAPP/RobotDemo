@@ -3,12 +3,12 @@ package com.chinasoft.robotdemo.activity;
 import android.content.Context;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -23,20 +23,18 @@ import com.chinasoft.robotdemo.robot.OnRobotListener;
 import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
-import com.chinasoft.robotdemo.util.RobotMoveUtils;
-import com.chinasoft.robotdemo.util.SuperPopupWindow;
+import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.google.gson.Gson;
 import com.kongqw.rockerlibrary.view.RockerView;
 import com.slamtec.slamware.robot.Location;
+
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
 import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.RequestShape;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 import java.util.Vector;
@@ -73,11 +71,11 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     private ImageView iv_collect;
     private TextView tv_forcestop,tv_prrusetting;
 
-    private boolean showBattery=true;
-    private LinearLayout ll_battery;
-    private ImageView iv_battery;
-    private TextView tv_battery;
-    private int nowPercentPic=-1;
+//    private boolean showBattery=true;
+//    private LinearLayout ll_battery;
+//    private ImageView iv_battery;
+//    private TextView tv_battery;
+//    private int nowPercentPic=-1;
 
 //    private int moveCode;   //
 //    private Handler mMoveHandler = new Handler() {
@@ -185,9 +183,9 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         iv_collect.setOnClickListener(this);
         tv_forcestop.setOnClickListener(this);
         tv_prrusetting.setOnClickListener(this);
-        ll_battery=findViewById(R.id.ll_battery);
-        iv_battery=findViewById(R.id.iv_battery);
-        tv_battery=findViewById(R.id.tv_battery);
+//        ll_battery=findViewById(R.id.ll_battery);
+//        iv_battery=findViewById(R.id.iv_battery);
+//        tv_battery=findViewById(R.id.tv_battery);
     }
 
     @Override
@@ -196,13 +194,13 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
         ro.startOperation();
         initRocker();
-        if(showBattery){
-            ro.setShowBattery(true);
-            ll_battery.setVisibility(View.VISIBLE);
-        }else{
-            ro.setShowBattery(false);
-            ll_battery.setVisibility(View.GONE);
-        }
+//        if(showBattery){
+//            ro.setShowBattery(true);
+//            ll_battery.setVisibility(View.VISIBLE);
+//        }else{
+//            ro.setShowBattery(false);
+//            ll_battery.setVisibility(View.GONE);
+//        }
     }
 
     private void initShape() {
@@ -226,7 +224,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 robotShape.setView(cv);
             }
         });
-
         map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
             @Override
             public void onLongClick(PointF point) {
@@ -712,13 +709,14 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         final float logY = y ;
         final String[] userIds = Constant.userId.split(",");
         for(int i = 0; i < userIds.length; i++){
-            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + userIds[i] + "&mapId=1", new Response.Listener<String>() {
+            final String ip = userIds[i];
+            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ip + "&mapId=1", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
                     LLog.getLog().e("getLocAndPrruInfo成功", s);
                     LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                     if (lap.code == 0 && lap.data.prruData != null) {
-                        LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData),userIds[0]);
+                        LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData), ip);
                         if (isAutoFind) {
                             Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
                             recordMaxRsrp(rsrp, logX, logY);
@@ -732,6 +730,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 }
             });
         }
+
     }
 
     @Override
@@ -764,34 +763,34 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         }
     }
 
-    @Override
-    public void showBattery(int percent) {
-        tv_battery.setText(percent+"%");
-        if(percent>90){
-            if(nowPercentPic!=100) {
-                nowPercentPic = 100;
-                iv_battery.setImageResource(R.mipmap.battery_100);
-            }
-        }else if(percent>60){
-            if(nowPercentPic!=75) {
-                nowPercentPic = 75;
-                iv_battery.setImageResource(R.mipmap.battery_75);
-            }
-        }else if(percent>35){
-            if(nowPercentPic!=50) {
-                nowPercentPic = 50;
-                iv_battery.setImageResource(R.mipmap.battery_50);
-            }
-        }else if(percent>10){
-            if(nowPercentPic!=25) {
-                nowPercentPic = 25;
-                iv_battery.setImageResource(R.mipmap.battery_25);
-            }
-        }else {
-            if(nowPercentPic!=0) {
-                nowPercentPic = 0;
-                iv_battery.setImageResource(R.mipmap.battery_0);
-            }
-        }
-    }
+//    @Override
+//    public void showBattery(int percent) {
+//        tv_battery.setText(percent+"%");
+//        if(percent>90){
+//            if(nowPercentPic!=100) {
+//                nowPercentPic = 100;
+//                iv_battery.setImageResource(R.mipmap.battery_100);
+//            }
+//        }else if(percent>60){
+//            if(nowPercentPic!=75) {
+//                nowPercentPic = 75;
+//                iv_battery.setImageResource(R.mipmap.battery_75);
+//            }
+//        }else if(percent>35){
+//            if(nowPercentPic!=50) {
+//                nowPercentPic = 50;
+//                iv_battery.setImageResource(R.mipmap.battery_50);
+//            }
+//        }else if(percent>10){
+//            if(nowPercentPic!=25) {
+//                nowPercentPic = 25;
+//                iv_battery.setImageResource(R.mipmap.battery_25);
+//            }
+//        }else {
+//            if(nowPercentPic!=0) {
+//                nowPercentPic = 0;
+//                iv_battery.setImageResource(R.mipmap.battery_0);
+//            }
+//        }
+//    }
 }

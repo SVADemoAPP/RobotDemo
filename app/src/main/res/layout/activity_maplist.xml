@@ -67,7 +67,7 @@
             android:text="pRRU采集"
             android:textStyle="bold"
             android:gravity="center"
-            android:background="@mipmap/tv_mode_unselect"
+            android:background="@mipmap/tv_mode_select"
             android:textSize="20dp"/>
         <TextView
             android:layout_marginLeft="10dp"

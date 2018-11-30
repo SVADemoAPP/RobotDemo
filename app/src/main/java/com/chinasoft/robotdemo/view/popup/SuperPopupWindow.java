@@ -1,4 +1,4 @@
-package com.chinasoft.robotdemo.util;
+package com.chinasoft.robotdemo.view.popup;
 
 import android.content.Context;
 import android.view.Gravity;
@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.PopupWindow;
 
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
+import com.chinasoft.robotdemo.util.WindowChangeUtils;
 
 
 /***
