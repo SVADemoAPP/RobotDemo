@@ -116,19 +116,19 @@ public class MaplistActivity extends BaseActivity {
                 e.printStackTrace();
             }
         }
-        File stcmDir = new File(Constant.sdPath + "/stcms/");
-        if (!stcmDir.exists()) {
-            stcmDir.mkdirs();
-        }
-        File stcmFile = new File(Constant.sdPath + "/stcms/U9.stcm");
-        if (!stcmFile.exists()) {
-            try {
-                stcmFile.createNewFile();
-                FileUtil.writeBytesToFile(this.getAssets().open("U9.stcm"), stcmFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+//        File stcmDir = new File(Constant.sdPath + "/stcms/");
+//        if (!stcmDir.exists()) {
+//            stcmDir.mkdirs();
+//        }
+//        File stcmFile = new File(Constant.sdPath + "/stcms/U9.stcm");
+//        if (!stcmFile.exists()) {
+//            try {
+//                stcmFile.createNewFile();
+//                FileUtil.writeBytesToFile(this.getAssets().open("U9.stcm"), stcmFile);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         String[] fileUrls = dir.list();
         for (String str : fileUrls) {
