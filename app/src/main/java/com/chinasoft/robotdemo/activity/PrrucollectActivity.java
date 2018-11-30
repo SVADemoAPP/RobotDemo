@@ -5,12 +5,16 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.bumptech.glide.Glide;
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.UserIdAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
@@ -74,7 +78,12 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private MyListView lv_userid;
     private UserIdAdapter userIdAdapter;
     private List<String> userIdList=new ArrayList<>();
+    private List<String> ipList=new ArrayList<>();
 
+    private LinearLayout ll_addshow,ll_add;
+    private RelativeLayout rl_add,rl_yes,rl_no;
+    private EditText et_userid;
+private String userIds;
 //    private boolean showBattery=true;
 //    private LinearLayout ll_battery;
 //    private ImageView iv_battery;
@@ -192,19 +201,22 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 //        tv_battery=findViewById(R.id.tv_battery);
     }
 
+
+
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
-//        ro.startOperation();
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        ro.setNotify(true);
+        ro.startOperation();
         initRocker();
-//        if(showBattery){
-//            ro.setShowBattery(true);
-//            ll_battery.setVisibility(View.VISIBLE);
-//        }else{
-//            ro.setShowBattery(false);
-//            ll_battery.setVisibility(View.GONE);
-//        }
+
+        userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
+        if(!TextUtils.isEmpty(userIds)){
+            for(String str:userIds.split(";")){
+                ipList.add(str);
+            }
+        }
     }
 
     private void initShape() {
@@ -217,28 +229,27 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     }
 
     private void initMap() {
-//        mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
         map.setMapBitmap(Constant.mapBitmap);
         initShape();
-//        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
-//            @Override
-//            public void onRotate(float rotate) {
-//                mapRotate = -rotate;
-//                cv.updateDirection(mapRotate + robotDirection);
-//                robotShape.setView(cv);
-//            }
-//        });
-//        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
-//            @Override
-//            public void onLongClick(PointF point) {
-//                if (isStart && !isAutoFind) {
-//                    rXY = mapToReal(point.x, point.y);
-//                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
-//                    desShape.setValues(point.x, point.y);
-//                    map.addShape(desShape, false);
-//                }
-//            }
-//        });
+        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+            @Override
+            public void onRotate(float rotate) {
+                mapRotate = -rotate;
+                cv.updateDirection(mapRotate + robotDirection);
+                robotShape.setView(cv);
+            }
+        });
+        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
+            @Override
+            public void onLongClick(PointF point) {
+                if (isStart && !isAutoFind) {
+                    rXY = mapToReal(point.x, point.y);
+                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
+                    desShape.setValues(point.x, point.y);
+                    map.addShape(desShape, false);
+                }
+            }
+        });
         mapHeight = Constant.mapBitmap.getHeight();
     }
 
@@ -328,12 +339,13 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                     isPrruCollect=false;
                     iv_collect.setImageResource(R.mipmap.iv_collectoff);
                 }else{
-                    if(TextUtils.isEmpty(Constant.userId)){
+                    if(ipList.size()==0){
                         showToast("至少配置一个userId");
                         return;
                     }
                     isPrruCollect=true;
-                    iv_collect.setImageResource(R.mipmap.iv_collecton);
+                    Glide.with(this).load(R.mipmap.iv_collecton_gif).into(iv_collect);
+//                    iv_collect.setImageResource(R.mipmap.iv_collecton_gif);
 //                    Vector vector = new Vector();
 //                    Location location;
 //                    float x = 10.5f;
@@ -365,14 +377,79 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 ro.forceStop();
                 break;
             case R.id.popup_confirm:
+                String newUserId=et_userid.getText().toString();
+                if(canUserIdAdd(newUserId)){
+                    userIdList.add(newUserId);
+                }
+                ipList.clear();
+                if(userIdList.size()>0) {
+                    StringBuffer sb=new StringBuffer();
+                    for (String str : userIdList) {
+                        ipList.add(str);
+                        sb.append(";"+str);
+                    }
+                    SharedPrefHelper.putString(this,"userId",sb.substring(1));
+                }else {
+                    SharedPrefHelper.putString(this,"userId","");
+                }
+                resetUserIdAdd();
                 hideUserIdPop();
                 break;
             case R.id.popup_cancel:
+                resetUserIdAdd();
                 hideUserIdPop();
                 break;
+            case R.id.rl_add:
+                rl_add.setVisibility(View.GONE);
+                ll_add.setVisibility(View.VISIBLE);
+                break;
+            case R.id.rl_yes:
+                String newUserId1=et_userid.getText().toString().trim();
+                if(canUserIdAdd(newUserId1)) {
+                    userIdList.add(newUserId1);
+                    refreshUserIdList(userIdList);
+                }else{
+                    showToast("空白或重复添加");
+                }
+                break;
+            case R.id.rl_no:
+                resetUserIdAdd();
+                break;
+
             default:
                 break;
         }
+    }
+
+    private boolean canUserIdAdd(String newUserId){
+        if(newUserId.equals("")){
+            return false;
+        }
+        for(String str:userIdList){
+            if(str.equals(newUserId)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+private void resetUserIdAdd(){
+        et_userid.setText("");
+    rl_add.setVisibility(View.VISIBLE);
+    ll_add.setVisibility(View.GONE);
+
+
+}
+
+    private void refreshUserIdList(List<String> userIdList){
+        resetUserIdAdd();
+        if(userIdList.size()<10){
+            ll_addshow.setVisibility(View.VISIBLE);
+        }else{
+            ll_addshow.setVisibility(View.GONE);
+        }
+        userIdAdapter.setUserIdList(userIdList);
+        userIdAdapter.notifyDataSetChanged();
     }
 
     private String prruDataToString(List<PrruSigalModel> prruSigalModelList) {
@@ -391,31 +468,38 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
      */
     private void initUserIdPop() {
         userIdList.clear();
-        if(Constant.userId!=null){
-            for(String str:Constant.userId.split(";")){
+            for(String str:ipList){
                 userIdList.add(str);
             }
-        }
-        userIdList.add("123");
-        userIdList.add("222");
-        userIdList.add("123");
-        userIdList.add("222");
-        userIdList.add("123");
-        userIdList.add("222");
         if(mSuperPopupWindow==null) {
             mSuperPopupWindow = new SuperPopupWindow(mContext, R.layout.popup_userid);
-//        mSuperPopupWindow.setFocusable(true);
+            mSuperPopupWindow.setFocusable(true);
             mSuperPopupWindow.setOutsideTouchable(true);
             mSuperPopupWindow.setAnimotion(R.style.PopAnimation);
             popupView = mSuperPopupWindow.getPopupView();
             popup_confirm = popupView.findViewById(R.id.popup_confirm);
             popup_cancel = popupView.findViewById(R.id.popup_cancel);
             lv_userid=popupView.findViewById(R.id.lv_userid);
-
             userIdAdapter=new UserIdAdapter(this,userIdList);
             lv_userid.setAdapter(userIdAdapter);
             popup_confirm.setOnClickListener(this);
             popup_cancel.setOnClickListener(this);
+            ll_addshow = popupView.findViewById(R.id.ll_addshow);
+            ll_add = popupView.findViewById(R.id.ll_add);
+            et_userid = popupView.findViewById(R.id.et_userid);
+            rl_add = popupView.findViewById(R.id.rl_add);
+            rl_no = popupView.findViewById(R.id.rl_no);
+            rl_yes = popupView.findViewById(R.id.rl_yes);
+            rl_yes.setOnClickListener(this);
+            rl_no.setOnClickListener(this);
+            rl_add.setOnClickListener(this);
+            userIdAdapter.setOnUserIdListener(new UserIdAdapter.OnUserIdListener() {
+                @Override
+                public void delete(int position) {
+                    userIdList.remove(position);
+                    refreshUserIdList(userIdList);
+                }
+            });
         }else{
 
         }
@@ -745,9 +829,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
         final float logX = x ;
         final float logY = y ;
-        final String[] userIds = Constant.userId.split(";");
-        for(int i = 0; i < userIds.length; i++){
-            final String ip = userIds[i];
+        for(final String ip: ipList){
             Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ip + "&mapId=1", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
@@ -801,34 +883,4 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
     }
 
-//    @Override
-//    public void showBattery(int percent) {
-//        tv_battery.setText(percent+"%");
-//        if(percent>90){
-//            if(nowPercentPic!=100) {
-//                nowPercentPic = 100;
-//                iv_battery.setImageResource(R.mipmap.battery_100);
-//            }
-//        }else if(percent>60){
-//            if(nowPercentPic!=75) {
-//                nowPercentPic = 75;
-//                iv_battery.setImageResource(R.mipmap.battery_75);
-//            }
-//        }else if(percent>35){
-//            if(nowPercentPic!=50) {
-//                nowPercentPic = 50;
-//                iv_battery.setImageResource(R.mipmap.battery_50);
-//            }
-//        }else if(percent>10){
-//            if(nowPercentPic!=25) {
-//                nowPercentPic = 25;
-//                iv_battery.setImageResource(R.mipmap.battery_25);
-//            }
-//        }else {
-//            if(nowPercentPic!=0) {
-//                nowPercentPic = 0;
-//                iv_battery.setImageResource(R.mipmap.battery_0);
-//            }
-//        }
-//    }
 }

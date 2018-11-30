@@ -1,9 +1,13 @@
 package com.chinasoft.robotdemo.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.chinasoft.robotdemo.R;
@@ -12,13 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserIdAdapter extends BaseAdapter {
-    private ViewHolder1 holder1;
-    private ViewHolder2 holder2;
+    private ViewHolder holder;
     private Context mContext;
     private List<String> userIdList = new ArrayList();
+private  OnUserIdListener onUserIdListener;
 
-
-
+    public void setOnUserIdListener(OnUserIdListener onUserIdListener) {
+        this.onUserIdListener = onUserIdListener;
+    }
 
     public UserIdAdapter(Context mContext, List<String> userIdList) {
         this.mContext = mContext;
@@ -27,11 +32,12 @@ public class UserIdAdapter extends BaseAdapter {
 
 
     public int getCount() {
-        if(userIdList.size()<10) {
-            return userIdList.size()+1;
-        }else{
             return userIdList.size();
-        }
+    }
+
+
+    public void setUserIdList(List<String> userIdList) {
+        this.userIdList = userIdList;
     }
 
     public Object getItem(int position) {
@@ -42,39 +48,35 @@ public class UserIdAdapter extends BaseAdapter {
         return (long) arg0;
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
 
-            if(position<userIdList.size()) {
-                holder1 = new ViewHolder1();
-                convertView = View.inflate(this.mContext, R.layout.item_userid_show, null);
-                convertView.setTag(holder1);
-            }else{
-                holder2 = new ViewHolder2();
-                convertView = View.inflate(this.mContext, R.layout.item_userid_add, null);
-                convertView.setTag(holder2);
-            }
-
+                holder = new ViewHolder();
+                convertView = View.inflate(mContext, R.layout.item_userid_show, null);
+                holder.tv_userid=convertView.findViewById(R.id.tv_userid);
+                holder.rl_delete=convertView.findViewById(R.id.rl_delete);
+                convertView.setTag(holder);
         } else {
-            if(convertView.getTag() instanceof ViewHolder1){
-                holder1 = (ViewHolder1) convertView.getTag();
-            }else{
-                holder2 = (ViewHolder2) convertView.getTag();
-            }
-
+                holder = (ViewHolder) convertView.getTag();
         }
-
+        holder.tv_userid.setText(userIdList.get(position));
+holder.rl_delete.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        onUserIdListener.delete(position);
+    }
+});
         return convertView;
     }
 
-    private class ViewHolder1 {
-        public TextView tv_name;
+    private class ViewHolder{
+        public TextView tv_userid;
+        public RelativeLayout rl_delete;
 
     }
 
-    private class ViewHolder2 {
-        public TextView tv_name;
-
+    public  interface  OnUserIdListener{
+        void delete(int position);
     }
 
 }

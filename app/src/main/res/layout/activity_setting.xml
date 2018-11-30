@@ -51,7 +51,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="UserId"
+                    android:text="服务器地址"
                     android:textColor="@color/white"
                     android:textSize="15dp"
                     android:typeface="serif" />
@@ -98,9 +98,9 @@
                     android:id="@+id/et_server_ip"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="9.8"
+                    android:layout_weight="5"
                     android:background="@drawable/tv_selector"
-                    android:digits="0123456789.,"
+                    android:digits="0123456789."
                     android:gravity="center"
                     android:hint="0.0.0.0"
                     android:inputType="number"
@@ -109,21 +109,23 @@
                     android:textColorHint="@color/gray_stroken"
                     android:textSize="17dp" />
 
-                <ImageView
-
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:text=":"
+                    android:textSize="13dp"
+                    android:textColor="@color/blue_colon"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.1" />
+                    android:layout_width="wrap_content" />
 
                 <EditText
-                    android:visibility="invisible"
                     android:id="@+id/et_server_port"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.1"
-                    android:background="@drawable/tv_selector"
+                    android:layout_weight="2"
+                    android:background="@drawable/tv_port"
                     android:gravity="center"
-                    android:hint=""
+                    android:hint="0"
                     android:inputType="number"
                     android:singleLine="true"
                     android:textColor="@color/white"
@@ -202,7 +204,7 @@
                 android:layout_height="36dp"
                 android:background="@drawable/tv_selector"
                 android:gravity="center"
-                android:hint=""
+                android:hint="0"
                 android:inputType="number"
                 android:singleLine="true"
                 android:textColor="@color/white"

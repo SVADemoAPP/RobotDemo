@@ -33,14 +33,107 @@
             android:fadeScrollbars="false"
             android:scrollbarThumbVertical="@mipmap/scrollview_barpic"
             android:layout_weight="3">
-                <com.chinasoft.robotdemo.view.MyListView
-                    android:id="@+id/lv_userid"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
 
-                </com.chinasoft.robotdemo.view.MyListView>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <com.chinasoft.robotdemo.view.MyListView
 
-            
+        android:id="@+id/lv_userid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </com.chinasoft.robotdemo.view.MyListView>
+    <LinearLayout
+        android:id="@+id/ll_addshow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="190dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:id="@+id/rl_add"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="添加一个userId"
+                    android:gravity="center_vertical"
+                    android:textSize="14dp"
+                    android:textColor="@color/userid_add"
+                    android:drawableLeft="@mipmap/userid_add"
+                    android:drawablePadding="2dp"/>
+            </RelativeLayout>
+            <LinearLayout
+                android:id="@+id/ll_add"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal">
+                <EditText
+                    android:id="@+id/et_userid"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:gravity="center_vertical"
+                    android:hint="输入userId"
+                    android:paddingLeft="30dp"
+                    android:textSize="14dp"
+                    android:digits="0123456789."
+                    android:inputType="number"
+                    android:background="@null"
+                    android:textColorHint="@color/gray_bg"
+                    android:textColor="@color/white" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:id="@+id/rl_yes"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:layout_height="match_parent">
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@mipmap/userid_yes"/>
+                    </RelativeLayout>
+                    <RelativeLayout
+                        android:id="@+id/rl_no"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:layout_height="match_parent">
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@mipmap/userid_no"/>
+
+                    </RelativeLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>
+
+
+
         </ScrollView>
 
         <LinearLayout

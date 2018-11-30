@@ -36,9 +36,15 @@ public class RobotOperation {
     private Handler handler;
     private final String RUNNING="RUNNING";
     private final String FINISHED="FINISHED";
-    private boolean isMoving;
+    private boolean isMoving;  //机器人action状态是否在移动
+    private boolean isNotify; //是否通知进行采集
     private String currentMap;
     private Context context;
+
+
+    public void setNotify(boolean notify) {
+        isNotify = notify;
+    }
 
     private Runnable runnable=new Runnable() {
         @Override
@@ -50,7 +56,9 @@ public class RobotOperation {
 //                if(isShowBattery){
 //                    onRobotListener.showBattery(platform.getBatteryPercentage());
 //                }
-                onRobotListener.notifyPrru(nowX, nowY);
+                if(isNotify) {
+                    onRobotListener.notifyPrru(nowX, nowY);
+                }
                 if(isMoving) {
                     robotDirection = yawToDirec(nowPose.getYaw());
                     switch (platform.getCurrentAction().getStatus().toString()) {

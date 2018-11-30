@@ -336,7 +336,7 @@ public class MaplistActivity extends BaseActivity {
     public void onClickEvent(View view) {
         switch (view.getId()) {
             case R.id.tv_setting:
-                openActivity(SettingActivity.class);
+                openActivityForResult(SettingActivity.class,1);
                 break;
             case R.id.tv_next:
 //                if (mode == 0) {
@@ -347,9 +347,6 @@ public class MaplistActivity extends BaseActivity {
                     deviceManager.stop(DiscoveryMode.MDNS);
                 }
                 initGlobalParams();
-                if (Constant.userId.equals("")) {
-                    showToast("请在设置中设置UserId");
-                } else {
                     Bundle bundle = new Bundle();
                     bundle.putString("currentMap", currentMap);
                     if (mode == 1) {
@@ -358,7 +355,6 @@ public class MaplistActivity extends BaseActivity {
                         bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
                         openActivity(PrrufindActivity.class, bundle);
                     }
-                }
                 break;
             case R.id.tv_modecollect:
                 mode = 1;
@@ -376,17 +372,19 @@ public class MaplistActivity extends BaseActivity {
     }
 
     private void initGlobalParams() {
-        if (TextUtils.isEmpty(wifiRobotIp)) {
-            Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
-            Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
-        } else {
-            Constant.robotIp = wifiRobotIp;
-            Constant.robotPort = wifiRobotPort;
-        }
+//        if (TextUtils.isEmpty(wifiRobotIp)) {
+//            Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
+//            Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
+//        } else {
+//            Constant.robotIp = wifiRobotIp;
+//            Constant.robotPort = wifiRobotPort;
+//        }
         Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.6f);
         Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.3f);
         Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
-        Constant.userId = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
+        Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
+        Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
+
         Constant.updatePeriod = SharedPrefHelper.getLong(this, "updatePeriod", 1000);
         Constant.lineSpace = SharedPrefHelper.getFloat(this, "lineSpace", 0.3f);
     }
@@ -402,8 +400,14 @@ public class MaplistActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == -1) {
-            showToast("机器人连接失败，请修改配置！");
+        if (requestCode == 1 && resultCode == 2) {
+            Constant.IP_ADDRESS = (SharedPrefHelper.getBoolean(this, "https", false)?"https://":"http://")
+                    +SharedPrefHelper.getString(this, "serverIp", "218.4.33.215")
+                    +":"+SharedPrefHelper.getInt(this, "serverPort", 8083);
+            Map<String, String> map = new HashMap();
+            map.put("username", "admin");
+            map.put("password", "admin");
+            login(map);
         }
     }
 }

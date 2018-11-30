@@ -3,18 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
+
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="190dp"
         android:layout_height="30dp"
         android:gravity="center"
         android:orientation="horizontal">
-        <!--<RelativeLayout
+        <RelativeLayout
+            android:id="@+id/rl_add"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center">
             <TextView
-                android:id="@+id/tv_userid"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="添加一个userId"
@@ -22,8 +23,10 @@
                 android:textColor="@color/userid_add"
                 android:drawableLeft="@mipmap/userid_add"
                 android:drawablePadding="2dp"/>
-        </RelativeLayout>-->
+        </RelativeLayout>
         <LinearLayout
+            android:id="@+id/ll_add"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
@@ -35,6 +38,7 @@
                 android:layout_weight="3"
                 android:gravity="center_vertical"
                 android:hint="输入userId"
+                android:paddingLeft="20dp"
                 android:textSize="10dp"
                 android:background="@null"
                 android:textColorHint="@color/gray_bg"
@@ -47,6 +51,7 @@
                 android:orientation="horizontal">
 
                 <RelativeLayout
+                    android:id="@+id/rl_yes"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
@@ -57,6 +62,7 @@
                         android:src="@mipmap/userid_yes"/>
                 </RelativeLayout>
                 <RelativeLayout
+                    android:id="@+id/rl_no"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
@@ -69,16 +75,7 @@
                 </RelativeLayout>
             </LinearLayout>
 
-
-
         </LinearLayout>
-        <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent">-->
-            <!---->
-        <!--</LinearLayout>-->
-
-
 
     </LinearLayout>
 

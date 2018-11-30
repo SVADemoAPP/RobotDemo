@@ -192,15 +192,9 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
         ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        ro.setNotify(false);
         ro.startOperation();
         initRocker();
-//        if(showBattery){
-//            ro.setShowBattery(true);
-//            ll_battery.setVisibility(View.VISIBLE);
-//        }else{
-//            ro.setShowBattery(false);
-//            ll_battery.setVisibility(View.GONE);
-//        }
     }
 
     private void initShape() {
@@ -702,34 +696,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void notifyPrru(float x, float y) {
-        if(!isPrruCollect){
-            return;
-        }
-        final float logX = x ;
-        final float logY = y ;
-        final String[] userIds = Constant.userId.split(",");
-        for(int i = 0; i < userIds.length; i++){
-            final String ip = userIds[i];
-            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ip + "&mapId=1", new Response.Listener<String>() {
-                @Override
-                public void onResponse(String s) {
-                    LLog.getLog().e("getLocAndPrruInfo成功", s);
-                    LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
-                    if (lap.code == 0 && lap.data.prruData != null) {
-                        LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData), ip);
-                        if (isAutoFind) {
-                            Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
-                            recordMaxRsrp(rsrp, logX, logY);
-                        }
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
-                }
-            });
-        }
 
     }
 
@@ -763,34 +729,4 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         }
     }
 
-//    @Override
-//    public void showBattery(int percent) {
-//        tv_battery.setText(percent+"%");
-//        if(percent>90){
-//            if(nowPercentPic!=100) {
-//                nowPercentPic = 100;
-//                iv_battery.setImageResource(R.mipmap.battery_100);
-//            }
-//        }else if(percent>60){
-//            if(nowPercentPic!=75) {
-//                nowPercentPic = 75;
-//                iv_battery.setImageResource(R.mipmap.battery_75);
-//            }
-//        }else if(percent>35){
-//            if(nowPercentPic!=50) {
-//                nowPercentPic = 50;
-//                iv_battery.setImageResource(R.mipmap.battery_50);
-//            }
-//        }else if(percent>10){
-//            if(nowPercentPic!=25) {
-//                nowPercentPic = 25;
-//                iv_battery.setImageResource(R.mipmap.battery_25);
-//            }
-//        }else {
-//            if(nowPercentPic!=0) {
-//                nowPercentPic = 0;
-//                iv_battery.setImageResource(R.mipmap.battery_0);
-//            }
-//        }
-//    }
 }
