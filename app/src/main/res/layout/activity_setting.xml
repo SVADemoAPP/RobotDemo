@@ -98,9 +98,9 @@
                     android:id="@+id/et_server_ip"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="6"
+                    android:layout_weight="9.8"
                     android:background="@drawable/tv_selector"
-                    android:digits="0123456789."
+                    android:digits="0123456789.,"
                     android:gravity="center"
                     android:hint="0.0.0.0"
                     android:inputType="number"
@@ -113,14 +113,14 @@
 
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_weight="0.1" />
 
                 <EditText
                     android:visibility="invisible"
                     android:id="@+id/et_server_port"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="3"
+                    android:layout_weight="0.1"
                     android:background="@drawable/tv_selector"
                     android:gravity="center"
                     android:hint=""

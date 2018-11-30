@@ -42,9 +42,9 @@ public class LLog {
         write(this.PATH_LOGCAT + "/Logs", "Log" + MyDate.getFileName() + ".txt", title, strcontent);
     }
 
-    public void prru(String title, String strcontent) {
+    public void prru(String title, String strcontent, String userId) {
         Log.e(title, strcontent);
-        write(this.PATH_LOGCAT + "/Logs_Prru", "Prru" + MyDate.getFileName() + ".txt", title, strcontent);
+        write(this.PATH_LOGCAT + "/Logs_Prru", "Prru" + userId + "-" + MyDate.getFileName() + ".txt", title, strcontent);
     }
 
     public void crash(String title, String strcontent) {

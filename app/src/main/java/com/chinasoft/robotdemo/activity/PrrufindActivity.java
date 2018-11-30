@@ -710,25 +710,28 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         }
         final float logX = x ;
         final float logY = y ;
-        Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                LLog.getLog().e("getLocAndPrruInfo成功", s);
-                LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
-                if (lap.code == 0) {
-                    LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData));
-                    if (isAutoFind) {
-                        Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
-                        recordMaxRsrp(rsrp, logX, logY);
+        final String[] userIds = Constant.userId.split(",");
+        for(int i = 0; i < userIds.length; i++){
+            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + userIds[i] + "&mapId=1", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    LLog.getLog().e("getLocAndPrruInfo成功", s);
+                    LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
+                    if (lap.code == 0 && lap.data.prruData != null) {
+                        LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData),userIds[0]);
+                        if (isAutoFind) {
+                            Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
+                            recordMaxRsrp(rsrp, logX, logY);
+                        }
                     }
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
-            }
-        });
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
+                }
+            });
+        }
     }
 
     @Override

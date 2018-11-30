@@ -96,15 +96,6 @@ public class RobotOperation {
     private void connect(String robotIp, int robotPort) {
         try {
             platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
-//            Pose pose=new Pose();
-//            pose.setX(Constant.firstX);
-//            pose.setY(Constant.firstY);
-//
-//            CompositeMapHelper compositeMapHelper = new CompositeMapHelper();
-//            String path = Constant.sdPath + "/U9.stcm";
-//            CompositeMap compositeMap = compositeMapHelper.loadFile(path);
-            //platform.setCompositeMap(compositeMap,pose);
-            //platform.setPose(pose);
             nowPose = platform.getPose();// 当前机器人的位置,
             nowX = nowPose.getX();
             nowY = nowPose.getY();
@@ -118,7 +109,6 @@ public class RobotOperation {
 
             if ((nowX > 0.1f || nowY > 0.1f) && currentMap.equals(SharedPrefHelper.getString(context, "currentMap", ""))){
                 robotDirection = yawToDirec(nowPose.getYaw());
-//                initCompositeMap(nowPose);
                 onRobotListener.connectSuccess(nowX, nowY, robotDirection,true);
             }else{
                     Pose pose=new Pose();

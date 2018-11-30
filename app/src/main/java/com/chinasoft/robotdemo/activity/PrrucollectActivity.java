@@ -3,12 +3,12 @@ package com.chinasoft.robotdemo.activity;
 import android.content.Context;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -23,20 +23,18 @@ import com.chinasoft.robotdemo.robot.OnRobotListener;
 import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
-import com.chinasoft.robotdemo.util.RobotMoveUtils;
 import com.chinasoft.robotdemo.util.SuperPopupWindow;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.google.gson.Gson;
 import com.kongqw.rockerlibrary.view.RockerView;
 import com.slamtec.slamware.robot.Location;
+
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
 import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.RequestShape;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 import java.util.Vector;
@@ -226,7 +224,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 robotShape.setView(cv);
             }
         });
-
         map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
             @Override
             public void onLongClick(PointF point) {
@@ -710,25 +707,30 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
         final float logX = x ;
         final float logY = y ;
-        Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                LLog.getLog().e("getLocAndPrruInfo成功", s);
-                LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
-                if (lap.code == 0) {
-                    LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData));
-                    if (isAutoFind) {
-                        Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
-                        recordMaxRsrp(rsrp, logX, logY);
+        final String[] userIds = Constant.userId.split(",");
+        for(int i = 0; i < userIds.length; i++){
+            final String ip = userIds[i];
+            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ip + "&mapId=1", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    LLog.getLog().e("getLocAndPrruInfo成功", s);
+                    LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
+                    if (lap.code == 0 && lap.data.prruData != null) {
+                        LLog.getLog().prru(logX + "," + logY, prruDataToString(lap.data.prruData), ip);
+                        if (isAutoFind) {
+                            Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
+                            recordMaxRsrp(rsrp, logX, logY);
+                        }
                     }
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
-            }
-        });
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
+                }
+            });
+        }
+
     }
 
     @Override
