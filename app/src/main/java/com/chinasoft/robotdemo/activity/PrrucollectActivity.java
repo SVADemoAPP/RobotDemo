@@ -500,33 +500,8 @@ private void resetUserIdAdd(){
                     refreshUserIdList(userIdList);
                 }
             });
-        }else{
-
         }
         showUserIdPop();
-//        LinearLayout tv_Cancel = popupView.findViewById(R.id.tv_ll_pop_cancel);
-//        ListView poplist = popupView.findViewById(R.id.pop_list);//获取list对象
-//        PrruModelListAdapter prruModelListAdapter = new PrruModelListAdapter(mContext, prruModelList);
-//        poplist.setAdapter(prruModelListAdapter);
-//        prruModelListAdapter.notifyDataSetChanged();
-//        prruModelListAdapter.setPrruModelListClickListener(new PrruModelListAdapter.OnPrruModelListClickListener() {
-//            @Override
-//            public void onClick(PrruModel prruModel) {
-//                if (prruModel.x != 0 && prruModel.y != 0) {  //如果 xy 为空 则不让其点击
-//                    hideBeginPop();
-//                    nowCollectPrru = prruModel;
-//                } else {
-//                    showToast("坐标数据错误！");
-//                }
-//            }
-//        });
-//        tv_Cancel.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                hideBeginPop();
-//            }
-//        });
-
     }
 
     /**

@@ -14,6 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.PrruModelListAdapter;
+import com.chinasoft.robotdemo.adapter.UserIdAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
@@ -23,6 +24,7 @@ import com.chinasoft.robotdemo.robot.OnRobotListener;
 import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
+import com.chinasoft.robotdemo.view.MyListView;
 import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.google.gson.Gson;
@@ -70,6 +72,10 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 
     private ImageView iv_collect;
     private TextView tv_forcestop,tv_prrusetting;
+
+    private MyListView lv_prrulist;
+    private TextView popup_prrulist_title;
+    private PrruModelListAdapter prruModelListAdapter;
 
 //    private boolean showBattery=true;
 //    private LinearLayout ll_battery;
@@ -166,6 +172,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void dealLogicBeforeInitView() {
+        mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
     }
 
     @Override
@@ -207,7 +214,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
     private void initMap() {
-        mPrruModelList = (List<PrruModel>) getIntent().getExtras().getSerializable("PrruModelList");
         map.setMapBitmap(Constant.mapBitmap);
         initShape();
         map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
@@ -308,7 +314,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 break;
             case R.id.tv_prrusetting:
                 if (mPrruModelList != null && mPrruModelList.size() != 0) {
-                    initBeginPop(mPrruModelList);     //加载弹窗视图
+                    initPrruListPop(mPrruModelList);     //加载弹窗视图
                 } else {
                     showToast("没有Prru列表");
                 }
@@ -369,49 +375,40 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     /***
      * 初始化开始popupwindow
      */
-    private void initBeginPop(List<PrruModel> prruModelList) {
-        mSuperPopupWindow = new SuperPopupWindow(mContext, R.layout.layout_popup_list_choose);
-//        mSuperPopupWindow.setFocusable(true);
-        mSuperPopupWindow.setOutsideTouchable(true);
-        mSuperPopupWindow.setAnimotion(R.style.PopAnimation);
-        popupView = mSuperPopupWindow.getPopupView();
-
-        LinearLayout tv_Cancel = popupView.findViewById(R.id.tv_ll_pop_cancel);
-        ListView poplist = popupView.findViewById(R.id.pop_list);//获取list对象
-        PrruModelListAdapter prruModelListAdapter = new PrruModelListAdapter(mContext, prruModelList);
-        poplist.setAdapter(prruModelListAdapter);
-        prruModelListAdapter.notifyDataSetChanged();
-        prruModelListAdapter.setPrruModelListClickListener(new PrruModelListAdapter.OnPrruModelListClickListener() {
-            @Override
-            public void onClick(PrruModel prruModel) {
-                if (prruModel.x != 0 && prruModel.y != 0) {  //如果 xy 为空 则不让其点击
-                    hideBeginPop();
-                    nowCollectPrru = prruModel;
-                } else {
-                    showToast("坐标数据错误！");
+    private void initPrruListPop(List<PrruModel> prruModelList) {
+        if(mSuperPopupWindow==null) {
+            mSuperPopupWindow = new SuperPopupWindow(mContext, R.layout.popup_prrulist);
+            mSuperPopupWindow.setFocusable(true);
+            mSuperPopupWindow.setOutsideTouchable(true);
+            mSuperPopupWindow.setAnimotion(R.style.PopAnimation);
+            popupView = mSuperPopupWindow.getPopupView();
+            lv_prrulist=popupView.findViewById(R.id.lv_prrulist);
+            popup_prrulist_title=popupView.findViewById(R.id.popup_prrulist_title);
+            prruModelListAdapter=new PrruModelListAdapter(this,prruModelList);
+            lv_prrulist.setAdapter(prruModelListAdapter);
+            prruModelListAdapter.setPrruModelListClickListener(new PrruModelListAdapter.OnPrruModelListClickListener() {
+                @Override
+                public void onClick(PrruModel prruModel) {
+                    nowCollectPrru=prruModel;
+                    popup_prrulist_title.setText(prruModel.neCode);
+                    hidePrruListPop();
                 }
-            }
-        });
-        tv_Cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideBeginPop();
-            }
-        });
-        showBeginPop();//默认开始一次
+            });
+        }
+        showPrruListPop();//默认开始一次
     }
 
     /**
      * 显示Popupwindow
      */
-    private void showBeginPop() {
+    private void showPrruListPop() {
         mSuperPopupWindow.showPopupWindow();
     }
 
     /**
      * 隐藏Popupwindow
      */
-    private void hideBeginPop() {
+    private void hidePrruListPop() {
         mSuperPopupWindow.hidePopupWindow();
     }
 
