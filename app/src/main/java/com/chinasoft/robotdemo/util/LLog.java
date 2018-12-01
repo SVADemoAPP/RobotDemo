@@ -44,7 +44,7 @@ public class LLog {
 
     public void prru(String title, String strcontent, String userId) {
         Log.e(title, strcontent);
-        write(this.PATH_LOGCAT + "/Logs_Prru", "Prru" + userId + "-" + MyDate.getFileName() + ".txt", title, strcontent);
+        write(this.PATH_LOGCAT + "/Logs_Prru/" + MyDate.getFileName(), "Prru" + userId + ".txt", title, strcontent);
     }
 
     public void crash(String title, String strcontent) {
