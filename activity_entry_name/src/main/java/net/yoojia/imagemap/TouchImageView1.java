@@ -54,6 +54,8 @@ public class TouchImageView1 extends ImageView implements
 	protected MapHandleImp mMapHandle;
 	private BaZhanUtil mBaZhanUtil;
 
+	private boolean canChange=true;
+
 	public TouchImageView1(Context context) {
 		this(context, null);
 	}
@@ -336,9 +338,10 @@ public class TouchImageView1 extends ImageView implements
 						lastOffsetX = mMovePoint.x - mDownPoint.x;
 						lastOffsetY = mMovePoint.y - mDownPoint.y;
 
-						postMatrixTranslate(lastOffsetX, lastOffsetY);
-
-						mDownPoint.set(mMovePoint);
+						if(canChange) {
+							postMatrixTranslate(lastOffsetX, lastOffsetY);
+							mDownPoint.set(mMovePoint);
+						}
 					}
 				}
 				break;
@@ -358,6 +361,10 @@ public class TouchImageView1 extends ImageView implements
 			return true;
 		}
 	};
+
+	public void setCanChange(boolean canChange) {
+		this.canChange = canChange;
+	}
 
 	/**
 	 * View被点击
@@ -461,8 +468,10 @@ public class TouchImageView1 extends ImageView implements
 			ScaleGestureDetector.SimpleOnScaleGestureListener {
 		@Override
 		public boolean onScale(ScaleGestureDetector detector) {
-			float scaleFactor = detector.getScaleFactor();
-			postMatrixScale(scaleFactor, mid);
+			if(canChange) {
+				float scaleFactor = detector.getScaleFactor();
+				postMatrixScale(scaleFactor, mid);
+			}
 			return true;
 		}
 	}
@@ -496,7 +505,9 @@ public class TouchImageView1 extends ImageView implements
 			// if (mOnRotateListener != null) {
 			// mOnRotateListener.onRotate(saveRotate);
 			// }
-			postMatrixRotate(-toRotate, new PointF(mid.x, mid.y));
+			if(canChange) {
+				postMatrixRotate(-toRotate, new PointF(mid.x, mid.y));
+			}
 			return true;
 		}
 

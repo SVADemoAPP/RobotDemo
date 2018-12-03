@@ -41,6 +41,7 @@ import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.RequestShape;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -84,6 +85,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private RelativeLayout rl_add,rl_yes,rl_no;
     private EditText et_userid;
 private String userIds;
+
+private List<PointF> testLocList=new LinkedList<>();
+private boolean isTestLine=false;
 //    private boolean showBattery=true;
 //    private LinearLayout ll_battery;
 //    private ImageView iv_battery;
@@ -245,6 +249,7 @@ private String userIds;
                 if (isStart && !isAutoFind) {
                     rXY = mapToReal(point.x, point.y);
                     ro.cancelAndMoveTo(rXY[0], rXY[1]);
+                    map.setCanChange(false);
                     desShape.setValues(point.x, point.y);
                     map.addShape(desShape, false);
                 }
@@ -280,7 +285,10 @@ private String userIds;
     public void onClickEvent(View view) {
         switch (view.getId()) {
             case R.id.tv_home_back:
-                finish();
+                testLocList.add(new PointF(5,62));
+                testLocList.add(new PointF(6,62));
+                testLocList.add(new PointF(7,62));
+                startTestLine(testLocList);
                 break;
             case R.id.tv_switch: //切换操作模式
 //                ro.forceStop();
@@ -737,6 +745,7 @@ private void resetUserIdAdd(){
 
     //到达目的点
     private void arriveDes(){
+        map.setCanChange(true);
         newF = realToMap(nowX, nowY);
         path.lineTo(newF[0], newF[1]);
         lineShape.setPath(path);
@@ -851,10 +860,36 @@ private void resetUserIdAdd(){
         nowY=y;
         robotDirection=direc;
         clearOrbits();
-        if(isAutoFind&&!isForce) {
-            autoFind();
+        if(!isForce) {
+            if(isTestLine){
+                continueTestLine();
+            }
+            if(isAutoFind) {
+                autoFind();
+            }
         }else{
             arriveDes();
+        }
+    }
+
+    private void startTestLine(List<PointF> locList){
+        if(locList!=null&&locList.size()>0){
+            testLocList=locList;
+            isTestLine=true;
+            showToast("路径测试开始");
+            ro.moveTo(testLocList.get(0).x,testLocList.get(0).y);
+        }else{
+            showToast("路径为空");
+        }
+    }
+
+    private void continueTestLine(){
+        testLocList.remove(0);
+        if(testLocList.size()>0){
+            ro.moveTo(testLocList.get(0).x,testLocList.get(0).y);
+        }else{
+            isTestLine=false;
+            showToast("路径测试完成");
         }
     }
 

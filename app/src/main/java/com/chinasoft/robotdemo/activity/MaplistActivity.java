@@ -107,11 +107,11 @@ public class MaplistActivity extends BaseActivity {
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        File mapFile = new File(Constant.sdPath + "/maps/U9.png");
+        File mapFile = new File(Constant.sdPath + "/maps/U5_2F.png");
         if (!mapFile.exists()) {
             try {
                 mapFile.createNewFile();
-                FileUtil.writeBytesToFile(this.getAssets().open("U9.png"), mapFile);
+                FileUtil.writeBytesToFile(this.getAssets().open("U5_2F.png"), mapFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
