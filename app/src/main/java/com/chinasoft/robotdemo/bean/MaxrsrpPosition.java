@@ -1,12 +1,9 @@
-package com.chinasoft.robotdemo.model;
+package com.chinasoft.robotdemo.bean;
 
-/**
- * Created by chinasoft_gyr on 2018/11/8.
- */
-
-public class CoorInMap {
+public class MaxrsrpPosition {
     private float x;
     private float y;
+    private float rsrp;
 
     public float getX() {
         return x;
@@ -22,5 +19,13 @@ public class CoorInMap {
 
     public void setY(float y) {
         this.y = y;
+    }
+
+    public float getRsrp() {
+        return rsrp;
+    }
+
+    public void setRsrp(float rsrp) {
+        this.rsrp = rsrp;
     }
 }

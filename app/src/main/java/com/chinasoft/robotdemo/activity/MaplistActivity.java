@@ -6,6 +6,7 @@ import android.content.res.TypedArray;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
@@ -385,14 +386,36 @@ public class MaplistActivity extends BaseActivity {
                     deviceManager.stop(DiscoveryMode.MDNS);
                 }
                 initGlobalParams();
-                Bundle bundle = new Bundle();
-                bundle.putString("currentMap", currentMap);
-                if (mode == 1) {
-                    openActivity(PrrucollectActivity.class, bundle);
-                } else if (mode == 2) {
-                    bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
-                    openActivity(PrrufindActivity.class, bundle);
+                if(TextUtils.isEmpty(mChooseMap)){
+                    showToast("必须选择地图");
+                    return;
                 }
+                Bundle bundle = new Bundle();
+                bundle.putString("currentMap", mChooseMap);
+                switch (mChooseMark){
+                    case -1:
+                        showToast("请选择模块");
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
+                        openActivity(PrrufindActivity.class, bundle);
+                        break;
+                    case 3:
+                        openActivity(PrrucollectActivity.class, bundle);
+                        break;
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
+//                if (mode == 1) {
+//                    openActivity(PrrucollectActivity.class, bundle);
+//                } else if (mode == 2) {
+//                    bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
+//                    openActivity(PrrufindActivity.class, bundle);
+//                }
                 break;
             case R.id.tv_modecollect:
                 mode = 1;
