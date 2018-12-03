@@ -27,6 +27,10 @@ public class PopMapListAdapter extends BaseAdapter {
 
     }
 
+    public void setNum(int n){
+        num=n;
+    }
+
     public PopMapListAdapter(Context mContext, List<String> mapList) {
         this.mContext = mContext;
         this.mapList = mapList;
@@ -73,7 +77,7 @@ public class PopMapListAdapter extends BaseAdapter {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onMaplistClickListener.click(mapList.get(position));
+                onMaplistClickListener.click(mapList.get(position),position);
                 num = position;
                 textView.setTextColor(mContext.getResources().getColor(R.color.blue_pop));
                 notifyDataSetChanged();
@@ -83,7 +87,7 @@ public class PopMapListAdapter extends BaseAdapter {
     }
 
     public interface OnMaplistClickListener {
-        void click(String map);
+        void click(String map,int num);
     }
 
     private void setDefault() {

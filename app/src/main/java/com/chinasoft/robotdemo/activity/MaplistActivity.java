@@ -72,7 +72,10 @@ public class MaplistActivity extends BaseActivity {
     private static final int[] ATTRS = new int[] {
             android.R.attr.fastScrollThumbDrawable,
     };
+    private  int cNum=-1;
+    private  int tNum=-1;
     private String  mChooseMap;
+    private PopMapListAdapter mPopMapListAdapter;
     //    private AbstractDiscover.DiscoveryListener discoveryListener = new AbstractDiscover.DiscoveryListener() {
 //        @Override
 //        public void onStartDiscovery(AbstractDiscover abstractDiscover) {
@@ -403,6 +406,8 @@ public class MaplistActivity extends BaseActivity {
                 break;
             case R.id.tv_find_map:
                 if (mMapChoosePop != null) {
+                    mPopMapListAdapter.setNum(cNum);
+                    mPopMapListAdapter.notifyDataSetChanged();
                     mMapChoosePop.showPopupWindow();
                 }
                 break;
@@ -465,6 +470,7 @@ public class MaplistActivity extends BaseActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                cNum=tNum;
                 mMapChoosePop.hidePopupWindow();
                 mTvMF.setText(mChooseMap);
                 Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + mChooseMap);
@@ -480,14 +486,15 @@ public class MaplistActivity extends BaseActivity {
     }
 
     private void initMapList(ListView listView) {
-        PopMapListAdapter popMapListAdapter = new PopMapListAdapter(MaplistActivity.this, mapList);
-        listView.setAdapter(popMapListAdapter);
-        popMapListAdapter.notifyDataSetChanged();
-        popMapListAdapter.setOnMaplistClickListener(new PopMapListAdapter.OnMaplistClickListener() {
+        mPopMapListAdapter = new PopMapListAdapter(MaplistActivity.this, mapList);
+        listView.setAdapter(mPopMapListAdapter);
+        mPopMapListAdapter.notifyDataSetChanged();
+        mPopMapListAdapter.setOnMaplistClickListener(new PopMapListAdapter.OnMaplistClickListener() {
 
             @Override
-            public void click(String map) {
+            public void click(String map,int n) {
                 mChooseMap=map;
+                tNum=n;
                 Log.e("XHF",mChooseMap);
             }
         });
