@@ -125,10 +125,11 @@ public class RobotOperation {
                     pose.setZ(nowPose.getZ());
                     pose.setYaw(0);
                     if(!initCompositeMap(pose)){
-                        platform.setPose(pose);
+                    }else{
                         //停止地图更新，使用载入地图
                         platform.setMapUpdate(false);
                     }
+                    platform.setPose(pose);
                     robotDirection=0;
                     onRobotListener.connectSuccess(Constant.firstX, Constant.firstY, robotDirection,false);
             }

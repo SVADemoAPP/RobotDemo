@@ -294,6 +294,10 @@ public class ImageMap1 extends FrameLayout implements ShapeExtension,
 		highlightImageView.setAllowRotate(allow);
 	}
 
+	public void setCanChange(boolean canChange){
+		highlightImageView.setCanChange(canChange);
+	}
+
 	public void releaseImageShow() {
 		highlightImageView.releaseImageShow();
 	}
