@@ -217,9 +217,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
-//        ro.setNotify(true);
-//        ro.startOperation();
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        ro.setNotify(true);
+        ro.startOperation();
         initRocker();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
@@ -244,26 +244,26 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private void initMap() {
         map.setMapBitmap(Constant.mapBitmap);
         initShape();
-//        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
-//            @Override
-//            public void onRotate(float rotate) {
-//                mapRotate = -rotate;
-//                cv.updateDirection(mapRotate + robotDirection);
-//                robotShape.setView(cv);
-//            }
-//        });
-//        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
-//            @Override
-//            public void onLongClick(PointF point) {
-//                if (isStart && !isAutoFind) {
-//                    rXY = mapToReal(point.x, point.y);
-//                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
-//                    map.setCanChange(false);
-//                    desShape.setValues(point.x, point.y);
-//                    map.addShape(desShape, false);
-//                }
-//            }
-//        });
+        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+            @Override
+            public void onRotate(float rotate) {
+                mapRotate = -rotate;
+                cv.updateDirection(mapRotate + robotDirection);
+                robotShape.setView(cv);
+            }
+        });
+        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
+            @Override
+            public void onLongClick(PointF point) {
+                if (isStart && !isAutoFind) {
+                    rXY = mapToReal(point.x, point.y);
+                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
+                    map.setCanChange(false);
+                    desShape.setValues(point.x, point.y);
+                    map.addShape(desShape, false);
+                }
+            }
+        });
         mapHeight = Constant.mapBitmap.getHeight();
     }
 
@@ -832,7 +832,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             return;
         }
         for (PrruSigalModel psm : prruSigalModelList) {
-            if (mpMap.get(psm.gpp) == null) {
+            if (!mpMap.keySet().contains(psm.gpp)) {
                 MaxrsrpPosition mp = new MaxrsrpPosition();
                 mp.setX(x);
                 mp.setY(y);
@@ -942,7 +942,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 //            drawPrruAfterTestLine();
             map.setCanChange(false);
             mpMap.clear();
-            //            ro.moveTo(testLocList.get(0).x,testLocList.get(0).y);
+            ro.moveTo(testLocList.get(0).x,testLocList.get(0).y);
         } else {
             showToast("路径为空");
         }
