@@ -3,12 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RobotDemo.iml" filepath="$PROJECT_DIR$/RobotDemo.iml" />
-      <module fileurl="file://F:\RobotDemoWorkSpace\RobotDemo\RobotDemo.iml" filepath="F:\RobotDemoWorkSpace\RobotDemo\RobotDemo.iml" />
       <module fileurl="file://D:\Robot_workspace\RobotDemo\.idea\RobotDemo.iml" filepath="D:\Robot_workspace\RobotDemo\.idea\RobotDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/activity_entry_name/activity_entry_name.iml" filepath="$PROJECT_DIR$/activity_entry_name/activity_entry_name.iml" />
-      <module fileurl="file://F:\RobotDemoWorkSpace\RobotDemo\activity_entry_name\activity_entry_name.iml" filepath="F:\RobotDemoWorkSpace\RobotDemo\activity_entry_name\activity_entry_name.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://F:\RobotDemoWorkSpace\RobotDemo\app\app.iml" filepath="F:\RobotDemoWorkSpace\RobotDemo\app\app.iml" />
     </modules>
   </component>
 </project>
