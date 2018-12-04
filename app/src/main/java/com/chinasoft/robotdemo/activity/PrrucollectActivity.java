@@ -224,7 +224,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        //xhf
         ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
         ro.setNotify(true);
         ro.startOperation();
@@ -872,7 +871,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             return;
         }
         for (PrruSigalModel psm : prruSigalModelList) {
-            if (mpMap.get(psm.gpp) == null) {
+            if (!mpMap.keySet().contains(psm.gpp)) {
                 MaxrsrpPosition mp = new MaxrsrpPosition();
                 mp.setX(x);
                 mp.setY(y);
