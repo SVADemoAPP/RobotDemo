@@ -1,6 +1,8 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -96,6 +98,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private LineShape testLineShape;
     private Path testLinePath;
     private Map<String, MaxrsrpPosition> mpMap = new HashMap<>();
+
+    private float rX;
+    private float rY;
 //    private boolean showBattery=true;
 //    private LinearLayout ll_battery;
 //    private ImageView iv_battery;
@@ -162,6 +167,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private TextView tv_home_back;
     private TextView mSwitch;
     private RockerView mRockerView;
+    private SuperPopupWindow mChooseCenterPointPop;
 
 
     //防止多个请求同时响应产生的线程不安全问题
@@ -208,6 +214,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         iv_collect.setOnClickListener(this);
         tv_forcestop.setOnClickListener(this);
         tv_useridsetting.setOnClickListener(this);
+
 //        ll_battery=findViewById(R.id.ll_battery);
 //        iv_battery=findViewById(R.id.iv_battery);
 //        tv_battery=findViewById(R.id.tv_battery);
@@ -217,9 +224,10 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
-//        ro.setNotify(true);
-//        ro.startOperation();
+        //xhf
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        ro.setNotify(true);
+        ro.startOperation();
         initRocker();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
@@ -228,8 +236,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 ipList.add(str);
             }
         }
-        map.setMapBitmap(Constant.mapBitmap);
-        mapHeight = Constant.mapBitmap.getHeight();
+//        map.setMapBitmap(Constant.mapBitmap);
+//        mapHeight = Constant.mapBitmap.getHeight();
+        initCenterPop();
     }
 
     private void initShape() {
@@ -244,26 +253,26 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private void initMap() {
         map.setMapBitmap(Constant.mapBitmap);
         initShape();
-//        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
-//            @Override
-//            public void onRotate(float rotate) {
-//                mapRotate = -rotate;
-//                cv.updateDirection(mapRotate + robotDirection);
-//                robotShape.setView(cv);
-//            }
-//        });
-//        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
-//            @Override
-//            public void onLongClick(PointF point) {
-//                if (isStart && !isAutoFind) {
-//                    rXY = mapToReal(point.x, point.y);
-//                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
-//                    map.setCanChange(false);
-//                    desShape.setValues(point.x, point.y);
-//                    map.addShape(desShape, false);
-//                }
-//            }
-//        });
+        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+            @Override
+            public void onRotate(float rotate) {
+                mapRotate = -rotate;
+                cv.updateDirection(mapRotate + robotDirection);
+                robotShape.setView(cv);
+            }
+        });
+        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
+            @Override
+            public void onLongClick(PointF point) {
+                if (isStart && !isAutoFind) {
+                    rXY = mapToReal(point.x, point.y);
+                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
+                    map.setCanChange(false);
+                    desShape.setValues(point.x, point.y);
+                    map.addShape(desShape, false);
+                }
+            }
+        });
         mapHeight = Constant.mapBitmap.getHeight();
     }
 
@@ -279,10 +288,13 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         lineShape = new LineShape("line", R.color.green, 2, "#00ffba");
     }
 
+    private float[] mapToReal(float mx, float my, int height) {
+        return new float[]{mx / Constant.mapScale, (height - my) / Constant.mapScale};
+    }
+
     private float[] mapToReal(float mx, float my) {
         return new float[]{mx / Constant.mapScale, (mapHeight - my) / Constant.mapScale};
     }
-
     private float[] realToMap(float rx, float ry) {
         return new float[]{rx * Constant.mapScale, mapHeight - ry * Constant.mapScale};
     }
@@ -292,10 +304,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     public void onClickEvent(View view) {
         switch (view.getId()) {
             case R.id.tv_home_back:
-//                testLocList.add(new PointF(5,62));
-//                testLocList.add(new PointF(6,62));
-//                testLocList.add(new PointF(7,62));
-//                startTestLine(testLocList);
+                testLocList.add(new PointF(1,0.3f));
+
+                startTestLine(testLocList);
                 finish();
                 break;
             case R.id.tv_switch: //切换操作模式
@@ -304,11 +315,11 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                     return;
                 }
                 List<PointF> pointList = new LinkedList<>();
-                pointList.add(new PointF(5, 92));
-                pointList.add(new PointF(6, 62));
-                pointList.add(new PointF(44, 103));
-                pointList.add(new PointF(66, 64));
-                startTestLine(pointList);
+                testLocList.add(new PointF(1,0.3f));
+                testLocList.add(new PointF(2,0.3f));
+                testLocList.add(new PointF(3,0.3f));
+                testLocList.add(new PointF(1,0.3f));
+                startTestLine(testLocList);
 //                ro.forceStop();
 //                if (mSwitchAutoFlag == true)//切换为手动
 //                {
@@ -756,6 +767,30 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!ro.getContinue()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mChooseCenterPointPop.showPopupWindow();
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
+    }
+
     //移除轨迹点
     private void clearOrbits() {
         for (int i = 0, len = coorCount; i < len; i++) {
@@ -811,6 +846,11 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         showToast("异常断开");
         LLog.getLog().e("异常断开", errormsg);
         //finish();
+    }
+
+    @Override
+    public void setCenterPoint() {
+
     }
 
     @Override
@@ -942,7 +982,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 //            drawPrruAfterTestLine();
             map.setCanChange(false);
             mpMap.clear();
-            //            ro.moveTo(testLocList.get(0).x,testLocList.get(0).y);
+            ro.moveTo(testLocList.get(0).x,testLocList.get(0).y);
         } else {
             showToast("路径为空");
         }
@@ -1008,5 +1048,51 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         testLineShape = new LineShape("testLine", R.color.green, 2, "#FF4081");
         testLineShape.setPath(testLinePath);
         map.addShape(testLineShape, false);
+    }
+
+    private void initCenterPop() {
+        mChooseCenterPointPop = new SuperPopupWindow(mContext, R.layout.pop_coordinate_layout);
+        mChooseCenterPointPop.setChangFocusable(true);
+        View popupView = mChooseCenterPointPop.getPopupView();
+        final TextView tvShowPoint = popupView.findViewById(R.id.coordinate_data);
+        ImageMap1 map = popupView.findViewById(R.id.coordinate_map);
+        TextView cancel = popupView.findViewById(R.id.pop_coordinate_cancel);
+        TextView confirm = popupView.findViewById(R.id.pop_coordinate_confirm);
+        Bitmap bitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
+        final int maphight = bitmap.getHeight();
+        map.setMapBitmap(bitmap);
+        PointF centerByImagePoint = map.getCenterByImagePoint();
+        float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
+        tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0]))+ " , " +Float.parseFloat(String.format("%.2f", float1[1])));
+        map.setOnCenerPointListener(new TouchImageView1.OnCenterPointListener() {
+            @Override
+            public void onCenter(PointF pointF) {
+                float[] floats = mapToReal(pointF.x, pointF.y, maphight);
+                rX = Float.parseFloat(String.format("%.2f", floats[0]));
+                rY = Float.parseFloat(String.format("%.2f", floats[1]));
+                tvShowPoint.setText(rX + " , " + rY);
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mChooseCenterPointPop.hidePopupWindow();
+                finish();
+            }
+        });
+        confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mChooseCenterPointPop.hidePopupWindow();
+                SharedPrefHelper.putFloat(mContext, "firstX", rX);
+                SharedPrefHelper.putFloat(mContext, "firstY", rY);
+                ro.doAfterConfirm(rX,rY);
+            }
+        });
+    }
+
+    public void showCenterPop() {
+        mChooseCenterPointPop.showPopupWindow();
     }
 }

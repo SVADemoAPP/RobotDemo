@@ -1,11 +1,20 @@
 package com.chinasoft.robotdemo.robot;
+
 import android.content.Context;
+import android.graphics.PointF;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.chinasoft.robotdemo.R;
+import com.chinasoft.robotdemo.activity.PrrucollectActivity;
+import com.chinasoft.robotdemo.activity.PrrufindActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
+import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.slamtec.slamware.AbstractSlamwarePlatform;
 import com.slamtec.slamware.discovery.DeviceManager;
 import com.slamtec.slamware.exceptions.ConnectionFailException;
@@ -18,6 +27,9 @@ import com.slamtec.slamware.robot.CompositeMap;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Pose;
 import com.slamtec.slamware.sdp.CompositeMapHelper;
+
+import net.yoojia.imagemap.ImageMap1;
+import net.yoojia.imagemap.TouchImageView1;
 
 import java.io.File;
 import java.util.Vector;
@@ -34,19 +46,20 @@ public class RobotOperation {
     private Pose nowPose;
     private float nowX, nowY, initZ, robotDirection;
     private Handler handler;
-    private final String RUNNING="RUNNING";
-    private final String FINISHED="FINISHED";
+    private final String RUNNING = "RUNNING";
+    private final String FINISHED = "FINISHED";
     private boolean isMoving;  //机器人action状态是否在移动
     private boolean isNotify; //是否通知进行采集
     private String currentMap;
     private Context context;
+    private SuperPopupWindow mChooseCenterPointPop;
 
-
+    private boolean mContinue=false;
     public void setNotify(boolean notify) {
         isNotify = notify;
     }
 
-    private Runnable runnable=new Runnable() {
+    private Runnable runnable = new Runnable() {
         @Override
         public void run() {
             try {
@@ -56,47 +69,47 @@ public class RobotOperation {
 //                if(isShowBattery){
 //                    onRobotListener.showBattery(platform.getBatteryPercentage());
 //                }
-                if(isNotify) {
+                if (isNotify) {
                     onRobotListener.notifyPrru(nowX, nowY);
                 }
-                if(isMoving) {
+                if (isMoving) {
                     robotDirection = yawToDirec(nowPose.getYaw());
                     switch (platform.getCurrentAction().getStatus().toString()) {
                         case RUNNING:
-                            onRobotListener.positionChange(nowX,nowY,robotDirection);
+                            onRobotListener.positionChange(nowX, nowY, robotDirection);
                             onRobotListener.refreshOrbits(platform.searchPath(forwardLocation).getPoints());
                             break;
                         case FINISHED:
-                            isMoving=false;
-                            onRobotListener.moveFinish(nowX,nowY,robotDirection,false);
+                            isMoving = false;
+                            onRobotListener.moveFinish(nowX, nowY, robotDirection, false);
                             break;
                         default:
                             break;
                     }
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 errorDisconnect(e.toString());
             }
             handler.postDelayed(runnable, Constant.updatePeriod);
         }
     };
 
-    public RobotOperation(String robotIp, int robotPort,String currentMap, OnRobotListener onRobotListener,Context context) {
-        this.context=context;
-        this.currentMap=currentMap;
+    public RobotOperation(String robotIp, int robotPort, String currentMap, OnRobotListener onRobotListener, Context context) {
+        this.context = context;
+        this.currentMap = currentMap;
         this.onRobotListener = onRobotListener;
-        handler=new Handler();
+        handler = new Handler();
         forwardLocation = new Location();
-        connect(robotIp,robotPort);
+        connect(robotIp, robotPort);
     }
 
     //开始
-    public void startOperation(){
+    public void startOperation() {
         handler.post(runnable);
     }
 
     //结束
-    public void endOperation(){
+    public void endOperation() {
         handler.removeCallbacks(runnable);
     }
 
@@ -114,24 +127,12 @@ public class RobotOperation {
             LLog.getLog().e("连接机器人成功", robotIp + ":" + robotPort);
 
 
-
-            if ((nowX > 0.1f || nowY > 0.1f) && currentMap.equals(SharedPrefHelper.getString(context, "currentMap", ""))){
+            if ((nowX > 0.1f || nowY > 0.1f) && currentMap.equals(SharedPrefHelper.getString(context, "currentMap", ""))) {
                 robotDirection = yawToDirec(nowPose.getYaw());
-                onRobotListener.connectSuccess(nowX, nowY, robotDirection,true);
-            }else{
-                    Pose pose=new Pose();
-                    pose.setX(Constant.firstX);
-                    pose.setY(Constant.firstY);
-                    pose.setZ(nowPose.getZ());
-                    pose.setYaw(0);
-                    if(!initCompositeMap(pose)){
-                    }else{
-                        //停止地图更新，使用载入地图
-                        platform.setMapUpdate(false);
-                    }
-                    platform.setPose(pose);
-                    robotDirection=0;
-                    onRobotListener.connectSuccess(Constant.firstX, Constant.firstY, robotDirection,false);
+                onRobotListener.connectSuccess(nowX, nowY, robotDirection, true);
+                mContinue=true;
+            }else {
+                mContinue=false;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -140,22 +141,22 @@ public class RobotOperation {
         }
     }
 
-    private boolean initCompositeMap(Pose pose){
+    private boolean initCompositeMap(Pose pose) {
         String path = Constant.sdPath + "/stcms/U9.stcm";
-        if(new File(path).exists()){
+        if (new File(path).exists()) {
             CompositeMapHelper compositeMapHelper = new CompositeMapHelper();
             CompositeMap compositeMap = compositeMapHelper.loadFile(path);
             try {
-                platform.setCompositeMap(compositeMap,pose);
-                LLog.getLog().robot("雷达地图","载入成功");
+                platform.setCompositeMap(compositeMap, pose);
+                LLog.getLog().robot("雷达地图", "载入成功");
                 return true;
             } catch (Exception e) {
-                LLog.getLog().robot("雷达地图","载入错误");
+                LLog.getLog().robot("雷达地图", "载入错误");
                 e.printStackTrace();
                 return false;
             }
-        }else{
-            LLog.getLog().robot("雷达地图","文件不存在");
+        } else {
+            LLog.getLog().robot("雷达地图", "文件不存在");
             return false;
         }
     }
@@ -167,7 +168,7 @@ public class RobotOperation {
 
     //移动
     public void moveTo(float toX, float toY) {
-        isMoving=true;
+        isMoving = true;
         forwardLocation.setX(toX);
         forwardLocation.setY(toY);
         try {
@@ -181,7 +182,7 @@ public class RobotOperation {
 
     //移动
     public void moveToVector(Vector vector) {
-        isMoving=true;
+        isMoving = true;
         try {
             platform.moveTo(vector);
         } catch (Exception e) {
@@ -193,7 +194,7 @@ public class RobotOperation {
     //取消动作并移动
     public void cancelAndMoveTo(float toX, float toY) {
         cancelAction();
-        moveTo(toX,toY);
+        moveTo(toX, toY);
     }
 
 
@@ -203,8 +204,8 @@ public class RobotOperation {
 
 
     //取消当前action
-    public void cancelAction(){
-        isMoving=false;
+    public void cancelAction() {
+        isMoving = false;
         try {
             platform.getCurrentAction().cancel();
         } catch (Exception e) {
@@ -212,28 +213,67 @@ public class RobotOperation {
         }
     }
 
-    public void forceStop(){
+    public void forceStop() {
         cancelAction();
         try {
             nowPose = platform.getPose();
             nowX = nowPose.getX();
             nowY = nowPose.getY();
             robotDirection = yawToDirec(nowPose.getYaw());
-            onRobotListener.moveFinish(nowX,nowY,robotDirection,true);
+            onRobotListener.moveFinish(nowX, nowY, robotDirection, true);
         } catch (Exception e) {
             errorDisconnect(e.toString());
         }
 
     }
 
-    public void disconnect(){
-        if(platform!=null){
+    public void disconnect() {
+        if (platform != null) {
             platform.disconnect();
         }
     }
 
-    private void errorDisconnect(String errormsg){
+    private void errorDisconnect(String errormsg) {
 //        disconnect();
         onRobotListener.catchError(errormsg);
+    }
+
+
+
+    /**
+     * 在第一次进入点击坐标确认后执行
+     */
+    public void doAfterConfirm(float x, float y) {
+        try {
+            Pose pose = new Pose();
+            pose.setX(x);
+            pose.setY(y);
+            pose.setZ(nowPose.getZ());
+            pose.setYaw(0);
+            if (!initCompositeMap(pose)) {
+            } else {
+                //停止地图更新，使用载入地图
+                platform.setMapUpdate(false);
+            }
+            platform.setPose(pose);
+            robotDirection = 0;
+            onRobotListener.connectSuccess(x,y, robotDirection, false);
+        } catch (RequestFailException e) {
+            e.printStackTrace();
+        } catch (ConnectionFailException e) {
+            e.printStackTrace();
+        } catch (ConnectionTimeOutException e) {
+            e.printStackTrace();
+        } catch (UnauthorizedRequestException e) {
+            e.printStackTrace();
+        } catch (UnsupportedCommandException e) {
+            e.printStackTrace();
+        } catch (ParseInvalidException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean getContinue(){
+        return mContinue;
     }
 }

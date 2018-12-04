@@ -16,6 +16,8 @@ public interface OnRobotListener {
 
     void catchError(String errormsg);
 
+    void setCenterPoint();
+
     void refreshOrbits(Vector<Location> locVector);
 
     void notifyPrru(float x,float y);

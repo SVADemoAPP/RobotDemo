@@ -1,6 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/pop_coordinate_cancel"
+        android:layout_width="75dp"
+        android:layout_height="22dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="15dp"
+        android:background="@drawable/maplist_next_press"
+        android:gravity="center"
+        android:text="返回"
+        android:textColor="@color/white"
+        android:textSize="11dp"
+        android:textStyle="bold" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="336dp"
+        android:layout_centerInParent="true">
+        <net.yoojia.imagemap.ImageMap1
+            android:id="@+id/coordinate_map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></net.yoojia.imagemap.ImageMap1>
+        <ImageView
+            android:id="@+id/coordinate_point"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:src="@mipmap/destination_point" />
+
+        <TextView
+            android:id="@+id/coordinate_data"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            android:layout_alignBottom="@+id/coordinate_point"
+            android:layout_toRightOf="@+id/coordinate_point"
+            android:background="@color/black_text"
+            android:gravity="center"
+            android:text="200.00,180.00"
+            android:textColor="@color/white"
+            android:textSize="13dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/pop_coordinate_confirm"
+        android:layout_width="102dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/tv_fuc_confirm_selector" />
+</RelativeLayout>

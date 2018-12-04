@@ -331,7 +331,7 @@ public class TouchImageView1 extends ImageView implements
 								mDownPoint)
 								/ timeTag
 								* FRICTION).floatValue();
-						Log.e(">>>>",(dragTime - lastDragTime)+"");
+						Log.e(">>>>",(dragTime - lastDragTime)+"s");
 						dragVelocity = Math.min(MAX_VELOCITY, dragVelocity);
 						lastDragTime = dragTime;
 
@@ -355,6 +355,13 @@ public class TouchImageView1 extends ImageView implements
 					curGestureMode = GestureMode.none;
 				}
 				mLastPointerCount = -1;
+				if (getCenterByImage()!=null)
+				{
+					if(mOnCenterPointListener!=null)
+					{
+						mOnCenterPointListener.onCenter(getCenterByImage());
+					}
+				}
 				break;
 			}
 			postImageMatrix();
@@ -481,6 +488,7 @@ public class TouchImageView1 extends ImageView implements
 	private OnRotateListener mOnRotateListener;
 	private OnLongClickListener1 mOnLongClickListener;
 
+	private OnCenterPointListener mOnCenterPointListener;
 	/**
 	 * 旋转事件
 	 * 
@@ -680,6 +688,9 @@ public class TouchImageView1 extends ImageView implements
 		this.mOnRotateListener = listener;
 	}
 
+	public  void setCenterPointListener(OnCenterPointListener centerPointListener){
+		this.mOnCenterPointListener=centerPointListener;
+	}
 	public void setOnLongClickListener(OnLongClickListener1 listener) {
 		this.mOnLongClickListener = listener;
 	}
@@ -694,5 +705,9 @@ public class TouchImageView1 extends ImageView implements
 
 	public interface OnRotateListener {
 		void onRotate(float rotate);
+	}
+
+	public interface OnCenterPointListener {
+		void onCenter(PointF pointF);
 	}
 }

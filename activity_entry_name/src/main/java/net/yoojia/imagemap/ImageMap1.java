@@ -273,6 +273,13 @@ public class ImageMap1 extends FrameLayout implements ShapeExtension,
 	}
 
 	/**
+	 * 设置取消旋转滑动后的值回调
+	 * @param listener
+	 */
+	public void setOnCenerPointListener(TouchImageView1.OnCenterPointListener listener) {
+		highlightImageView.setCenterPointListener(listener);
+	}
+	/**
 	 * 设置单击监听
 	 * 
 	 * @param listener

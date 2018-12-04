@@ -469,7 +469,8 @@ public class MaplistActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == 2) {
-            Constant.IP_ADDRESS = (SharedPrefHelper.getBoolean(this, "https", false) ? "https://" : "http://")
+//            (SharedPrefHelper.getBoolean(this, "https", false) ? "https://" : "http://")
+            Constant.IP_ADDRESS = "https://"
                     + SharedPrefHelper.getString(this, "serverIp", "218.4.33.215")
                     + ":" + SharedPrefHelper.getInt(this, "serverPort", 8083);
             Map<String, String> map = new HashMap();

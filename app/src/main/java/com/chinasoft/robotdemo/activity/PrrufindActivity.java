@@ -1,6 +1,8 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.view.View;
@@ -52,7 +54,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     private Path path;
     private LineShape lineShape;
     private float lastX, lastY, nowX, nowY;
-    private float[] newF,desF,mXY,rXY;
+    private float[] newF, desF, mXY, rXY;
     private String currentMap;
     private ImageView iv_operation;
     private RequestShape robotShape;
@@ -71,11 +73,13 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     private boolean mSwitchAutoFlag = true; //默认为自动
 
     private ImageView iv_collect;
-    private TextView tv_forcestop,tv_prrusetting;
+    private TextView tv_forcestop, tv_prrusetting;
 
     private MyListView lv_prrulist;
     private TextView popup_prrulist_title;
     private PrruModelListAdapter prruModelListAdapter;
+    private float rX;
+    private float rY;
 
 //    private boolean showBattery=true;
 //    private LinearLayout ll_battery;
@@ -143,6 +147,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     private TextView tv_home_back;
     private TextView mSwitch;
     private RockerView mRockerView;
+    private SuperPopupWindow mChooseCenterPointPop;
 
 
     //防止多个请求同时响应产生的线程不安全问题
@@ -181,27 +186,52 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         iv_operation = findViewById(R.id.iv_operation);
         tv_home_back = findViewById(R.id.tv_home_back);
         mSwitch = findViewById(R.id.tv_switch);
-        iv_collect=findViewById(R.id.iv_collect);
-        tv_forcestop=findViewById(R.id.tv_forcestop);
-        tv_prrusetting=findViewById(R.id.tv_prrusetting);
+        iv_collect = findViewById(R.id.iv_collect);
+        tv_forcestop = findViewById(R.id.tv_forcestop);
+        tv_prrusetting = findViewById(R.id.tv_prrusetting);
         iv_operation.setOnClickListener(this);
         tv_home_back.setOnClickListener(this);
         mSwitch.setOnClickListener(this);
         iv_collect.setOnClickListener(this);
         tv_forcestop.setOnClickListener(this);
         tv_prrusetting.setOnClickListener(this);
+
 //        ll_battery=findViewById(R.id.ll_battery);
 //        iv_battery=findViewById(R.id.iv_battery);
 //        tv_battery=findViewById(R.id.tv_battery);
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (!ro.getContinue()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mChooseCenterPointPop.showPopupWindow();
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
+    }
+
+    @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this);
         ro.setNotify(false);
         ro.startOperation();
         initRocker();
+        initCenterPop();
     }
 
     private void initShape() {
@@ -239,8 +269,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
 
-
-
     private void initStart(float x, float y) {
         robotShape.setValues(x, y);
         map.addShape(robotShape, false);
@@ -253,11 +281,15 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
     private float[] mapToReal(float mx, float my) {
-        return new float[]{mx  / Constant.mapScale , (mapHeight-my) /Constant.mapScale };
+        return new float[]{mx / Constant.mapScale, (mapHeight - my) / Constant.mapScale};
+    }
+
+    private float[] mapToReal(float mx, float my, int height) {
+        return new float[]{mx / Constant.mapScale, (height - my) / Constant.mapScale};
     }
 
     private float[] realToMap(float rx, float ry) {
-        return new float[]{rx  * Constant.mapScale , mapHeight-ry*Constant.mapScale};
+        return new float[]{rx * Constant.mapScale, mapHeight - ry * Constant.mapScale};
     }
 
 
@@ -288,12 +320,12 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                     isAutoFind = false;
                     iv_operation.setImageResource(R.mipmap.home_start);
                     return;
-                }else{
-                    if(nowCollectPrru==null){
+                } else {
+                    if (nowCollectPrru == null) {
                         showToast("请先选择Prru");
                         return;
                     }
-                    desF=realToMap(nowCollectPrru.x,nowCollectPrru.y);
+                    desF = realToMap(nowCollectPrru.x, nowCollectPrru.y);
                     desShape.setValues(desF[0], desF[1]);
                     map.addShape(desShape, false);
                     isAutoFind = true;
@@ -302,13 +334,13 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                     maxRsrp = Float.NEGATIVE_INFINITY;
                     xWhenMax = Float.NEGATIVE_INFINITY;
                     yWhenMax = Float.NEGATIVE_INFINITY;
-                    if (nowCollectPrru.x  == nowX && nowCollectPrru.y == nowY) {
+                    if (nowCollectPrru.x == nowX && nowCollectPrru.y == nowY) {
                         cStep = 1;
                         LLog.getLog().e("扫描", "1");
-                        ro.moveTo(nowCollectPrru.x  + 0.5f, nowCollectPrru.y );
+                        ro.moveTo(nowCollectPrru.x + 0.5f, nowCollectPrru.y);
                     } else {
                         cStep = 0;
-                        ro.moveTo(nowCollectPrru.x, nowCollectPrru.y );
+                        ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
                     }
                 }
                 break;
@@ -319,12 +351,12 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                     showToast("没有Prru列表");
                 }
                 break;
-            case  R.id.iv_collect:
-                if(isPrruCollect){
-                    isPrruCollect=false;
+            case R.id.iv_collect:
+                if (isPrruCollect) {
+                    isPrruCollect = false;
                     iv_collect.setImageResource(R.mipmap.iv_collectoff);
-                }else{
-                    isPrruCollect=true;
+                } else {
+                    isPrruCollect = true;
                     iv_collect.setImageResource(R.mipmap.iv_collecton);
 //                    Vector vector = new Vector();
 //                    Location location;
@@ -353,7 +385,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 //                    ro.moveToVector(vector);
                 }
                 break;
-            case  R.id.tv_forcestop:
+            case R.id.tv_forcestop:
                 ro.forceStop();
                 break;
             default:
@@ -376,20 +408,20 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
      * 初始化开始popupwindow
      */
     private void initPrruListPop(List<PrruModel> prruModelList) {
-        if(mSuperPopupWindow==null) {
-            mSuperPopupWindow = new SuperPopupWindow(mContext, R.layout.popup_prrulist);
+        if (mSuperPopupWindow == null) {
+            mSuperPopupWindow = new SuperPopupWindow(PrrufindActivity.this, R.layout.popup_prrulist);
             mSuperPopupWindow.setFocusable(true);
             mSuperPopupWindow.setOutsideTouchable(true);
             mSuperPopupWindow.setAnimotion(R.style.PopAnimation);
             popupView = mSuperPopupWindow.getPopupView();
-            lv_prrulist=popupView.findViewById(R.id.lv_prrulist);
-            popup_prrulist_title=popupView.findViewById(R.id.popup_prrulist_title);
-            prruModelListAdapter=new PrruModelListAdapter(this,prruModelList);
+            lv_prrulist = popupView.findViewById(R.id.lv_prrulist);
+            popup_prrulist_title = popupView.findViewById(R.id.popup_prrulist_title);
+            prruModelListAdapter = new PrruModelListAdapter(this, prruModelList);
             lv_prrulist.setAdapter(prruModelListAdapter);
             prruModelListAdapter.setPrruModelListClickListener(new PrruModelListAdapter.OnPrruModelListClickListener() {
                 @Override
                 public void onClick(PrruModel prruModel) {
-                    nowCollectPrru=prruModel;
+                    nowCollectPrru = prruModel;
                     popup_prrulist_title.setText(prruModel.neCode);
                     hidePrruListPop();
                 }
@@ -413,8 +445,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
 
-
-
     /***
      *
      * @param x
@@ -423,7 +453,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
      */
     private void saveRbLocationInfo(float x, float y, float scaleRuler) {
         SharedPrefHelper.putString(PrrufindActivity.this, "currentMap", currentMap);
-        mXY=realToMap(x,y);
+        mXY = realToMap(x, y);
         initStart(mXY[0], mXY[1]);
     }
 
@@ -561,11 +591,11 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void onBackPressed() {
-        long nowClickTime=System.currentTimeMillis();
-        if(nowClickTime-lastClickTime>2000){
-            lastClickTime=nowClickTime;
+        long nowClickTime = System.currentTimeMillis();
+        if (nowClickTime - lastClickTime > 2000) {
+            lastClickTime = nowClickTime;
             showToast("再点一次回退");
-        }else{
+        } else {
             finish();
         }
     }
@@ -575,35 +605,35 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         switch (cStep) {
             case 1:
                 LLog.getLog().e("扫描", "1");
-                ro.moveTo(nowCollectPrru.x  + 0.5f, nowCollectPrru.y );
+                ro.moveTo(nowCollectPrru.x + 0.5f, nowCollectPrru.y);
                 break;
             case 2:
                 LLog.getLog().e("扫描", "2");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y );
+                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
                 break;
             case 3:
                 LLog.getLog().e("扫描", "3");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y  + 0.5f);
+                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y + 0.5f);
                 break;
             case 4:
                 LLog.getLog().e("扫描", "4");
-                ro.moveTo(nowCollectPrru.x , nowCollectPrru.y );
+                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
                 break;
             case 5:
                 LLog.getLog().e("扫描", "5");
-                ro.moveTo(nowCollectPrru.x  - 0.5f, nowCollectPrru.y );
+                ro.moveTo(nowCollectPrru.x - 0.5f, nowCollectPrru.y);
                 break;
             case 6:
                 LLog.getLog().e("扫描", "6");
-                ro.moveTo(nowCollectPrru.x , nowCollectPrru.y );
+                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
                 break;
             case 7:
                 LLog.getLog().e("扫描", "7");
-                ro.moveTo(nowCollectPrru.x , nowCollectPrru.y  - 0.5f);
+                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y - 0.5f);
                 break;
             case 8:
                 LLog.getLog().e("扫描", "8");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y );
+                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
                 break;
             case 9:
                 LLog.getLog().e("扫描", "9");
@@ -623,14 +653,14 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
     //移除轨迹点
-    private void clearOrbits(){
+    private void clearOrbits() {
         for (int i = 0, len = coorCount; i < len; i++) {
             map.removeShape("coor" + i);
         }
     }
 
     //到达目的点
-    private void arriveDes(){
+    private void arriveDes() {
         newF = realToMap(nowX, nowY);
         path.lineTo(newF[0], newF[1]);
         lineShape.setPath(path);
@@ -642,7 +672,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
     //根据实际坐标更新机器人图标
-    private synchronized void updateRobotByReal(){
+    private synchronized void updateRobotByReal() {
         mXY = realToMap(nowX, nowY);
         cv.updateDirection(mapRotate + robotDirection);
         robotShape.setView(cv);
@@ -650,7 +680,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
     @Override
-    public void connectSuccess(float x, float y,  float direc,boolean isContinue) {
+    public void connectSuccess(float x, float y, float direc, boolean isContinue) {
         showToast("机器人连接成功！");
         initMap();
 
@@ -676,6 +706,10 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         showToast("异常断开");
         LLog.getLog().e("异常断开", errormsg);
         //finish();
+    }
+
+    @Override
+    public void setCenterPoint() {
     }
 
     @Override
@@ -714,16 +748,63 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
     @Override
-    public void moveFinish(float x, float y, float direc,boolean isForce) {
-        nowX=x;
-        nowY=y;
-        robotDirection=direc;
+    public void moveFinish(float x, float y, float direc, boolean isForce) {
+        nowX = x;
+        nowY = y;
+        robotDirection = direc;
         clearOrbits();
-        if(isAutoFind&&!isForce) {
+        if (isAutoFind && !isForce) {
             autoFind();
-        }else{
+        } else {
             arriveDes();
         }
+    }
+
+    private void initCenterPop() {
+        mChooseCenterPointPop = new SuperPopupWindow(mContext, R.layout.pop_coordinate_layout);
+        mChooseCenterPointPop.setChangFocusable(true);
+        View popupView = mChooseCenterPointPop.getPopupView();
+        final TextView tvShowPoint = popupView.findViewById(R.id.coordinate_data);
+        ImageMap1 map = popupView.findViewById(R.id.coordinate_map);
+        TextView cancel = popupView.findViewById(R.id.pop_coordinate_cancel);
+        TextView confirm = popupView.findViewById(R.id.pop_coordinate_confirm);
+        Bitmap bitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
+        final int maphight = bitmap.getHeight();
+        PointF centerByImagePoint = map.getCenterByImagePoint();
+        float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
+        tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0]))+ " , " +Float.parseFloat(String.format("%.2f", float1[1])));
+        map.setMapBitmap(bitmap);
+        map.setOnCenerPointListener(new TouchImageView1.OnCenterPointListener() {
+            @Override
+            public void onCenter(PointF pointF) {
+                float[] floats = mapToReal(pointF.x, pointF.y, maphight);
+                rX = Float.parseFloat(String.format("%.2f", floats[0]));
+                rY = Float.parseFloat(String.format("%.2f", floats[1]));
+
+                tvShowPoint.setText(rX + " , " + rY);
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mChooseCenterPointPop.hidePopupWindow();
+                finish();
+            }
+        });
+        confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mChooseCenterPointPop.hidePopupWindow();
+                SharedPrefHelper.putFloat(mContext, "firstX", rX);
+                SharedPrefHelper.putFloat(mContext, "firstY", rY);
+                ro.doAfterConfirm(rX, rY);
+            }
+        });
+    }
+
+    public void showCenterPop() {
+        mChooseCenterPointPop.showPopupWindow();
     }
 
 }
