@@ -53,6 +53,22 @@
         android:textSize="13dp"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/tv_routesetting"
+        android:layout_width="32dp"
+        android:layout_height="130dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="320dp"
+        android:layout_marginRight="12dp"
+        android:background="@drawable/prru_setting"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="r\no\nu\nt\ne"
+        android:textColor="@color/white"
+        android:textSize="13dp"
+        android:textStyle="bold" />
+
         <LinearLayout
             android:id="@+id/ll_rd"
             android:layout_width="92dp"

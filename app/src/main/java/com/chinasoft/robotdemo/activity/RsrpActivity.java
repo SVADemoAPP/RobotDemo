@@ -19,6 +19,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.bumptech.glide.Glide;
 import com.chinasoft.robotdemo.R;
+import com.chinasoft.robotdemo.adapter.RouteAdapter;
 import com.chinasoft.robotdemo.adapter.UserIdAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.MaxrsrpPosition;
@@ -52,7 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-public class PrrucollectActivity extends BaseActivity implements OnRobotListener {
+public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private ImageMap1 map;
     private int mapHeight;
     private boolean isStart = false;
@@ -73,9 +74,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private float maxRsrp, xWhenMax, yWhenMax;
     private float[] xyRobotWhenMax;
     private CustomShape desShape;
-    private SuperPopupWindow mUseridPopupWindow;
+    private SuperPopupWindow mUseridPopupWindow,mRoutePopupWindow;
     private Context mContext;
-    private View popupView_userid;
+    private View popupView_userid,popupView_route;
     private float mapRotate;
     private float robotDirection;
     private RobotOperation ro;
@@ -83,14 +84,19 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     private ImageView iv_collect;
     private TextView tv_forcestop, tv_useridsetting, popup_confirm_userid, popup_cancel_userid;
-    private MyListView lv_userid;
+    private  TextView tv_routesetting,popup_confirm_route, popup_cancel_route;
+    private MyListView lv_userid,lv_route;
     private UserIdAdapter userIdAdapter;
+    private RouteAdapter routeAdapter;
     private List<String> userIdList = new ArrayList<>();
     private List<String> ipList = new ArrayList<>();
 
     private LinearLayout ll_addshow_userid, ll_add_userid;
+    private LinearLayout ll_addshow_route, ll_add_route;
     private RelativeLayout rl_add_userid, rl_yes_userid, rl_no_userid;
+    private RelativeLayout rl_add_route, rl_yes_route, rl_no_route;
     private EditText et_userid;
+    private EditText et_route;
     private String userIds;
 
     private List<PointF> testLocList = new LinkedList<>();
@@ -190,8 +196,8 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     @Override
     public void setContentLayout() {
-        mContext = PrrucollectActivity.this;
-        setContentView(R.layout.activity_prrucollect);
+        mContext = RsrpActivity.this;
+        setContentView(R.layout.activity_rsrp);
     }
 
 
@@ -208,13 +214,14 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         iv_collect = findViewById(R.id.iv_collect);
         tv_forcestop = findViewById(R.id.tv_forcestop);
         tv_useridsetting = findViewById(R.id.tv_useridsetting);
+        tv_routesetting = findViewById(R.id.tv_routesetting);
         iv_operation.setOnClickListener(this);
         tv_home_back.setOnClickListener(this);
         mSwitch.setOnClickListener(this);
         iv_collect.setOnClickListener(this);
         tv_forcestop.setOnClickListener(this);
         tv_useridsetting.setOnClickListener(this);
-
+        tv_routesetting.setOnClickListener(this);
 //        ll_battery=findViewById(R.id.ll_battery);
 //        iv_battery=findViewById(R.id.iv_battery);
 //        tv_battery=findViewById(R.id.tv_battery);
@@ -224,9 +231,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
-        ro.setNotify(true);
-        ro.startOperation();
+//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+//        ro.setNotify(true);
+//        ro.startOperation();
         initRocker();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
@@ -235,43 +242,43 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 ipList.add(str);
             }
         }
-//        map.setMapBitmap(Constant.mapBitmap);
-//        mapHeight = Constant.mapBitmap.getHeight();
+        map.setMapBitmap(Constant.mapBitmap);
+        mapHeight = Constant.mapBitmap.getHeight();
 
     }
 
     private void initShape() {
-        cv = new CompassView(PrrucollectActivity.this);
+        cv = new CompassView(RsrpActivity.this);
         cv.setId(0);
         cv.setImageResource(R.mipmap.icon_robot);
         cv.updateDirection(mapRotate + robotDirection);
-        robotShape = new RequestShape("s", -16776961, cv, PrrucollectActivity.this);
-        desShape = new CustomShape("des", R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.destination_point);
+        robotShape = new RequestShape("s", -16776961, cv, RsrpActivity.this);
+        desShape = new CustomShape("des", R.color.blue, RsrpActivity.this, "dwf", R.mipmap.destination_point);
     }
 
     private void initMap() {
         map.setMapBitmap(Constant.mapBitmap);
         initShape();
-        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
-            @Override
-            public void onRotate(float rotate) {
-                mapRotate = -rotate;
-                cv.updateDirection(mapRotate + robotDirection);
-                robotShape.setView(cv);
-            }
-        });
-        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
-            @Override
-            public void onLongClick(PointF point) {
-                if (isStart && !isAutoFind) {
-                    rXY = mapToReal(point.x, point.y);
-                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
-                    map.setCanChange(false);
-                    desShape.setValues(point.x, point.y);
-                    map.addShape(desShape, false);
-                }
-            }
-        });
+//        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+//            @Override
+//            public void onRotate(float rotate) {
+//                mapRotate = -rotate;
+//                cv.updateDirection(mapRotate + robotDirection);
+//                robotShape.setView(cv);
+//            }
+//        });
+//        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
+//            @Override
+//            public void onLongClick(PointF point) {
+//                if (isStart && !isAutoFind) {
+//                    rXY = mapToReal(point.x, point.y);
+//                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
+//                    map.setCanChange(false);
+//                    desShape.setValues(point.x, point.y);
+//                    map.addShape(desShape, false);
+//                }
+//            }
+//        });
         mapHeight = Constant.mapBitmap.getHeight();
     }
 
@@ -371,6 +378,17 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 }
                 initUserIdPop();
                 break;
+            case R.id.tv_routesetting:
+                if (isTestLine) {
+                    showToast("请先关闭或完成路径测试");
+                    return;
+                }
+                if (isPrruCollect) {
+                    showToast("请先关闭采集");
+                    return;
+                }
+                initRoutePop();
+                break;
             case R.id.iv_collect:
                 if (isPrruCollect) {
                     isPrruCollect = false;
@@ -452,7 +470,45 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             case R.id.rl_no_userid:
                 resetUserIdAdd();
                 break;
-
+            case R.id.popup_confirm_route:
+                String newRoute = et_route.getText().toString();
+                if (canUserIdAdd(newRoute)) {
+                    userIdList.add(newRoute);
+                }
+                ipList.clear();
+                if (userIdList.size() > 0) {
+                    StringBuffer sb = new StringBuffer();
+                    for (String str : userIdList) {
+                        ipList.add(str);
+                        sb.append(";" + str);
+                    }
+                    SharedPrefHelper.putString(this, "userId", sb.substring(1));
+                } else {
+                    SharedPrefHelper.putString(this, "userId", "");
+                }
+                resetRouteAdd();
+                hideRoutePop();
+                break;
+            case R.id.popup_cancel_route:
+                resetRouteAdd();
+                hideRoutePop();
+                break;
+            case R.id.rl_add_route:
+                rl_add_route.setVisibility(View.GONE);
+                ll_add_route.setVisibility(View.VISIBLE);
+                break;
+            case R.id.rl_yes_route:
+                String newRoute1 = et_route.getText().toString().trim();
+                if (canUserIdAdd(newRoute1)) {
+                    userIdList.add(newRoute1);
+                    refreshRouteList(userIdList);
+                } else {
+                    showToast("空白或重复添加");
+                }
+                break;
+            case R.id.rl_no_route:
+                resetRouteAdd();
+                break;
             default:
                 break;
         }
@@ -474,8 +530,12 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         et_userid.setText("");
         rl_add_userid.setVisibility(View.VISIBLE);
         ll_add_userid.setVisibility(View.GONE);
+    }
 
-
+    private void resetRouteAdd() {
+        et_route.setText("");
+        rl_add_route.setVisibility(View.VISIBLE);
+        ll_add_route.setVisibility(View.GONE);
     }
 
     private void refreshUserIdList(List<String> userIdList) {
@@ -487,6 +547,17 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
         userIdAdapter.setUserIdList(userIdList);
         userIdAdapter.notifyDataSetChanged();
+    }
+
+    private void refreshRouteList(List<String> routeList) {
+        resetRouteAdd();
+        if (routeList.size() < 10) {
+            ll_addshow_route.setVisibility(View.VISIBLE);
+        } else {
+            ll_addshow_route.setVisibility(View.GONE);
+        }
+        routeAdapter.setRouteList(routeList);
+        routeAdapter.notifyDataSetChanged();
     }
 
     private String prruDataToString(List<PrruSigalModel> prruSigalModelList) {
@@ -555,6 +626,61 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         mUseridPopupWindow.hidePopupWindow();
     }
 
+    /***
+     * 初始化开始popupwindow
+     */
+    private void initRoutePop() {
+        userIdList.clear();
+        for (String str : ipList) {
+            userIdList.add(str);
+        }
+        if (mRoutePopupWindow == null) {
+            mRoutePopupWindow = new SuperPopupWindow(mContext, R.layout.popup_route);
+            mRoutePopupWindow.setFocusable(true);
+            mRoutePopupWindow.setOutsideTouchable(true);
+            mRoutePopupWindow.setAnimotion(R.style.PopAnimation);
+            popupView_route = mRoutePopupWindow.getPopupView();
+            popup_confirm_route = popupView_route.findViewById(R.id.popup_confirm_route);
+            popup_cancel_route = popupView_route.findViewById(R.id.popup_cancel_route);
+            lv_route = popupView_route.findViewById(R.id.lv_route);
+            routeAdapter = new RouteAdapter(this, userIdList);
+            lv_route.setAdapter(routeAdapter);
+            popup_confirm_route.setOnClickListener(this);
+            popup_cancel_route.setOnClickListener(this);
+            ll_addshow_route = popupView_route.findViewById(R.id.ll_addshow_route);
+            ll_add_route = popupView_route.findViewById(R.id.ll_add_route);
+            et_route = popupView_route.findViewById(R.id.et_route);
+            rl_add_route = popupView_route.findViewById(R.id.rl_add_route);
+            rl_no_route = popupView_route.findViewById(R.id.rl_no_route);
+            rl_yes_route = popupView_route.findViewById(R.id.rl_yes_route);
+            rl_yes_route.setOnClickListener(this);
+            rl_no_route.setOnClickListener(this);
+            rl_add_route.setOnClickListener(this);
+            routeAdapter.setOnRouteListener(new RouteAdapter.OnRouteListener() {
+                @Override
+                public void delete(int position) {
+                    userIdList.remove(position);
+                    refreshRouteList(userIdList);
+                }
+            });
+        }
+        showRoutePop();
+    }
+
+    /**
+     * 显示Popupwindow
+     */
+    private void showRoutePop() {
+        mRoutePopupWindow.showPopupWindow();
+    }
+
+    /**
+     * 隐藏Popupwindow
+     */
+    private void hideRoutePop() {
+        mRoutePopupWindow.hidePopupWindow();
+    }
+
 
     /***
      *
@@ -563,7 +689,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
      * @param scaleRuler
      */
     private void saveRbLocationInfo(float x, float y, float scaleRuler) {
-        SharedPrefHelper.putString(PrrucollectActivity.this, "currentMap", currentMap);
+        SharedPrefHelper.putString(RsrpActivity.this, "currentMap", currentMap);
         mXY = realToMap(x, y);
         initStart(mXY[0], mXY[1]);
     }
@@ -753,7 +879,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 iv_operation.setImageResource(R.mipmap.home_start);
                 if (maxRsrp > -10000f) {
                     xyRobotWhenMax = realToMap(xWhenMax, yWhenMax);
-                    CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, PrrucollectActivity.this, "dwf");
+                    CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, RsrpActivity.this, "dwf");
                     maxRsrpPointShape.setValues(xyRobotWhenMax[0], xyRobotWhenMax[1]);
                     map.addShape(maxRsrpPointShape, false);
                 }
@@ -856,7 +982,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         coorCount = locVector.size();
         for (int i = 0, len = coorCount; i < len; i++) {
             float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
-            CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.orbit_point);
+            CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, RsrpActivity.this, "dwf", R.mipmap.orbit_point);
             orbitShape.setValues(tf[0], tf[1]);
             map.addShape(orbitShape, false);
         }
@@ -1020,7 +1146,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         for (Map.Entry<String, MaxrsrpPosition> entry : mpMap.entrySet()) {
             System.out.println("key= " + entry.getKey() + " and value= "
                     + entry.getValue());
-            PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, PrrucollectActivity.this);
+            PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
             pgShape.setNecodeText(entry.getKey());
             pgShape.setPaintColor(Color.parseColor("#442b87"));
             mXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
@@ -1032,7 +1158,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private void drawLineBeforeTestLine() {
         for (int i = 0, len = testLocList.size(); i < len; i++) {
             mXY = realToMap(testLocList.get(i).x, testLocList.get(i).y);
-            CustomShape tShape = new CustomShape("test" + i, R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.destination_point);
+            CustomShape tShape = new CustomShape("test" + i, R.color.blue, RsrpActivity.this, "dwf", R.mipmap.destination_point);
             tShape.setValues(mXY[0], mXY[1]);
             map.addShape(tShape, false);
             if (i == 0) {

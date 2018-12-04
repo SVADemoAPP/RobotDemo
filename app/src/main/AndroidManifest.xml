@@ -37,9 +37,8 @@
         <activity android:name=".activity.PrrufindActivity"></activity>
         <activity android:name=".activity.PrrucollectActivity"></activity>
         <activity android:name=".activity.SettingActivity"></activity>
-        <activity android:name=".activity.TestActivity">
-
-        </activity>
+        <activity android:name=".activity.RouteActivity"></activity>
+        <activity android:name=".activity.RsrpActivity"></activity>
     </application>
 
 </manifest>
