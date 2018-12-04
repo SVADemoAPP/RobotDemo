@@ -213,6 +213,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                initCenterPop();
                                 mChooseCenterPointPop.showPopupWindow();
                             }
                         });
@@ -231,7 +232,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         ro.setNotify(false);
         ro.startOperation();
         initRocker();
-        initCenterPop();
     }
 
     private void initShape() {

@@ -237,7 +237,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
 //        map.setMapBitmap(Constant.mapBitmap);
 //        mapHeight = Constant.mapBitmap.getHeight();
-        initCenterPop();
+
     }
 
     private void initShape() {
@@ -779,6 +779,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                initCenterPop();
                                 mChooseCenterPointPop.showPopupWindow();
                             }
                         });
@@ -995,6 +996,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             isTestLine = false;
             map.setCanChange(true);
             drawPrruAfterTestLine();
+            updateRobotByReal();
             showToast("路径测试完成");
         }
 
