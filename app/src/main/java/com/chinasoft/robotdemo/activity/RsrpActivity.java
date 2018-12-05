@@ -254,7 +254,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         currentMap = getIntent().getExtras().getString("currentMap");
         ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
         ro.setNotify(true);
-        ro.startOperation();
+//        ro.startOperation();
         initRocker();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
@@ -263,8 +263,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 ipList.add(str);
             }
         }
-        map.setMapBitmap(Constant.mapBitmap);
-        mapHeight = Constant.mapBitmap.getHeight();
+//        map.setMapBitmap(Constant.mapBitmap);
+//        mapHeight = Constant.mapBitmap.getHeight();
 
         if (ro != null && !ro.getContinue()) {
             new Thread(new Runnable() {
@@ -1286,6 +1286,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         PointF centerByImagePoint = map.getCenterByImagePoint();
         float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
         tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0])) + " , " + Float.parseFloat(String.format("%.2f", float1[1])));
+        rX = Float.parseFloat(String.format("%.2f", float1[0]));
+        rY = Float.parseFloat(String.format("%.2f", float1[1]));
         map.setOnCenerPointListener(new TouchImageView1.OnCenterPointListener() {
             @Override
             public void onCenter(PointF pointF) {
@@ -1306,10 +1308,15 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mChooseCenterPointPop.hidePopupWindow();
-                SharedPrefHelper.putFloat(mContext, "firstX", rX);
-                SharedPrefHelper.putFloat(mContext, "firstY", rY);
-                ro.doAfterConfirm(rX, rY);
+                if (rX>=0&&rY>=0) {
+                    mChooseCenterPointPop.hidePopupWindow();
+                    SharedPrefHelper.putFloat(mContext, "firstX", rX);
+                    SharedPrefHelper.putFloat(mContext, "firstY", rY);
+                    ro.doAfterConfirm(rX, rY);
+                    mChooseCenterPointPop=null;
+                }else {
+                    showToast("选取起始点越界");
+                }
             }
         });
     }

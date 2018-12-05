@@ -768,6 +768,8 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         PointF centerByImagePoint = map.getCenterByImagePoint();
         float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
         tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0]))+ " , " +Float.parseFloat(String.format("%.2f", float1[1])));
+        rX = Float.parseFloat(String.format("%.2f", float1[0]));
+        rY = Float.parseFloat(String.format("%.2f", float1[1]));
         map.setMapBitmap(bitmap);
         map.setOnCenerPointListener(new TouchImageView1.OnCenterPointListener() {
             @Override
@@ -789,12 +791,12 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (rX>=0&&rY>=0)
-                {
+                if (rX>=0&&rY>=0) {
                     mChooseCenterPointPop.hidePopupWindow();
                     SharedPrefHelper.putFloat(mContext, "firstX", rX);
                     SharedPrefHelper.putFloat(mContext, "firstY", rY);
                     ro.doAfterConfirm(rX, rY);
+                    mChooseCenterPointPop=null;
                 }else {
                     showToast("选取起始点越界");
                 }

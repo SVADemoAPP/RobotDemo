@@ -1059,6 +1059,8 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         PointF centerByImagePoint = map.getCenterByImagePoint();
         float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
         tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0]))+ " , " +Float.parseFloat(String.format("%.2f", float1[1])));
+        rX = Float.parseFloat(String.format("%.2f", float1[0]));
+        rY = Float.parseFloat(String.format("%.2f", float1[1]));
         map.setOnCenerPointListener(new TouchImageView1.OnCenterPointListener() {
             @Override
             public void onCenter(PointF pointF) {
@@ -1084,6 +1086,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                     SharedPrefHelper.putFloat(mContext, "firstX", rX);
                     SharedPrefHelper.putFloat(mContext, "firstY", rY);
                     ro.doAfterConfirm(rX, rY);
+                    mChooseCenterPointPop=null;
                 } else {
                     showToast("选取起始点越界");
                 }

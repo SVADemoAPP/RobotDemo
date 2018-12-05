@@ -148,7 +148,7 @@ public class MaplistActivity extends BaseActivity {
             mapList.add(str);
         }
         maplistAdapter = new MaplistAdapter(this, mapList);
-        currentMap = mapList.get(0);
+//        currentMap = mapList.get(0);
         showProgressDialog("地图识别中...");
         Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
         dismissProgressDialog();
@@ -381,7 +381,6 @@ public class MaplistActivity extends BaseActivity {
 //                    showToast("必须选择模式");
 //                    return;
 //                }
-                SharedPrefHelper.putString(MaplistActivity.this,"currentMap",currentMap);
                 if (deviceManager != null) {
                     deviceManager.stop(DiscoveryMode.MDNS);
                 }
@@ -499,7 +498,7 @@ public class MaplistActivity extends BaseActivity {
                 mMapChoosePop.hidePopupWindow();
                 mTvMF.setText(mChooseMap);
                 Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + mChooseMap);
-
+                SharedPrefHelper.putString(MaplistActivity.this, "currentMap", mChooseMap);
             }
         });
         cancel.setOnClickListener(new View.OnClickListener() {
