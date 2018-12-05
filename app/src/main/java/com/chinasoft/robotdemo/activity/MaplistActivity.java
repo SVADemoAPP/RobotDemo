@@ -498,7 +498,7 @@ public class MaplistActivity extends BaseActivity {
                 mMapChoosePop.hidePopupWindow();
                 mTvMF.setText(mChooseMap);
                 Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + mChooseMap);
-                SharedPrefHelper.putString(MaplistActivity.this, "currentMap", mChooseMap);
+//                SharedPrefHelper.putString(MaplistActivity.this, "currentMap", mChooseMap);
             }
         });
         cancel.setOnClickListener(new View.OnClickListener() {

@@ -223,7 +223,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     public void dealLogicBeforeInitView() {
         routeLinePath = new Path();
         routeLineShape = new LineShape("routeLine", R.color.green, 2, "#FF4081");
-        mMapName = SharedPrefHelper.getString(mContext, "currentMap", "");
+
     }
 
     @Override
@@ -252,6 +252,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
+        mMapName=currentMap;
         ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
         ro.setNotify(true);
         ro.startOperation();
