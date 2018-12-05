@@ -50,10 +50,12 @@ import net.yoojia.imagemap.core.PrruGkcShape;
 import net.yoojia.imagemap.core.RequestShape;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 
 public class RsrpActivity extends BaseActivity implements OnRobotListener {
@@ -115,7 +117,17 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private boolean isTestLine = false;
     private LineShape routeLineShape;
     private Path routeLinePath;
-    private Map<String, MaxrsrpPosition> mpMap = new HashMap<>();
+    private Map<String, MaxrsrpPosition> mpMap = new TreeMap<>(new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+            if(mpMap.get(o1).getRsrp()>mpMap.get(o2).getRsrp()){
+                return -1;
+            }else if(mpMap.get(o1).getRsrp()<mpMap.get(o2).getRsrp()){
+                return 1;
+            }
+            return 0;
+        }
+    });
 
     private float rX;
     private float rY;
@@ -1046,18 +1058,20 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             return;
         }
         for (PrruSigalModel psm : prruSigalModelList) {
-            if (!mpMap.keySet().contains(psm.gpp)) {
-                MaxrsrpPosition mp = new MaxrsrpPosition();
-                mp.setX(x);
-                mp.setY(y);
-                mp.setRsrp(psm.rsrp);
-                mpMap.put(psm.gpp, mp);
-            } else {
-                tempMp = mpMap.get(psm.gpp);
-                if (psm.rsrp > tempMp.getRsrp()) {
-                    tempMp.setX(x);
-                    tempMp.setY(y);
-                    tempMp.setRsrp(psm.rsrp);
+            if(psm.rsrp>-950) {
+                if (!mpMap.keySet().contains(psm.gpp)) {
+                    MaxrsrpPosition mp = new MaxrsrpPosition();
+                    mp.setX(x);
+                    mp.setY(y);
+                    mp.setRsrp(psm.rsrp);
+                    mpMap.put(psm.gpp, mp);
+                } else {
+                    tempMp = mpMap.get(psm.gpp);
+                    if (psm.rsrp > tempMp.getRsrp()) {
+                        tempMp.setX(x);
+                        tempMp.setY(y);
+                        tempMp.setRsrp(psm.rsrp);
+                    }
                 }
             }
         }
@@ -1194,15 +1208,20 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 //        mp4.setX(66);
 //        mp4.setY(64);
 //        mpMap.put("444",mp4);
+
+        int p=0;
         for (Map.Entry<String, MaxrsrpPosition> entry : mpMap.entrySet()) {
-            System.out.println("key= " + entry.getKey() + " and value= "
-                    + entry.getValue());
-            PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
-            pgShape.setNecodeText(entry.getKey());
-            pgShape.setPaintColor(Color.parseColor("#442b87"));
-            mXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
-            pgShape.setValues(mXY[0], mXY[1]);
-            map.addShape(pgShape, false);
+            if(p<5) {
+                p++;
+                System.out.println("key= " + entry.getKey() + " and value= "
+                        + entry.getValue());
+                PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
+                pgShape.setNecodeText(entry.getKey());
+                pgShape.setPaintColor(Color.parseColor("#442b87"));
+                mXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
+                pgShape.setValues(mXY[0], mXY[1]);
+                map.addShape(pgShape, false);
+            }
         }
     }
 
