@@ -485,7 +485,6 @@ public class MaplistActivity extends BaseActivity {
 
     private void initPop() {
         mMapChoosePop = new SuperPopupWindow(MaplistActivity.this, R.layout.popup_map_list_layout);
-        mMapChoosePop.setWarpContent();
         mMapChoosePop.setChangFocusable(true);
         mMapChoosePop.setAnimotion(R.style.PopAnimation);
         View popupView = mMapChoosePop.getPopupView();
