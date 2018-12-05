@@ -12,7 +12,7 @@ public class CircleShape extends Shape
 {
 
     private final PointF center = new PointF();
-    private float radius = 5f;
+    private float radius = 10f;
 
     public CircleShape(Object tag, int coverColor)
     {

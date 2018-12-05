@@ -8,12 +8,14 @@ import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.text.TextUtils;
+import android.view.PointerIcon;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -24,6 +26,7 @@ import com.chinasoft.robotdemo.adapter.RouteAdapter;
 import com.chinasoft.robotdemo.adapter.UserIdAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.MaxrsrpPosition;
+import com.chinasoft.robotdemo.bean.PrruData;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
 import com.chinasoft.robotdemo.bean.RouteModel;
@@ -45,11 +48,13 @@ import com.slamtec.slamware.robot.Location;
 
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
+import net.yoojia.imagemap.core.CircleShape;
 import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.PrruGkcShape;
 import net.yoojia.imagemap.core.RequestShape;
+import net.yoojia.imagemap.core.Shape;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -252,8 +257,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        mMapName=currentMap;
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        mMapName = currentMap;
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this);
         ro.setNotify(true);
         ro.startOperation();
         initRocker();
@@ -356,21 +361,21 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 finish();
                 break;
             case R.id.tv_switch: //切换操作模式
-                if (ipList.size() == 0) {
-                    showToast("用第一个userId测试，未配置");
-                    return;
-                }
-//                List<PointF> pointList = new LinkedList<>();
-//                testLocList.add(new PointF(1, 0.3f));
-//                testLocList.add(new PointF(2, 0.3f));
-//                testLocList.add(new PointF(3, 0.3f));
-//                testLocList.add(new PointF(1, 0.3f));
-                if(nowRouteList.size()==0){
-                    showToast("未选择路径");
-                    return;
-                }
-                startTestLine(nowRouteList);
-//                ro.forceStop();
+//                if (ipList.size() == 0) {
+//                    showToast("用第一个userId测试，未配置");
+//                    return;
+//                }
+////                List<PointF> pointList = new LinkedList<>();
+////                testLocList.add(new PointF(1, 0.3f));
+////                testLocList.add(new PointF(2, 0.3f));
+////                testLocList.add(new PointF(3, 0.3f));
+////                testLocList.add(new PointF(1, 0.3f));
+//                if(nowRouteList.size()==0){
+//                    showToast("未选择路径");
+//                    return;
+//                }
+//                startTestLine(nowRouteList);
+////                ro.forceStop();
 //                if (mSwitchAutoFlag == true)//切换为手动
 //                {
 //                    mSwitchAutoFlag = false;
@@ -385,6 +390,21 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 //                }
                 break;
             case R.id.iv_operation:
+                if (ipList.size() == 0) {
+                    showToast("用第一个userId测试，未配置");
+                    return;
+                }
+//                List<PointF> pointList = new LinkedList<>();
+//                testLocList.add(new PointF(1, 0.3f));
+//                testLocList.add(new PointF(2, 0.3f));
+//                testLocList.add(new PointF(3, 0.3f));
+//                testLocList.add(new PointF(1, 0.3f));
+                if (nowRouteList.size() == 0) {
+                    showToast("未选择路径");
+                    return;
+                }
+                startTestLine(nowRouteList);
+//                ro.forceStop();
 //                if (isAutoFind) {
 //                    ro.forceStop();
 //                    isAutoFind = false;
@@ -980,8 +1000,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     }
 
 
-
-
     //移除轨迹点
     private void clearOrbits() {
         for (int i = 0, len = coorCount; i < len; i++) {
@@ -1063,8 +1081,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             return;
         }
         for (PrruSigalModel psm : prruSigalModelList) {
-            if(psm.rsrp>-950) {
-                LLog.getLog().robot(x+","+y,psm.gpp+"____"+psm.rsrp);
+            if (psm.rsrp > -950) {
+                LLog.getLog().robot(x + "," + y, psm.gpp + "____" + psm.rsrp);
                 if (!mpMap.keySet().contains(psm.gpp)) {
                     MaxrsrpPosition mp = new MaxrsrpPosition();
                     mp.setX(x);
@@ -1106,7 +1124,17 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 @Override
                 public void onResponse(String s) {
                     LLog.getLog().e("getPhonePrru成功", s);
-                    LLog.getLog().robot(x+","+y, s);
+                    LLog.getLog().robot(x + "," + y, s);
+
+                    PrruData prruData = new Gson().fromJson(s, PrruData.class);
+                    if (prruData.getCode() == 0) //成功
+                    {
+                        PrruData.DataBean data = prruData.getData();
+                        setPrruColorPoint(map, data.getRsrp(), data.getId());
+
+                    } else {
+                        Toast.makeText(mContext, "prru失败", Toast.LENGTH_LONG);
+                    }
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -1183,7 +1211,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private void startTestLine(List<PointF> locList) {
         if (locList != null && locList.size() > 0) {
             testLocList = locList;
-//            isTestLine = true;
+            isTestLine = true;
             showToast("路径测试开始");
             drawLineBeforeTestLine();
 //            drawPrruAfterTestLine();
@@ -1200,7 +1228,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         if (testLocList.size() > 0) {
             ro.moveTo(testLocList.get(0).x, testLocList.get(0).y);
         } else {
-//            isTestLine = false;
+            isTestLine = false;
             map.setCanChange(true);
             drawPrruAfterTestLine();
             updateRobotByReal();
@@ -1228,19 +1256,17 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 //        mp4.setY(64);
 //        mpMap.put("444",mp4);
 
-        int p=0;
+        int p = 0;
         for (Map.Entry<String, MaxrsrpPosition> entry : mpMap.entrySet()) {
-            if(p<5) {
-                p++;
-                System.out.println("key= " + entry.getKey() + " and value= "
-                        + entry.getValue());
-                PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
-                pgShape.setNecodeText(entry.getKey());
-                pgShape.setPaintColor(Color.parseColor("#442b87"));
-                mXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
-                pgShape.setValues(mXY[0], mXY[1]);
-                map.addShape(pgShape, false);
-            }
+            p++;
+            System.out.println("key= " + entry.getKey() + " and value= "
+                    + entry.getValue());
+            PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
+            pgShape.setNecodeText(entry.getKey());
+            pgShape.setPaintColor(Color.parseColor("#442b87"));
+            mXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
+            pgShape.setValues(mXY[0], mXY[1]);
+            map.addShape(pgShape, false);
         }
     }
 
@@ -1323,13 +1349,13 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (rX>=0&&rY>=0) {
+                if (rX >= 0 && rY >= 0) {
                     mChooseCenterPointPop.hidePopupWindow();
                     SharedPrefHelper.putFloat(mContext, "firstX", rX);
                     SharedPrefHelper.putFloat(mContext, "firstY", rY);
                     ro.doAfterConfirm(rX, rY);
-                    mChooseCenterPointPop=null;
-                }else {
+                    mChooseCenterPointPop = null;
+                } else {
                     showToast("选取起始点越界");
                 }
             }
@@ -1349,5 +1375,27 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             newRouteJson = data.getStringExtra("routeJson");
 //            et_route.setText("默认");
         }
+    }
+
+    /**
+     * 设置 PrruColor
+     */
+    private void setPrruColorPoint(ImageMap1 map, int prru, String id) {
+        int color;
+
+        if (-75 < prru && prru <= 0) {  //深绿色
+            color = Color.GREEN;
+        } else if (-95 < prru && prru <= -75) { //浅绿色
+            color = Color.CYAN;
+        } else if (-105 < prru && prru <= -95) {  //黄色
+            color = Color.YELLOW;
+        } else if (-120 < prru && prru <= -105) { //红色
+            color = Color.RED;
+        } else {
+            color = Color.BLACK;
+        }
+        CircleShape shape = new CircleShape(id, color);
+        shape.setValues(mXY[0], mXY[1]);
+        map.addShape(shape, false);
     }
 }

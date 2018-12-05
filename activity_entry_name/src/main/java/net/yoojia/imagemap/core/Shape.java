@@ -8,67 +8,65 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 
 public abstract class Shape {
-	public final int color;
-	public final Object tag;
-	protected Bubble displayBubble;
-	protected int alaph = 255;
-	protected final Paint drawPaint;
-	protected Paint drawPaints;
-	protected final static Paint cleanPaint;
-	protected final Matrix mOverMatrix = new Matrix();
-	protected float mScale = 1f;
+    public final int color;
+    public final Object tag;
+    protected Bubble displayBubble;
+    protected int alaph = 255;
+    protected Paint drawPaint;
+    protected Paint drawPaints;
+    protected final static Paint cleanPaint;
+    protected final Matrix mOverMatrix = new Matrix();
+    protected float mScale = 1f;
 
-	static {
-		cleanPaint = new Paint();
-		cleanPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-	}
-	
-	
+    static {
+        cleanPaint = new Paint();
+        cleanPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+    }
 
-	public float getScale() {
-		return mScale;
-	}
 
-	public void setScale(float mScale) {
-		this.mScale = mScale;
-	}
+    public float getScale() {
+        return mScale;
+    }
 
-	public Shape(Object tag, int coverColor) {
-		this.tag = tag;
-		this.color = coverColor;
-		drawPaint = new Paint();
-		drawPaint.setColor(coverColor);
-		drawPaint.setStyle(Paint.Style.FILL);
-		drawPaint.setAntiAlias(true);
-		drawPaint.setFilterBitmap(true);
-		drawPaint.setTextSize(18);
-		drawPaints = new Paint();
-		drawPaints.setColor(coverColor);
-		drawPaints.setStyle(Paint.Style.FILL);
-		drawPaints.setAntiAlias(true);
-		drawPaints.setFilterBitmap(true);
-	}
+    public void setScale(float mScale) {
+        this.mScale = mScale;
+    }
 
-	public void setAlaph(int alaph) {
-		this.alaph = alaph;
-	}
+    public Shape(Object tag, int coverColor) {
+        this.tag = tag;
+        this.color = coverColor;
+        drawPaint = new Paint();
+        drawPaint.setColor(coverColor);
+        drawPaint.setStyle(Paint.Style.FILL);
+        drawPaint.setAntiAlias(true);
+        drawPaint.setFilterBitmap(true);
+        drawPaint.setTextSize(18);
+        drawPaints = new Paint();
+        drawPaints.setColor(coverColor);
+        drawPaints.setStyle(Paint.Style.FILL);
+        drawPaints.setAntiAlias(true);
+        drawPaints.setFilterBitmap(true);
+    }
 
-	public void createBubbleRelation(Bubble displayBubble) {
-		this.displayBubble = displayBubble;
-	}
+    public void setAlaph(int alaph) {
+        this.alaph = alaph;
+    }
 
-	public void cleanBubbleRelation() {
-		this.displayBubble = null;
-	}
+    public void createBubbleRelation(Bubble displayBubble) {
+        this.displayBubble = displayBubble;
+    }
 
-	public abstract void setValues(float... coords);
+    public void cleanBubbleRelation() {
+        this.displayBubble = null;
+    }
 
-	/**
-	 * Set coords. Split by char ',' .
-	 * 
-	 * @param coords
-	 *            coords
-	 */
+    public abstract void setValues(float... coords);
+
+    /**
+     * Set coords. Split by char ',' .
+     *
+     * @param coords coords
+     */
 //	public void setValues(String coords) {
 //		String[] parametrs = coords.split(",");
 //		final int size = parametrs.length;
@@ -78,170 +76,164 @@ public abstract class Shape {
 //		}
 //		setValues(args);
 //	}
-	public void setValues(String coords) {
+    public void setValues(String coords) {
         String[] parametrs = coords.split(":");
         final int size = parametrs.length;
         final float[] args = new float[size];
         for (int i = 0; i < size; i++) {
-            args[i] = Float.valueOf(parametrs[i].replace(",",".").trim());
+            args[i] = Float.valueOf(parametrs[i].replace(",", ".").trim());
         }
         setValues(args);
     }
 
-	/**
-	 * 由HightlightImageView调度
-	 * 
-	 * @param scale
-	 *            缩放量
-	 * @param centerX
-	 *            缩放中心 x
-	 * @param centerY
-	 *            缩放中心 y
-	 */
-	public final void onScale(float scale, float centerX, float centerY) {
-		// scaleBy(scale, centerX, centerY);
-		if (displayBubble != null) {
-			displayBubble.showAtShape(this);
-		}
-	}
+    /**
+     * 由HightlightImageView调度
+     *
+     * @param scale   缩放量
+     * @param centerX 缩放中心 x
+     * @param centerY 缩放中心 y
+     */
+    public final void onScale(float scale, float centerX, float centerY) {
+        // scaleBy(scale, centerX, centerY);
+        if (displayBubble != null) {
+            displayBubble.showAtShape(this);
+        }
+    }
 
-	public abstract void onScale(float scale);
+    public abstract void onScale(float scale);
 
-	/**
-	 * 由HightlightImageView调度
-	 * 
-	 * @param deltaX
-	 *            移动量 x
-	 * @param deltaY
-	 *            移动量 y
-	 */
-	public final void onTranslate(float deltaX, float deltaY) {
-		// translate(deltaX, deltaY);
-		if (displayBubble != null) {
-			displayBubble.showAtShape(this);
-		}
-	}
+    /**
+     * 由HightlightImageView调度
+     *
+     * @param deltaX 移动量 x
+     * @param deltaY 移动量 y
+     */
+    public final void onTranslate(float deltaX, float deltaY) {
+        // translate(deltaX, deltaY);
+        if (displayBubble != null) {
+            displayBubble.showAtShape(this);
+        }
+    }
 
-	/**
-	 * 由HightlightImageView调度。
-	 * 
-	 * @param canvas
-	 *            绘制画布
-	 */
-	public final void onDraw(Canvas canvas) {
-		draw(canvas);
-		// 如果当前Shape与Bubble有关联，则将Bubble也显示出来
-		if (displayBubble != null) {
-			displayBubble.showAtShape(this);
-		}
-	}
+    /**
+     * 由HightlightImageView调度。
+     *
+     * @param canvas 绘制画布
+     */
+    public final void onDraw(Canvas canvas) {
+        draw(canvas);
+        // 如果当前Shape与Bubble有关联，则将Bubble也显示出来
+        if (displayBubble != null) {
+            displayBubble.showAtShape(this);
+        }
+    }
 
-	public abstract void draw(Canvas canvas);
+    public abstract void draw(Canvas canvas);
 
-	public abstract boolean bubbleTag();
+    public abstract boolean bubbleTag();
 
-	public abstract void scaleBy(float scale, float centerX, float centerY);
+    public abstract void scaleBy(float scale, float centerX, float centerY);
 
-	public abstract void translate(float deltaX, float deltaY);
+    public abstract void translate(float deltaX, float deltaY);
 
-	public abstract boolean inArea(float x, float y);
+    public abstract boolean inArea(float x, float y);
 
-	public abstract PointF getCenterPoint();
+    public abstract PointF getCenterPoint();
 
-	public abstract String getUrl();
+    public abstract String getUrl();
 
-	public abstract String getPictureUrl();
+    public abstract String getPictureUrl();
 
-	public abstract String getContent();
+    public abstract String getContent();
 
-	public abstract String getTitle();
-	
-	public abstract float getCenterX();
-	
-	public abstract float getCenterY();
+    public abstract String getTitle();
 
-	public static String getCenterCoord(final String _coords) {
-		if (_coords == null || _coords.trim().length() == 0)
-			return null;
+    public abstract float getCenterX();
 
-		try {
-			String coords = _coords.trim();
-			String[] pts = coords.split(" ");
-			int nPts = pts.length;
-			float x = 0;
-			float y = 0;
-			float f;
-			int j = nPts - 1;
-			String p1;
-			String p2;
-			float p1_x;
-			float p1_y;
-			float p2_x;
-			float p2_y;
-			for (int i = 0; i < nPts; j = i++) {
-				p1 = pts[i].trim();
-				if (p1.length() == 0)
-					continue;
+    public abstract float getCenterY();
 
-				p1_x = Float.parseFloat(p1.split(",")[0]);
-				p1_y = Float.parseFloat(p1.split(",")[1]);
+    public static String getCenterCoord(final String _coords) {
+        if (_coords == null || _coords.trim().length() == 0)
+            return null;
 
-				p2 = pts[j].trim();
-				if (p2.length() == 0)
-					continue;
+        try {
+            String coords = _coords.trim();
+            String[] pts = coords.split(" ");
+            int nPts = pts.length;
+            float x = 0;
+            float y = 0;
+            float f;
+            int j = nPts - 1;
+            String p1;
+            String p2;
+            float p1_x;
+            float p1_y;
+            float p2_x;
+            float p2_y;
+            for (int i = 0; i < nPts; j = i++) {
+                p1 = pts[i].trim();
+                if (p1.length() == 0)
+                    continue;
 
-				p2_x = Float.parseFloat(p2.split(",")[0]);
-				p2_y = Float.parseFloat(p2.split(",")[1]);
+                p1_x = Float.parseFloat(p1.split(",")[0]);
+                p1_y = Float.parseFloat(p1.split(",")[1]);
 
-				f = p1_x * p2_y - p2_x * p1_y;
-				x += (p1_x + p2_x) * f;
-				y += (p1_y + p2_y) * f;
-			}
+                p2 = pts[j].trim();
+                if (p2.length() == 0)
+                    continue;
 
-			f = area(pts) * 6;
+                p2_x = Float.parseFloat(p2.split(",")[0]);
+                p2_y = Float.parseFloat(p2.split(",")[1]);
 
-			return x / f + "," + y / f;
-		} catch (Throwable e) {
-			return null;
-		}
-	}
+                f = p1_x * p2_y - p2_x * p1_y;
+                x += (p1_x + p2_x) * f;
+                y += (p1_y + p2_y) * f;
+            }
 
-	private static float area(String[] pts) {
-		float area = 0;
-		int nPts = pts.length;
-		int j = nPts - 1;
-		String p1 = null;
-		String p2 = null;
+            f = area(pts) * 6;
 
-		float p1_x;
-		float p1_y;
-		float p2_x;
-		float p2_y;
-		for (int i = 0; i < nPts; j = i++) {
-			p1 = pts[i].trim();
-			if (p1.length() == 0)
-				continue;
+            return x / f + "," + y / f;
+        } catch (Throwable e) {
+            return null;
+        }
+    }
 
-			p1_x = Float.parseFloat(p1.split(",")[0]);
-			p1_y = Float.parseFloat(p1.split(",")[1]);
+    private static float area(String[] pts) {
+        float area = 0;
+        int nPts = pts.length;
+        int j = nPts - 1;
+        String p1 = null;
+        String p2 = null;
 
-			p2 = pts[j].trim();
-			if (p2.length() == 0)
-				continue;
+        float p1_x;
+        float p1_y;
+        float p2_x;
+        float p2_y;
+        for (int i = 0; i < nPts; j = i++) {
+            p1 = pts[i].trim();
+            if (p1.length() == 0)
+                continue;
 
-			p2_x = Float.parseFloat(p2.split(",")[0]);
-			p2_y = Float.parseFloat(p2.split(",")[1]);
+            p1_x = Float.parseFloat(p1.split(",")[0]);
+            p1_y = Float.parseFloat(p1.split(",")[1]);
 
-			area += p1_x * p2_y;
-			area -= p1_y * p2_x;
-		}
+            p2 = pts[j].trim();
+            if (p2.length() == 0)
+                continue;
 
-		area /= 2;
-		return area;
-	}
+            p2_x = Float.parseFloat(p2.split(",")[0]);
+            p2_y = Float.parseFloat(p2.split(",")[1]);
 
-	public void postMatrixCahnge(Matrix matrix) {
-		mOverMatrix.set(matrix);
-	}
+            area += p1_x * p2_y;
+            area -= p1_y * p2_x;
+        }
+
+        area /= 2;
+        return area;
+    }
+
+    public void postMatrixCahnge(Matrix matrix) {
+        mOverMatrix.set(matrix);
+    }
 
 }

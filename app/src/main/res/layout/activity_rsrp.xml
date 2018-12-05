@@ -79,6 +79,7 @@
             android:layout_marginRight="18dp">
 
             <com.kongqw.rockerlibrary.view.RockerView
+                android:visibility="gone"
                 android:id="@+id/home_rockerView"
                 android:layout_width="92dp"
                 android:layout_height="92dp"
@@ -88,7 +89,6 @@
                 kongqw:rockerRadius="24dp" />
 
             <ImageView
-                android:visibility="gone"
                 android:id="@+id/iv_operation"
                 android:layout_width="92dp"
                 android:layout_height="92dp"
@@ -98,6 +98,7 @@
                 android:src="@mipmap/home_start" />
         </LinearLayout>
     <TextView
+        android:visibility="gone"
         android:id="@+id/tv_switch"
         android:layout_width="60dp"
         android:layout_height="60dp"
