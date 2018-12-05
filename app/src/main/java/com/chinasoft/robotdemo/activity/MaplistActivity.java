@@ -523,4 +523,6 @@ public class MaplistActivity extends BaseActivity {
             }
         });
     }
+
+
 }

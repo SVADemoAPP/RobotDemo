@@ -224,7 +224,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this);
         ro.setNotify(true);
         ro.startOperation();
         initRocker();
@@ -294,6 +294,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private float[] mapToReal(float mx, float my) {
         return new float[]{mx / Constant.mapScale, (mapHeight - my) / Constant.mapScale};
     }
+
     private float[] realToMap(float rx, float ry) {
         return new float[]{rx * Constant.mapScale, mapHeight - ry * Constant.mapScale};
     }
@@ -303,7 +304,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     public void onClickEvent(View view) {
         switch (view.getId()) {
             case R.id.tv_home_back:
-                testLocList.add(new PointF(1,0.3f));
+                testLocList.add(new PointF(1, 0.3f));
 
                 startTestLine(testLocList);
                 finish();
@@ -314,10 +315,10 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                     return;
                 }
                 List<PointF> pointList = new LinkedList<>();
-                testLocList.add(new PointF(1,0.3f));
-                testLocList.add(new PointF(2,0.3f));
-                testLocList.add(new PointF(3,0.3f));
-                testLocList.add(new PointF(1,0.3f));
+                testLocList.add(new PointF(1, 0.3f));
+                testLocList.add(new PointF(2, 0.3f));
+                testLocList.add(new PointF(3, 0.3f));
+                testLocList.add(new PointF(1, 0.3f));
                 startTestLine(testLocList);
 //                ro.forceStop();
 //                if (mSwitchAutoFlag == true)//切换为手动
@@ -982,7 +983,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 //            drawPrruAfterTestLine();
             map.setCanChange(false);
             mpMap.clear();
-            ro.moveTo(testLocList.get(0).x,testLocList.get(0).y);
+            ro.moveTo(testLocList.get(0).x, testLocList.get(0).y);
         } else {
             showToast("路径为空");
         }
@@ -1064,7 +1065,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         map.setMapBitmap(bitmap);
         PointF centerByImagePoint = map.getCenterByImagePoint();
         float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
-        tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0]))+ " , " +Float.parseFloat(String.format("%.2f", float1[1])));
+        tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0])) + " , " + Float.parseFloat(String.format("%.2f", float1[1])));
         map.setOnCenerPointListener(new TouchImageView1.OnCenterPointListener() {
             @Override
             public void onCenter(PointF pointF) {
@@ -1085,10 +1086,14 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mChooseCenterPointPop.hidePopupWindow();
-                SharedPrefHelper.putFloat(mContext, "firstX", rX);
-                SharedPrefHelper.putFloat(mContext, "firstY", rY);
-                ro.doAfterConfirm(rX,rY);
+                if (rX >= 0 && rY >= 0) {
+                    mChooseCenterPointPop.hidePopupWindow();
+                    SharedPrefHelper.putFloat(mContext, "firstX", rX);
+                    SharedPrefHelper.putFloat(mContext, "firstY", rY);
+                    ro.doAfterConfirm(rX, rY);
+                } else {
+                    showToast("选取起始点越界");
+                }
             }
         });
     }
