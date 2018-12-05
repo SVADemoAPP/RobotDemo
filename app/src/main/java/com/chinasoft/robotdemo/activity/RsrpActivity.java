@@ -262,9 +262,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
-//        ro.setNotify(true);
-//        ro.startOperation();
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        ro.setNotify(true);
+        ro.startOperation();
         initRocker();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
@@ -273,8 +273,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 ipList.add(str);
             }
         }
-        map.setMapBitmap(Constant.mapBitmap);
-        mapHeight = Constant.mapBitmap.getHeight();
+//        map.setMapBitmap(Constant.mapBitmap);
+//        mapHeight = Constant.mapBitmap.getHeight();
 
     }
 
@@ -290,26 +290,26 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private void initMap() {
         map.setMapBitmap(Constant.mapBitmap);
         initShape();
-//        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
-//            @Override
-//            public void onRotate(float rotate) {
-//                mapRotate = -rotate;
-//                cv.updateDirection(mapRotate + robotDirection);
-//                robotShape.setView(cv);
-//            }
-//        });
-//        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
-//            @Override
-//            public void onLongClick(PointF point) {
-//                if (isStart && !isAutoFind) {
-//                    rXY = mapToReal(point.x, point.y);
-//                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
-//                    map.setCanChange(false);
-//                    desShape.setValues(point.x, point.y);
-//                    map.addShape(desShape, false);
-//                }
-//            }
-//        });
+        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+            @Override
+            public void onRotate(float rotate) {
+                mapRotate = -rotate;
+                cv.updateDirection(mapRotate + robotDirection);
+                robotShape.setView(cv);
+            }
+        });
+        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
+            @Override
+            public void onLongClick(PointF point) {
+                if (isStart && !isAutoFind) {
+                    rXY = mapToReal(point.x, point.y);
+                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
+                    map.setCanChange(false);
+                    desShape.setValues(point.x, point.y);
+                    map.addShape(desShape, false);
+                }
+            }
+        });
         mapHeight = Constant.mapBitmap.getHeight();
     }
 
@@ -349,12 +349,16 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                     showToast("用第一个userId测试，未配置");
                     return;
                 }
-                List<PointF> pointList = new LinkedList<>();
-                testLocList.add(new PointF(1, 0.3f));
-                testLocList.add(new PointF(2, 0.3f));
-                testLocList.add(new PointF(3, 0.3f));
-                testLocList.add(new PointF(1, 0.3f));
-                startTestLine(testLocList);
+//                List<PointF> pointList = new LinkedList<>();
+//                testLocList.add(new PointF(1, 0.3f));
+//                testLocList.add(new PointF(2, 0.3f));
+//                testLocList.add(new PointF(3, 0.3f));
+//                testLocList.add(new PointF(1, 0.3f));
+                if(nowRouteList.size()==0){
+                    showToast("未选择路径");
+                    return;
+                }
+                startTestLine(nowRouteList);
 //                ro.forceStop();
 //                if (mSwitchAutoFlag == true)//切换为手动
 //                {
