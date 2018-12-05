@@ -1063,6 +1063,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         }
         for (PrruSigalModel psm : prruSigalModelList) {
             if(psm.rsrp>-950) {
+                LLog.getLog().robot(x+","+y,psm.gpp+"____"+psm.rsrp);
                 if (!mpMap.keySet().contains(psm.gpp)) {
                     MaxrsrpPosition mp = new MaxrsrpPosition();
                     mp.setX(x);
@@ -1097,6 +1098,19 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
                     LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
+                }
+            });
+
+            Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + ipList.get(0) + "&mapId=1", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    LLog.getLog().e("getPhonePrru成功", s);
+                    LLog.getLog().robot(x+","+y, s);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    LLog.getLog().e("getPhonePrru错误", volleyError.toString());
                 }
             });
 
@@ -1168,7 +1182,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private void startTestLine(List<PointF> locList) {
         if (locList != null && locList.size() > 0) {
             testLocList = locList;
-            isTestLine = true;
+//            isTestLine = true;
             showToast("路径测试开始");
             drawLineBeforeTestLine();
 //            drawPrruAfterTestLine();
@@ -1185,7 +1199,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         if (testLocList.size() > 0) {
             ro.moveTo(testLocList.get(0).x, testLocList.get(0).y);
         } else {
-            isTestLine = false;
+//            isTestLine = false;
             map.setCanChange(true);
             drawPrruAfterTestLine();
             updateRobotByReal();

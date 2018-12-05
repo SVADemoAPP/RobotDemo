@@ -65,4 +65,10 @@ public class InterRequestUtil {
         sPostRequest.setSendCookie(SharedPrefHelper.getString(context, "Cookie"));
         Constant.mRequestQueue.add(sPostRequest);
     }
+
+    public void getPhonePrru(int method, String url, Listener<String> listener, ErrorListener errorListener) {
+        StringPostRequest sPostRequest = new StringPostRequest(method, url, listener, errorListener);
+        sPostRequest.setSendCookie(SharedPrefHelper.getString(context, "Cookie"));
+        Constant.mRequestQueue.add(sPostRequest);
+    }
 }
