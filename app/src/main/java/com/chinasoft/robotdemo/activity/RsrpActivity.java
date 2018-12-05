@@ -254,7 +254,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         currentMap = getIntent().getExtras().getString("currentMap");
         ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
         ro.setNotify(true);
-//        ro.startOperation();
+        ro.startOperation();
         initRocker();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
