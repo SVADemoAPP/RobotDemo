@@ -397,6 +397,7 @@ public class MaplistActivity extends BaseActivity {
                         showToast("请选择模块");
                         break;
                     case 1:
+                        openActivity(RsrpActivity.class, bundle);
                         break;
                     case 2:
                         bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
@@ -406,6 +407,7 @@ public class MaplistActivity extends BaseActivity {
                         openActivity(PrrucollectActivity.class, bundle);
                         break;
                     case 4:
+                        openActivity(RouteActivity.class);
                         break;
                     default:
                         break;
