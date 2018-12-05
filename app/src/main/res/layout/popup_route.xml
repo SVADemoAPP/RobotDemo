@@ -94,8 +94,7 @@
                     android:hint="输入路径名"
                     android:paddingLeft="30dp"
                     android:textSize="14dp"
-                    android:digits="0123456789."
-                    android:inputType="number"
+                    android:inputType="text"
                     android:background="@null"
                     android:textColorHint="@color/gray_bg"
                     android:textColor="@color/white" />

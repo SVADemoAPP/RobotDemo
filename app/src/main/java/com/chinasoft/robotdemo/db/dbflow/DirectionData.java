@@ -17,10 +17,21 @@ public class DirectionData extends BaseModel {
     public String mapName;
 
     @Column
-    public String directionName;
+    public String routeName;
 
     @Column
     public String path;
+
+    public DirectionData() {
+
+    }
+
+    public DirectionData( String mapName, String routeName, String path) {
+        this.id = id;
+        this.mapName = mapName;
+        this.routeName = routeName;
+        this.path = path;
+    }
 
     public long getId() {
         return id;
@@ -30,15 +41,7 @@ public class DirectionData extends BaseModel {
         this.id = id;
     }
 
-    public DirectionData() {
 
-    }
-
-    public DirectionData(String mapName, String directionName, String path) {
-        this.mapName = mapName;
-        this.directionName = directionName;
-        this.path = path;
-    }
 
     public String getMapName() {
         return mapName;
@@ -48,13 +51,6 @@ public class DirectionData extends BaseModel {
         this.mapName = mapName;
     }
 
-    public String getDirectionName() {
-        return directionName;
-    }
-
-    public void setDirectionName(String directionName) {
-        this.directionName = directionName;
-    }
 
     public String getPath() {
         return path;
@@ -64,15 +60,22 @@ public class DirectionData extends BaseModel {
         this.path = path;
     }
 
+
+    public String getRouteName() {
+        return routeName;
+    }
+
+    public void setRouteName(String routeName) {
+        this.routeName = routeName;
+    }
+
     @Override
     public String toString() {
         return "DirectionData{" +
                 "id=" + id +
                 ", mapName='" + mapName + '\'' +
-                ", directionName='" + directionName + '\'' +
+                ", routeName='" + routeName + '\'' +
                 ", path='" + path + '\'' +
                 '}';
     }
-
-
 }
