@@ -101,6 +101,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     private float rX;
     private float rY;
+    private boolean mFirstflag=false;
 //    private boolean showBattery=true;
 //    private LinearLayout ll_battery;
 //    private ImageView iv_battery;
@@ -113,7 +114,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 //        public void handleMessage(Message msg) {
 //            super.handleMessage(msg);
 //            if (platform != null) {
-//                try {
+//                try {;
 //                    switch (msg.what) {
 //                        case 101:
 //                            platform.moveBy(MoveDirection.FORWARD);
@@ -237,7 +238,25 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
 //        map.setMapBitmap(Constant.mapBitmap);
 //        mapHeight = Constant.mapBitmap.getHeight();
-
+        if (ro!=null&&!ro.getContinue()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                initCenterPop();
+                                mChooseCenterPointPop.showPopupWindow();
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
     }
 
     private void initShape() {
@@ -764,29 +783,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     }
 
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (ro!=null&&!ro.getContinue()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(1000);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                initCenterPop();
-                                mChooseCenterPointPop.showPopupWindow();
-                            }
-                        });
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        }
-    }
+
 
     //移除轨迹点
     private void clearOrbits() {

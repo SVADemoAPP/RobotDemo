@@ -201,9 +201,14 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 //        tv_battery=findViewById(R.id.tv_battery);
     }
 
+
     @Override
-    protected void onResume() {
-        super.onResume();
+    public void dealLogicAfterInitView() {
+        currentMap = getIntent().getExtras().getString("currentMap");
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this);
+        ro.setNotify(false);
+        ro.startOperation();
+        initRocker();
         if (!ro.getContinue()) {
             new Thread(new Runnable() {
                 @Override
@@ -223,15 +228,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 }
             }).start();
         }
-    }
-
-    @Override
-    public void dealLogicAfterInitView() {
-        currentMap = getIntent().getExtras().getString("currentMap");
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this);
-        ro.setNotify(false);
-        ro.startOperation();
-        initRocker();
     }
 
     private void initShape() {

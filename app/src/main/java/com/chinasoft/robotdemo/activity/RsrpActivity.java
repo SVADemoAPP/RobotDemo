@@ -264,6 +264,26 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         map.setMapBitmap(Constant.mapBitmap);
         mapHeight = Constant.mapBitmap.getHeight();
 
+        if (ro != null && !ro.getContinue()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                initCenterPop();
+                                mChooseCenterPointPop.showPopupWindow();
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
+
     }
 
     private void initShape() {
@@ -952,29 +972,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     }
 
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (ro != null && !ro.getContinue()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(1000);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                initCenterPop();
-                                mChooseCenterPointPop.showPopupWindow();
-                            }
-                        });
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        }
-    }
+
 
     //移除轨迹点
     private void clearOrbits() {
