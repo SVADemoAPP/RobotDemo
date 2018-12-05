@@ -225,7 +225,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this,1000);
         ro.setNotify(true);
         ro.startOperation();
         initRocker();
@@ -842,10 +842,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         //finish();
     }
 
-    @Override
-    public void setCenterPoint() {
-
-    }
 
     @Override
     public void refreshOrbits(Vector<Location> locVector) {

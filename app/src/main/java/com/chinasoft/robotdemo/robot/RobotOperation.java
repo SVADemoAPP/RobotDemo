@@ -52,7 +52,8 @@ public class RobotOperation {
     private boolean isNotify; //是否通知进行采集
     private String currentMap;
     private Context context;
-    private SuperPopupWindow mChooseCenterPointPop;
+    private long updatePeriod; //更新间隔时间
+    private boolean isAlwaysUpdate; //机器人是否始终定时更新位置（不管是否移动）
 
     private boolean mContinue=false;
     public void setNotify(boolean notify) {
@@ -66,9 +67,6 @@ public class RobotOperation {
                 nowPose = platform.getPose();
                 nowX = nowPose.getX();
                 nowY = nowPose.getY();
-//                if(isShowBattery){
-//                    onRobotListener.showBattery(platform.getBatteryPercentage());
-//                }
                 if (isNotify) {
                     onRobotListener.notifyPrru(nowX, nowY);
                 }
@@ -78,6 +76,10 @@ public class RobotOperation {
                         case RUNNING:
                             onRobotListener.positionChange(nowX, nowY, robotDirection);
                             onRobotListener.refreshOrbits(platform.searchPath(forwardLocation).getPoints());
+                            //如果机器人仅在移动时定时更新位置
+                            if(!isAlwaysUpdate) {
+                                handler.postDelayed(runnable, updatePeriod);
+                            }
                             break;
                         case FINISHED:
                             isMoving = false;
@@ -90,26 +92,32 @@ public class RobotOperation {
             } catch (Exception e) {
                 errorDisconnect(e.toString());
             }
-            handler.postDelayed(runnable, Constant.updatePeriod);
+            //如果机器人始终定时更新位置
+            if(isAlwaysUpdate) {
+                handler.postDelayed(runnable, updatePeriod);
+            }
         }
     };
 
-    public RobotOperation(String robotIp, int robotPort, String currentMap, OnRobotListener onRobotListener, Context context) {
+    public RobotOperation(String robotIp, int robotPort, String currentMap, OnRobotListener onRobotListener, Context context,long updatePeriod) {
         this.context = context;
         this.currentMap = currentMap;
         this.onRobotListener = onRobotListener;
+        this.updatePeriod=updatePeriod;
         handler = new Handler();
         forwardLocation = new Location();
         connect(robotIp, robotPort);
     }
 
-    //开始
+    //机器人始终更新位置（不管是否移动）
     public void startOperation() {
+        isAlwaysUpdate=true;
         handler.post(runnable);
     }
 
-    //结束
+    //结束机器人更新位置
     public void endOperation() {
+        isAlwaysUpdate=false;
         handler.removeCallbacks(runnable);
     }
 
@@ -174,33 +182,24 @@ public class RobotOperation {
         try {
 //            onRobotListener.refreshOrbits(platform.searchPath(forwardLocation).getPoints());
             platform.moveTo(forwardLocation);
+            if(!isAlwaysUpdate) {
+                handler.post(runnable);
+            }
         } catch (Exception e) {
             errorDisconnect(e.toString());
         }
 
     }
 
-    //移动
-    public void moveToVector(Vector vector) {
-        isMoving = true;
-        try {
-            platform.moveTo(vector);
-        } catch (Exception e) {
-            errorDisconnect(e.toString());
-        }
-
-    }
 
     //取消动作并移动
     public void cancelAndMoveTo(float toX, float toY) {
+        if(!isAlwaysUpdate) {
+            handler.removeCallbacks(runnable);
+        }
         cancelAction();
         moveTo(toX, toY);
     }
-
-
-//    public void setShowBattery(boolean flag) {
-//        isShowBattery = flag;
-//    }
 
 
     //取消当前action

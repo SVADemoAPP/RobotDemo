@@ -69,24 +69,7 @@
         android:textSize="13dp"
         android:textStyle="bold" />
 
-        <LinearLayout
-            android:id="@+id/ll_rd"
-            android:layout_width="92dp"
-            android:layout_height="92dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="18dp"
-            android:layout_marginRight="18dp">
 
-            <com.kongqw.rockerlibrary.view.RockerView
-                android:visibility="gone"
-                android:id="@+id/home_rockerView"
-                android:layout_width="92dp"
-                android:layout_height="92dp"
-                android:layout_gravity="center"
-                kongqw:areaBackground="@mipmap/default_area_bg"
-                kongqw:rockerBackground="@mipmap/default_rocker_bg"
-                kongqw:rockerRadius="24dp" />
 
             <ImageView
                 android:id="@+id/iv_operation"
@@ -94,18 +77,19 @@
                 android:layout_height="92dp"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
+                android:layout_marginBottom="18dp"
+                android:layout_marginRight="18dp"
                 android:gravity="center"
                 android:src="@mipmap/home_start" />
-        </LinearLayout>
     <TextView
         android:visibility="gone"
-        android:id="@+id/tv_switch"
+        android:id="@+id/tv_opeleft"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_toLeftOf="@+id/ll_rd"
+        android:layout_toLeftOf="@+id/iv_operation"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="24dp"
-        android:text="手动"
+        android:text="清除"
         android:textColor="@color/white"
         android:gravity="center"
         android:textSize="18dp"
@@ -118,7 +102,7 @@
         android:id="@+id/tv_forcestop"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_toLeftOf="@+id/ll_rd"
+        android:layout_toLeftOf="@+id/iv_operation"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="90dp"
         android:text="停止"

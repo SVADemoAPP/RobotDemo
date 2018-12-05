@@ -28,4 +28,13 @@ public class MaxrsrpPosition {
     public void setRsrp(float rsrp) {
         this.rsrp = rsrp;
     }
+
+    @Override
+    public String toString() {
+        return "MaxrsrpPosition{" +
+                "x=" + x +
+                ", y=" + y +
+                ", rsrp=" + rsrp +
+                '}';
+    }
 }

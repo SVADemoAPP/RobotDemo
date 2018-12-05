@@ -1,5 +1,6 @@
 package com.chinasoft.robotdemo.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -53,9 +54,9 @@ import java.util.Map;
  */
 
 public class MaplistActivity extends BaseActivity {
-    private ListView lv_maplist;
+//    private ListView lv_maplist;
     private List<String> mapList = new ArrayList();
-    private MaplistAdapter maplistAdapter;
+//    private MaplistAdapter maplistAdapter;
     private String currentMap, wifiRobotIp;
     private int wifiRobotPort;
     private int mode = 1;
@@ -147,16 +148,16 @@ public class MaplistActivity extends BaseActivity {
         for (String str : fileUrls) {
             mapList.add(str);
         }
-        maplistAdapter = new MaplistAdapter(this, mapList);
+//        maplistAdapter = new MaplistAdapter(this, mapList);
 //        currentMap = mapList.get(0);
-        showProgressDialog("地图识别中...");
-        Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
-        dismissProgressDialog();
+//        showProgressDialog("地图识别中...");
+//        Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
+//        dismissProgressDialog();
     }
 
     @Override
     public void initView() {
-        lv_maplist = findViewById(R.id.lv_maplist);
+//        lv_maplist = findViewById(R.id.lv_maplist);
         tv_next = findViewById(R.id.tv_next);
         tv_setting = findViewById(R.id.tv_setting);
         tv_modecollect = findViewById(R.id.tv_modecollect);
@@ -355,19 +356,19 @@ public class MaplistActivity extends BaseActivity {
     @Override
     public void dealLogicAfterInitView() {
         initPop();
-        maplistAdapter.setCurrentMap(currentMap);
-        lv_maplist.setAdapter(maplistAdapter);
-        maplistAdapter.setOnMaplistClickListener(new MaplistAdapter.OnMaplistClickListener() {
-            @Override
-            public void click(String map) {
-                currentMap = map;
-                maplistAdapter.setCurrentMap(currentMap);
-                maplistAdapter.notifyDataSetChanged();
-                showProgressDialog("切换中...");
-                Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
-                dismissProgressDialog();
-            }
-        });
+//        maplistAdapter.setCurrentMap(currentMap);
+//        lv_maplist.setAdapter(maplistAdapter);
+//        maplistAdapter.setOnMaplistClickListener(new MaplistAdapter.OnMaplistClickListener() {
+//            @Override
+//            public void click(String map) {
+//                currentMap = map;
+//                maplistAdapter.setCurrentMap(currentMap);
+//                maplistAdapter.notifyDataSetChanged();
+//                showProgressDialog("切换中...");
+//                Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
+//                dismissProgressDialog();
+//            }
+//        });
     }
 
     @Override
@@ -454,7 +455,6 @@ public class MaplistActivity extends BaseActivity {
         Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
         Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
 
-        Constant.updatePeriod = SharedPrefHelper.getLong(this, "updatePeriod", 2000);
         Constant.lineSpace = SharedPrefHelper.getFloat(this, "lineSpace", 0.3f);
     }
 
@@ -497,6 +497,9 @@ public class MaplistActivity extends BaseActivity {
                 cNum=tNum;
                 mMapChoosePop.hidePopupWindow();
                 mTvMF.setText(mChooseMap);
+                if(Constant.mapBitmap!=null) {
+                    Constant.mapBitmap.recycle();
+                }
                 Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + mChooseMap);
 //                SharedPrefHelper.putString(MaplistActivity.this, "currentMap", mChooseMap);
             }

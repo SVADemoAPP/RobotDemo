@@ -16,8 +16,6 @@ public interface OnRobotListener {
 
     void catchError(String errormsg);
 
-    void setCenterPoint();
-
     void refreshOrbits(Vector<Location> locVector);
 
     void notifyPrru(float x,float y);
@@ -26,6 +24,5 @@ public interface OnRobotListener {
 
     void moveFinish(float x,float y,float direc,boolean isForce);
 
-//    void showBattery(int percent);
 
 }

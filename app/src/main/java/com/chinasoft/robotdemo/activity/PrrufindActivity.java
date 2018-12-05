@@ -205,7 +205,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this);
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this,2000);
         ro.setNotify(false);
         ro.startOperation();
         initRocker();
@@ -703,9 +703,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         //finish();
     }
 
-    @Override
-    public void setCenterPoint() {
-    }
 
     @Override
     public void refreshOrbits(Vector<Location> locVector) {
