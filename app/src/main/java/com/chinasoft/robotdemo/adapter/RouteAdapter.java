@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.bean.RouteModel;
+import com.chinasoft.robotdemo.db.dbflow.DirectionData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +17,14 @@ import java.util.List;
 public class RouteAdapter extends BaseAdapter {
     private ViewHolder holder;
     private Context mContext;
-    private List<RouteModel> routeList = new ArrayList();
+    private List<DirectionData> routeList = new ArrayList();
     private  OnRouteListener onRouteListener;
 
     public void setOnRouteListener(OnRouteListener onRouteListener) {
         this.onRouteListener = onRouteListener;
     }
 
-    public RouteAdapter(Context mContext, List<RouteModel> routeList) {
+    public RouteAdapter(Context mContext, List<DirectionData> routeList) {
         this.mContext = mContext;
         this.routeList = routeList;
     }
@@ -34,8 +35,8 @@ public class RouteAdapter extends BaseAdapter {
     }
 
 
-    public void setRouteList(List<RouteModel> routeList) {
-        this.routeList = routeList;
+    public void setRouteList(List<DirectionData> routeList) {
+        this.routeList=routeList;
     }
 
     public Object getItem(int position) {
@@ -79,8 +80,8 @@ public class RouteAdapter extends BaseAdapter {
     }
 
     public  interface  OnRouteListener{
-        void delete(RouteModel routeModel);
-        void select(RouteModel routeModel);
+        void delete(DirectionData routeModel);
+        void select(DirectionData routeModel);
     }
 
 }

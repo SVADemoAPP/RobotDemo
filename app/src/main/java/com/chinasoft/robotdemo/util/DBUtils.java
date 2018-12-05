@@ -61,7 +61,7 @@ public class DBUtils {
      */
     public static List<DirectionData> queryAsync(String mapName, String directionName) {
         final List<DirectionData> data = new ArrayList<>();
-        OperatorGroup op = OperatorGroup.clause().and(DirectionData_Table.mapName.eq(mapName)).and(DirectionData_Table.directionName.eq(directionName));  //连接多个查询条件
+        OperatorGroup op = OperatorGroup.clause().and(DirectionData_Table.mapName.eq(mapName)).and(DirectionData_Table.routeName.eq(directionName));  //连接多个查询条件
         SQLite.select().from(DirectionData.class).where(op).async().queryListResultCallback(new QueryTransaction.QueryResultListCallback<DirectionData>() {   //执行异步查询
             @Override
             public void onListQueryResult(QueryTransaction transaction, @NonNull List<DirectionData> tResult) {
@@ -78,7 +78,20 @@ public class DBUtils {
      */
     public static List<DirectionData> query(String mapName, String directionName) {
         List<DirectionData> data;
-        OperatorGroup op = OperatorGroup.clause().and(DirectionData_Table.mapName.eq(mapName)).and(DirectionData_Table.directionName.eq(directionName));  //连接多个查询条件
+        OperatorGroup op = OperatorGroup.clause().and(DirectionData_Table.mapName.eq(mapName)).and(DirectionData_Table.routeName.eq(directionName));  //连接多个查询条件
+        data = SQLite.select().from(DirectionData.class).where(op).queryList();
+        return data;
+    }
+
+
+    /***
+     * 使用同步返回查询数据
+     * @param mapName
+     * @return
+     */
+    public static List<DirectionData> query(String mapName) {
+        List<DirectionData> data;
+        OperatorGroup op = OperatorGroup.clause().and(DirectionData_Table.mapName.eq(mapName));  //连接多个查询条件
         data = SQLite.select().from(DirectionData.class).where(op).queryList();
         return data;
     }

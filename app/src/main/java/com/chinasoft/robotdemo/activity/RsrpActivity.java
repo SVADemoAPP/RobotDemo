@@ -27,11 +27,13 @@ import com.chinasoft.robotdemo.bean.MaxrsrpPosition;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
 import com.chinasoft.robotdemo.bean.RouteModel;
+import com.chinasoft.robotdemo.db.dbflow.DirectionData;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.robot.OnRobotListener;
 import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
+import com.chinasoft.robotdemo.util.DBUtils;
 import com.chinasoft.robotdemo.util.LLog;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.chinasoft.robotdemo.view.MyListView;
@@ -77,9 +79,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private float maxRsrp, xWhenMax, yWhenMax;
     private float[] xyRobotWhenMax;
     private CustomShape desShape;
-    private SuperPopupWindow mUseridPopupWindow,mRoutePopupWindow;
+    private SuperPopupWindow mUseridPopupWindow, mRoutePopupWindow;
     private Context mContext;
-    private View popupView_userid,popupView_route;
+    private View popupView_userid, popupView_route;
     private float mapRotate;
     private float robotDirection;
     private RobotOperation ro;
@@ -87,14 +89,14 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     private ImageView iv_collect;
     private TextView tv_forcestop, tv_useridsetting, popup_confirm_userid, popup_cancel_userid;
-    private  TextView tv_routesetting,popup_confirm_route, popup_cancel_route;
-    private MyListView lv_userid,lv_route;
+    private TextView tv_routesetting, popup_confirm_route, popup_cancel_route;
+    private MyListView lv_userid, lv_route;
     private UserIdAdapter userIdAdapter;
     private RouteAdapter routeAdapter;
     private List<String> userIdList = new ArrayList<>();
     private List<String> ipList = new ArrayList<>();
 
-    private List<RouteModel> routeList = new ArrayList<>();
+    private List<DirectionData> routeList = new ArrayList<>();
 
     private LinearLayout ll_addshow_userid, ll_add_userid;
     private LinearLayout ll_addshow_route, ll_add_route;
@@ -103,8 +105,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private TextView tv_pop_route_title;
     private String newRouteJson;
     private String nowRouteName;
-    private List<PointF> nowRouteList=new ArrayList<>();
-    private RouteModel selectRouteModel;
+    private List<PointF> nowRouteList = new ArrayList<>();
+    private DirectionData selectRouteModel;
 
     private EditText et_userid;
     private EditText et_route;
@@ -187,6 +189,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private TextView mSwitch;
     private RockerView mRockerView;
     private SuperPopupWindow mChooseCenterPointPop;
+    private String mMapName;
 
 
     //防止多个请求同时响应产生的线程不安全问题
@@ -216,8 +219,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void dealLogicBeforeInitView() {
-        routeLinePath=new Path();
+        routeLinePath = new Path();
         routeLineShape = new LineShape("routeLine", R.color.green, 2, "#FF4081");
+        mMapName = SharedPrefHelper.getString(mContext, "currentMap", "");
     }
 
     @Override
@@ -316,6 +320,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private float[] mapToReal(float mx, float my) {
         return new float[]{mx / Constant.mapScale, (mapHeight - my) / Constant.mapScale};
     }
+
     private float[] realToMap(float rx, float ry) {
         return new float[]{rx * Constant.mapScale, mapHeight - ry * Constant.mapScale};
     }
@@ -333,10 +338,10 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                     return;
                 }
                 List<PointF> pointList = new LinkedList<>();
-                testLocList.add(new PointF(1,0.3f));
-                testLocList.add(new PointF(2,0.3f));
-                testLocList.add(new PointF(3,0.3f));
-                testLocList.add(new PointF(1,0.3f));
+                testLocList.add(new PointF(1, 0.3f));
+                testLocList.add(new PointF(2, 0.3f));
+                testLocList.add(new PointF(3, 0.3f));
+                testLocList.add(new PointF(1, 0.3f));
                 startTestLine(testLocList);
 //                ro.forceStop();
 //                if (mSwitchAutoFlag == true)//切换为手动
@@ -485,7 +490,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 resetUserIdAdd();
                 break;
             case R.id.popup_confirm_route:
-                if(selectRouteModel==null){
+                if (selectRouteModel == null) {
                     showToast("未选择路径");
                     return;
                 }
@@ -494,9 +499,10 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 //                    RouteModel rm=new RouteModel(newRouteName1,newRouteJson);
 //                    routeList.add(rm);
 //                }
-                nowRouteName=selectRouteModel.getRouteName();
+                nowRouteName = selectRouteModel.getRouteName();
                 removeRoute(nowRouteList.size());
-                nowRouteList=new Gson().fromJson(selectRouteModel.getRouteJson(),new TypeToken<List<PointF>>(){}.getType());
+                nowRouteList = new Gson().fromJson(selectRouteModel.getPath(), new TypeToken<List<PointF>>() {
+                }.getType());
                 drawRoute(nowRouteList);
 
                 resetRouteAdd();
@@ -507,16 +513,18 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 hideRoutePop();
                 break;
             case R.id.rl_add_route:
-                openActivityForResult(RouteActivity.class,1);
+                openActivityForResult(RouteActivity.class, 1);
                 break;
             case R.id.rl_yes_route:
                 String newRouteName = et_route.getText().toString().trim();
                 if (canRouteAdd(newRouteName)) {
 //                    userIdList.add(newRoute1);
 //                    refreshRouteList(userIdList);
-                    RouteModel rm=new RouteModel(newRouteName,newRouteJson);
 
-                    //todo 插入数据并更新routeList
+                    DirectionData rm = new DirectionData(mMapName, newRouteName, newRouteJson);
+
+                    // 插入数据并更新routeList
+                    DBUtils.insert(rm);
                     routeList.add(rm);
                     resetRouteAdd();
                     refreshRouteList(routeList);
@@ -548,7 +556,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         if (routeName.equals("")) {
             return false;
         }
-        for (RouteModel route : routeList) {
+        for (DirectionData route : routeList) {
             if (routeName.equals(route.getRouteName())) {
                 return false;
             }
@@ -579,7 +587,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         userIdAdapter.notifyDataSetChanged();
     }
 
-    private void refreshRouteList(List<RouteModel> routeList) {
+    private void refreshRouteList(List<DirectionData> routeList) {
         resetRouteAdd();
         routeAdapter.setRouteList(routeList);
         routeAdapter.notifyDataSetChanged();
@@ -655,7 +663,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
      * 初始化开始popupwindow
      */
     private void initRoutePop() {
-        //todo   查询数据库，赋予routeList；
+        //   查询数据库，赋予routeList；
+        routeList = DBUtils.query(mMapName);
+
         if (mRoutePopupWindow == null) {
             mRoutePopupWindow = new SuperPopupWindow(mContext, R.layout.popup_route);
             mRoutePopupWindow.setFocusable(true);
@@ -675,25 +685,26 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             rl_add_route = popupView_route.findViewById(R.id.rl_add_route);
             rl_no_route = popupView_route.findViewById(R.id.rl_no_route);
             rl_yes_route = popupView_route.findViewById(R.id.rl_yes_route);
-            tv_pop_route_title=popupView_route.findViewById(R.id.tv_pop_route_title);
+            tv_pop_route_title = popupView_route.findViewById(R.id.tv_pop_route_title);
             rl_yes_route.setOnClickListener(this);
             rl_no_route.setOnClickListener(this);
             rl_add_route.setOnClickListener(this);
             routeAdapter.setOnRouteListener(new RouteAdapter.OnRouteListener() {
                 @Override
-                public void delete(RouteModel routeModel) {
-                    if (routeModel==selectRouteModel){
+                public void delete(DirectionData routeModel) {
+                    if (routeModel == selectRouteModel) {
                         showToast("不能删除选择的路径");
                         return;
                     }
-                    //todo  删除数据库并更新routeList
+                    //  删除数据库并更新routeList
+                    DBUtils.delete(routeModel);//删除
                     routeList.remove(routeModel);
                     refreshRouteList(routeList);
                 }
 
                 @Override
-                public void select(RouteModel routeModel) {
-                    if(routeModel!=selectRouteModel) {
+                public void select(DirectionData routeModel) {
+                    if (routeModel != selectRouteModel) {
                         selectRouteModel = routeModel;
                         tv_pop_route_title.setText(selectRouteModel.getRouteName());
                     }
@@ -707,16 +718,16 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
      * 显示Popupwindow
      */
     private void showRoutePop() {
-        if(!TextUtils.isEmpty(nowRouteName)){
+        if (!TextUtils.isEmpty(nowRouteName)) {
             tv_pop_route_title.setText(nowRouteName);
-            selectRouteModel=getRouteModelByRouteName(nowRouteName);
+            selectRouteModel = getRouteModelByRouteName(nowRouteName);
         }
         mRoutePopupWindow.showPopupWindow();
     }
 
-    private RouteModel getRouteModelByRouteName(String routeName){
-        for(RouteModel route:routeList){
-            if(routeName.equals(route.getRouteName())){
+    private DirectionData getRouteModelByRouteName(String routeName) {
+        for (DirectionData route : routeList) {
+            if (routeName.equals(route.getRouteName())) {
                 return route;
             }
         }
@@ -728,7 +739,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
      */
     private void hideRoutePop() {
         tv_pop_route_title.setText("");
-        selectRouteModel=null;
+        selectRouteModel = null;
         mRoutePopupWindow.hidePopupWindow();
     }
 
@@ -944,7 +955,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     protected void onResume() {
         super.onResume();
-        if (ro!=null&&!ro.getContinue()) {
+        if (ro != null && !ro.getContinue()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -1156,7 +1167,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 //            drawPrruAfterTestLine();
             map.setCanChange(false);
             mpMap.clear();
-            ro.moveTo(testLocList.get(0).x,testLocList.get(0).y);
+            ro.moveTo(testLocList.get(0).x, testLocList.get(0).y);
         } else {
             showToast("路径为空");
         }
@@ -1206,14 +1217,14 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         }
     }
 
-    private void removeRoute(int pointSize){
-        for(int i=0;i<pointSize;i++){
-            map.removeShape("routePoint"+i);
+    private void removeRoute(int pointSize) {
+        for (int i = 0; i < pointSize; i++) {
+            map.removeShape("routePoint" + i);
         }
         map.removeShape("routeLine");
     }
 
-    private void drawRoute(List<PointF> routeList){
+    private void drawRoute(List<PointF> routeList) {
         routeLinePath.reset();
         for (int i = 0, len = routeList.size(); i < len; i++) {
             mXY = realToMap(routeList.get(i).x, routeList.get(i).y);
@@ -1262,7 +1273,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         map.setMapBitmap(bitmap);
         PointF centerByImagePoint = map.getCenterByImagePoint();
         float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
-        tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0]))+ " , " +Float.parseFloat(String.format("%.2f", float1[1])));
+        tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0])) + " , " + Float.parseFloat(String.format("%.2f", float1[1])));
         map.setOnCenerPointListener(new TouchImageView1.OnCenterPointListener() {
             @Override
             public void onCenter(PointF pointF) {
@@ -1286,7 +1297,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 mChooseCenterPointPop.hidePopupWindow();
                 SharedPrefHelper.putFloat(mContext, "firstX", rX);
                 SharedPrefHelper.putFloat(mContext, "firstY", rY);
-                ro.doAfterConfirm(rX,rY);
+                ro.doAfterConfirm(rX, rY);
             }
         });
     }
@@ -1298,10 +1309,10 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==1&&resultCode==2){
+        if (requestCode == 1 && resultCode == 2) {
             rl_add_route.setVisibility(View.GONE);
             ll_add_route.setVisibility(View.VISIBLE);
-            newRouteJson=data.getStringExtra("routeJson");
+            newRouteJson = data.getStringExtra("routeJson");
 //            et_route.setText("默认");
         }
     }
