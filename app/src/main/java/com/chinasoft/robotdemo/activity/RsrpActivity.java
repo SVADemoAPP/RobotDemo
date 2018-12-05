@@ -119,17 +119,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private boolean isTestLine = false;
     private LineShape routeLineShape;
     private Path routeLinePath;
-    private Map<String, MaxrsrpPosition> mpMap = new TreeMap<>(new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-            if(mpMap.get(o1).getRsrp()>mpMap.get(o2).getRsrp()){
-                return -1;
-            }else if(mpMap.get(o1).getRsrp()<mpMap.get(o2).getRsrp()){
-                return 1;
-            }
-            return 0;
-        }
-    });
+    private Map<String, MaxrsrpPosition> mpMap = new TreeMap<>();
 
     private float rX;
     private float rY;
@@ -262,9 +252,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
-//        ro.setNotify(true);
-//        ro.startOperation();
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+        ro.setNotify(true);
+        ro.startOperation();
         initRocker();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
@@ -273,8 +263,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 ipList.add(str);
             }
         }
-//        map.setMapBitmap(Constant.mapBitmap);
-//        mapHeight = Constant.mapBitmap.getHeight();
+        map.setMapBitmap(Constant.mapBitmap);
+        mapHeight = Constant.mapBitmap.getHeight();
 
         if (ro != null && !ro.getContinue()) {
             new Thread(new Runnable() {
