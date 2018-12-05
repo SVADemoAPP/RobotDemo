@@ -1,6 +1,7 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -25,6 +26,7 @@ import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.MaxrsrpPosition;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
+import com.chinasoft.robotdemo.bean.RouteModel;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.robot.OnRobotListener;
@@ -35,6 +37,7 @@ import com.chinasoft.robotdemo.view.CompassView;
 import com.chinasoft.robotdemo.view.MyListView;
 import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.kongqw.rockerlibrary.view.RockerView;
 import com.slamtec.slamware.robot.Location;
 
@@ -91,22 +94,32 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private List<String> userIdList = new ArrayList<>();
     private List<String> ipList = new ArrayList<>();
 
+    private List<RouteModel> routeList = new ArrayList<>();
+
     private LinearLayout ll_addshow_userid, ll_add_userid;
     private LinearLayout ll_addshow_route, ll_add_route;
     private RelativeLayout rl_add_userid, rl_yes_userid, rl_no_userid;
     private RelativeLayout rl_add_route, rl_yes_route, rl_no_route;
+    private TextView tv_pop_route_title;
+    private String newRouteJson;
+    private String nowRouteName;
+    private List<PointF> nowRouteList=new ArrayList<>();
+    private RouteModel selectRouteModel;
+
     private EditText et_userid;
     private EditText et_route;
     private String userIds;
 
+
     private List<PointF> testLocList = new LinkedList<>();
     private boolean isTestLine = false;
-    private LineShape testLineShape;
-    private Path testLinePath;
+    private LineShape routeLineShape;
+    private Path routeLinePath;
     private Map<String, MaxrsrpPosition> mpMap = new HashMap<>();
 
     private float rX;
     private float rY;
+
 //    private boolean showBattery=true;
 //    private LinearLayout ll_battery;
 //    private ImageView iv_battery;
@@ -203,6 +216,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void dealLogicBeforeInitView() {
+        routeLinePath=new Path();
+        routeLineShape = new LineShape("routeLine", R.color.green, 2, "#FF4081");
     }
 
     @Override
@@ -432,7 +447,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 ro.forceStop();
                 break;
             case R.id.popup_confirm_userid:
-                String newUserId = et_userid.getText().toString();
+                String newUserId = et_userid.getText().toString().trim();
                 if (canUserIdAdd(newUserId)) {
                     userIdList.add(newUserId);
                 }
@@ -455,8 +470,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 hideUserIdPop();
                 break;
             case R.id.rl_add_userid:
-                rl_add_userid.setVisibility(View.GONE);
-                ll_add_userid.setVisibility(View.VISIBLE);
+
                 break;
             case R.id.rl_yes_userid:
                 String newUserId1 = et_userid.getText().toString().trim();
@@ -471,21 +485,20 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 resetUserIdAdd();
                 break;
             case R.id.popup_confirm_route:
-                String newRoute = et_route.getText().toString();
-                if (canUserIdAdd(newRoute)) {
-                    userIdList.add(newRoute);
+                if(selectRouteModel==null){
+                    showToast("未选择路径");
+                    return;
                 }
-                ipList.clear();
-                if (userIdList.size() > 0) {
-                    StringBuffer sb = new StringBuffer();
-                    for (String str : userIdList) {
-                        ipList.add(str);
-                        sb.append(";" + str);
-                    }
-                    SharedPrefHelper.putString(this, "userId", sb.substring(1));
-                } else {
-                    SharedPrefHelper.putString(this, "userId", "");
-                }
+//                String newRouteName1 = et_route.getText().toString().trim();
+//                if (canRouteAdd(newRouteName1)) {
+//                    RouteModel rm=new RouteModel(newRouteName1,newRouteJson);
+//                    routeList.add(rm);
+//                }
+                nowRouteName=selectRouteModel.getRouteName();
+                removeRoute(nowRouteList.size());
+                nowRouteList=new Gson().fromJson(selectRouteModel.getRouteJson(),new TypeToken<List<PointF>>(){}.getType());
+                drawRoute(nowRouteList);
+
                 resetRouteAdd();
                 hideRoutePop();
                 break;
@@ -494,14 +507,19 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 hideRoutePop();
                 break;
             case R.id.rl_add_route:
-                rl_add_route.setVisibility(View.GONE);
-                ll_add_route.setVisibility(View.VISIBLE);
+                openActivityForResult(RouteActivity.class,1);
                 break;
             case R.id.rl_yes_route:
-                String newRoute1 = et_route.getText().toString().trim();
-                if (canUserIdAdd(newRoute1)) {
-                    userIdList.add(newRoute1);
-                    refreshRouteList(userIdList);
+                String newRouteName = et_route.getText().toString().trim();
+                if (canRouteAdd(newRouteName)) {
+//                    userIdList.add(newRoute1);
+//                    refreshRouteList(userIdList);
+                    RouteModel rm=new RouteModel(newRouteName,newRouteJson);
+
+                    //todo 插入数据并更新routeList
+                    routeList.add(rm);
+                    resetRouteAdd();
+                    refreshRouteList(routeList);
                 } else {
                     showToast("空白或重复添加");
                 }
@@ -520,6 +538,18 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         }
         for (String str : userIdList) {
             if (str.equals(newUserId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean canRouteAdd(String routeName) {
+        if (routeName.equals("")) {
+            return false;
+        }
+        for (RouteModel route : routeList) {
+            if (routeName.equals(route.getRouteName())) {
                 return false;
             }
         }
@@ -549,13 +579,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         userIdAdapter.notifyDataSetChanged();
     }
 
-    private void refreshRouteList(List<String> routeList) {
+    private void refreshRouteList(List<RouteModel> routeList) {
         resetRouteAdd();
-        if (routeList.size() < 10) {
-            ll_addshow_route.setVisibility(View.VISIBLE);
-        } else {
-            ll_addshow_route.setVisibility(View.GONE);
-        }
         routeAdapter.setRouteList(routeList);
         routeAdapter.notifyDataSetChanged();
     }
@@ -630,10 +655,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
      * 初始化开始popupwindow
      */
     private void initRoutePop() {
-        userIdList.clear();
-        for (String str : ipList) {
-            userIdList.add(str);
-        }
+        //todo   查询数据库，赋予routeList；
         if (mRoutePopupWindow == null) {
             mRoutePopupWindow = new SuperPopupWindow(mContext, R.layout.popup_route);
             mRoutePopupWindow.setFocusable(true);
@@ -643,7 +665,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             popup_confirm_route = popupView_route.findViewById(R.id.popup_confirm_route);
             popup_cancel_route = popupView_route.findViewById(R.id.popup_cancel_route);
             lv_route = popupView_route.findViewById(R.id.lv_route);
-            routeAdapter = new RouteAdapter(this, userIdList);
+            routeAdapter = new RouteAdapter(this, routeList);
             lv_route.setAdapter(routeAdapter);
             popup_confirm_route.setOnClickListener(this);
             popup_cancel_route.setOnClickListener(this);
@@ -653,14 +675,28 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             rl_add_route = popupView_route.findViewById(R.id.rl_add_route);
             rl_no_route = popupView_route.findViewById(R.id.rl_no_route);
             rl_yes_route = popupView_route.findViewById(R.id.rl_yes_route);
+            tv_pop_route_title=popupView_route.findViewById(R.id.tv_pop_route_title);
             rl_yes_route.setOnClickListener(this);
             rl_no_route.setOnClickListener(this);
             rl_add_route.setOnClickListener(this);
             routeAdapter.setOnRouteListener(new RouteAdapter.OnRouteListener() {
                 @Override
-                public void delete(int position) {
-                    userIdList.remove(position);
-                    refreshRouteList(userIdList);
+                public void delete(RouteModel routeModel) {
+                    if (routeModel==selectRouteModel){
+                        showToast("不能删除选择的路径");
+                        return;
+                    }
+                    //todo  删除数据库并更新routeList
+                    routeList.remove(routeModel);
+                    refreshRouteList(routeList);
+                }
+
+                @Override
+                public void select(RouteModel routeModel) {
+                    if(routeModel!=selectRouteModel) {
+                        selectRouteModel = routeModel;
+                        tv_pop_route_title.setText(selectRouteModel.getRouteName());
+                    }
                 }
             });
         }
@@ -671,13 +707,28 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
      * 显示Popupwindow
      */
     private void showRoutePop() {
+        if(!TextUtils.isEmpty(nowRouteName)){
+            tv_pop_route_title.setText(nowRouteName);
+            selectRouteModel=getRouteModelByRouteName(nowRouteName);
+        }
         mRoutePopupWindow.showPopupWindow();
+    }
+
+    private RouteModel getRouteModelByRouteName(String routeName){
+        for(RouteModel route:routeList){
+            if(routeName.equals(route.getRouteName())){
+                return route;
+            }
+        }
+        return null;
     }
 
     /**
      * 隐藏Popupwindow
      */
     private void hideRoutePop() {
+        tv_pop_route_title.setText("");
+        selectRouteModel=null;
         mRoutePopupWindow.hidePopupWindow();
     }
 
@@ -1155,23 +1206,47 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         }
     }
 
-    private void drawLineBeforeTestLine() {
-        for (int i = 0, len = testLocList.size(); i < len; i++) {
-            mXY = realToMap(testLocList.get(i).x, testLocList.get(i).y);
-            CustomShape tShape = new CustomShape("test" + i, R.color.blue, RsrpActivity.this, "dwf", R.mipmap.destination_point);
+    private void removeRoute(int pointSize){
+        for(int i=0;i<pointSize;i++){
+            map.removeShape("routePoint"+i);
+        }
+        map.removeShape("routeLine");
+    }
+
+    private void drawRoute(List<PointF> routeList){
+        routeLinePath.reset();
+        for (int i = 0, len = routeList.size(); i < len; i++) {
+            mXY = realToMap(routeList.get(i).x, routeList.get(i).y);
+            CustomShape tShape = new CustomShape("routePoint" + i, R.color.blue, RsrpActivity.this, "dwf", R.mipmap.destination_point);
             tShape.setValues(mXY[0], mXY[1]);
             map.addShape(tShape, false);
             if (i == 0) {
-                testLinePath = new Path();
-                testLinePath.moveTo(mXY[0], mXY[1]);
+                routeLinePath.moveTo(mXY[0], mXY[1]);
             } else {
-                testLinePath.lineTo(mXY[0], mXY[1]);
+                routeLinePath.lineTo(mXY[0], mXY[1]);
             }
 
         }
-        testLineShape = new LineShape("testLine", R.color.green, 2, "#FF4081");
-        testLineShape.setPath(testLinePath);
-        map.addShape(testLineShape, false);
+        routeLineShape.setPath(routeLinePath);
+        map.addShape(routeLineShape, false);
+    }
+
+    private void drawLineBeforeTestLine() {
+        routeLinePath.reset();
+        for (int i = 0, len = testLocList.size(); i < len; i++) {
+            mXY = realToMap(testLocList.get(i).x, testLocList.get(i).y);
+            CustomShape tShape = new CustomShape("routePoint" + i, R.color.blue, RsrpActivity.this, "dwf", R.mipmap.destination_point);
+            tShape.setValues(mXY[0], mXY[1]);
+            map.addShape(tShape, false);
+            if (i == 0) {
+                routeLinePath.moveTo(mXY[0], mXY[1]);
+            } else {
+                routeLinePath.lineTo(mXY[0], mXY[1]);
+            }
+
+        }
+        routeLineShape.setPath(routeLinePath);
+        map.addShape(routeLineShape, false);
     }
 
     private void initCenterPop() {
@@ -1218,5 +1293,16 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     public void showCenterPop() {
         mChooseCenterPointPop.showPopupWindow();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==1&&resultCode==2){
+            rl_add_route.setVisibility(View.GONE);
+            ll_add_route.setVisibility(View.VISIBLE);
+            newRouteJson=data.getStringExtra("routeJson");
+//            et_route.setText("默认");
+        }
     }
 }

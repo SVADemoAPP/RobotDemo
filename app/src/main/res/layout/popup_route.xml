@@ -16,9 +16,12 @@
     android:layout_height="0dp"
     android:layout_weight="1">
     <TextView
+        android:id="@+id/tv_pop_route_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="route管理"
+        android:text=""
+        android:hint="请选择一条路径"
+        android:textColorHint="@color/gray_bg"
         android:textColor="@color/white"
         android:textSize="16dp"
         android:layout_centerInParent="true"/>
@@ -68,7 +71,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="添加一个route"
+                    android:text="新增路径"
                     android:gravity="center_vertical"
                     android:textSize="14dp"
                     android:textColor="@color/userid_add"
@@ -88,7 +91,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="3"
                     android:gravity="center_vertical"
-                    android:hint="输入userId"
+                    android:hint="输入路径名"
                     android:paddingLeft="30dp"
                     android:textSize="14dp"
                     android:digits="0123456789."

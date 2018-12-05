@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.chinasoft.robotdemo.R;
+import com.chinasoft.robotdemo.bean.RouteModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,14 +16,14 @@ import java.util.List;
 public class RouteAdapter extends BaseAdapter {
     private ViewHolder holder;
     private Context mContext;
-    private List<String> routeList = new ArrayList();
-private  OnRouteListener onRouteListener;
+    private List<RouteModel> routeList = new ArrayList();
+    private  OnRouteListener onRouteListener;
 
     public void setOnRouteListener(OnRouteListener onRouteListener) {
         this.onRouteListener = onRouteListener;
     }
 
-    public RouteAdapter(Context mContext, List<String> routeList) {
+    public RouteAdapter(Context mContext, List<RouteModel> routeList) {
         this.mContext = mContext;
         this.routeList = routeList;
     }
@@ -33,7 +34,7 @@ private  OnRouteListener onRouteListener;
     }
 
 
-    public void setRouteList(List<String> routeList) {
+    public void setRouteList(List<RouteModel> routeList) {
         this.routeList = routeList;
     }
 
@@ -47,7 +48,6 @@ private  OnRouteListener onRouteListener;
 
     public View getView(final int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-
                 holder = new ViewHolder();
                 convertView = View.inflate(mContext, R.layout.item_route_show, null);
                 holder.tv_route=convertView.findViewById(R.id.tv_route);
@@ -56,13 +56,19 @@ private  OnRouteListener onRouteListener;
         } else {
                 holder = (ViewHolder) convertView.getTag();
         }
-        holder.tv_route.setText(routeList.get(position));
-holder.rl_delete.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View v) {
-        onRouteListener.delete(position);
-    }
-});
+        holder.tv_route.setText(routeList.get(position).getRouteName());
+        holder.tv_route.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onRouteListener.select(routeList.get(position));
+            }
+        });
+        holder.rl_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onRouteListener.delete(routeList.get(position));
+            }
+        });
         return convertView;
     }
 
@@ -73,7 +79,8 @@ holder.rl_delete.setOnClickListener(new View.OnClickListener() {
     }
 
     public  interface  OnRouteListener{
-        void delete(int position);
+        void delete(RouteModel routeModel);
+        void select(RouteModel routeModel);
     }
 
 }
