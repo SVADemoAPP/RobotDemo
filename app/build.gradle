@@ -40,7 +40,7 @@ dependencies {
     //chrome
     implementation 'com.facebook.stetho:stetho-okhttp3:1.4.2'
 
-    //data
+    //db
     annotationProcessor  "com.github.Raizlabs.DBFlow:dbflow-processor:${dbflow_version}"
     implementation "com.github.Raizlabs.DBFlow:dbflow-core:${dbflow_version}"
     implementation "com.github.Raizlabs.DBFlow:dbflow:${dbflow_version}"

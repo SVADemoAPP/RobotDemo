@@ -683,7 +683,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     public void connectSuccess(float x, float y, float direc, boolean isContinue) {
         showToast("机器人连接成功！");
         initMap();
-
         nowX = x;
         nowY = y;
         robotDirection = direc;

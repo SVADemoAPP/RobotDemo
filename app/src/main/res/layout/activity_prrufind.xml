@@ -17,7 +17,6 @@
         android:background="@mipmap/home_bg2" />
 
 
-
     <!--返回按钮-->
     <TextView
         android:id="@+id/tv_home_back"
@@ -76,37 +75,39 @@
             android:gravity="center"
             android:src="@mipmap/home_start" />
     </LinearLayout>
+
     <TextView
         android:id="@+id/tv_switch"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_toLeftOf="@+id/ll_rd"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="24dp"
-        android:text="自动"
-        android:textSize="18dp"
-        android:textColor="@color/white"
-        android:gravity="center"
-        android:textStyle="bold"
         android:layout_marginRight="12dp"
         android:layout_marginTop="5dp"
-        android:background="@drawable/tv_round" />
+        android:layout_toLeftOf="@+id/ll_rd"
+        android:background="@drawable/tv_round"
+        android:gravity="center"
+        android:text="自动"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tv_forcestop"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_toLeftOf="@+id/ll_rd"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="90dp"
+        android:layout_marginRight="-10dp"
+        android:layout_marginTop="5dp"
+        android:layout_toLeftOf="@+id/ll_rd"
+        android:background="@drawable/tv_round"
+        android:gravity="center"
         android:text="停止"
         android:textColor="@color/white"
         android:textSize="18dp"
-        android:gravity="center"
-        android:textStyle="bold"
-        android:layout_marginRight="-10dp"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/tv_round" />
+        android:textStyle="bold" />
 
     <ImageView
         android:id="@+id/iv_collect"
@@ -114,11 +115,12 @@
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginEnd="30dp"
         android:layout_marginBottom="120dp"
+        android:layout_marginEnd="30dp"
         android:layout_marginRight="0dp"
         android:layout_marginTop="5dp"
-        android:src="@mipmap/iv_collectoff" />
+        android:src="@mipmap/iv_collectoff"
+        android:visibility="gone" />
 
     <!--<LinearLayout-->
     <!--android:id="@+id/ll_battery"-->
