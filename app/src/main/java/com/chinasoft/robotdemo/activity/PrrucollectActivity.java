@@ -215,7 +215,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         tv_forcestop.setOnClickListener(this);
         tv_useridsetting.setOnClickListener(this);
 
-//        ll_battery=findViewById(R.id.ll_battery);
+//        ll_battery=findViewById(R.id.ll_bafttery);
 //        iv_battery=findViewById(R.id.iv_battery);
 //        tv_battery=findViewById(R.id.tv_battery);
     }
@@ -414,7 +414,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 ro.forceStop();
                 break;
             case R.id.popup_confirm_userid:
-                String newUserId = et_userid.getText().toString();
+                String newUserId = et_userid.getText().toString().trim();
                 if (canUserIdAdd(newUserId)) {
                     userIdList.add(newUserId);
                 }

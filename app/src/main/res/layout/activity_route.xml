@@ -42,7 +42,7 @@
         android:layout_marginBottom="18dp"
         android:layout_marginRight="18dp"
         android:gravity="center"
-        android:src="@mipmap/home_start" />
+        android:src="@mipmap/route_save" />
 
     <TextView
         android:id="@+id/tv_prev"

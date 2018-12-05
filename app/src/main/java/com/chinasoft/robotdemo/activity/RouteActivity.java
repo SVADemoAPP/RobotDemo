@@ -1,6 +1,7 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.util.Log;
@@ -12,6 +13,7 @@ import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.utils.NumUtil;
 import com.chinasoft.robotdemo.util.Constant;
+import com.google.gson.Gson;
 
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
@@ -119,6 +121,10 @@ public class RouteActivity extends BaseActivity  {
                     p.x=tempF[0];
                     p.y=tempF[1];
                 }
+                Intent intent=new Intent();
+                intent.putExtra("routeJson",new Gson().toJson(mPointList));
+                setResult(2,intent);
+                finish();
                 break;
             case R.id.tv_clear:
                 for(int i=0,len=mPointList.size();i<len;i++){
