@@ -262,9 +262,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
-        ro.setNotify(true);
-        ro.startOperation();
+//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this);
+//        ro.setNotify(true);
+//        ro.startOperation();
         initRocker();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
@@ -290,26 +290,26 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private void initMap() {
         map.setMapBitmap(Constant.mapBitmap);
         initShape();
-        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
-            @Override
-            public void onRotate(float rotate) {
-                mapRotate = -rotate;
-                cv.updateDirection(mapRotate + robotDirection);
-                robotShape.setView(cv);
-            }
-        });
-        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
-            @Override
-            public void onLongClick(PointF point) {
-                if (isStart && !isAutoFind) {
-                    rXY = mapToReal(point.x, point.y);
-                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
-                    map.setCanChange(false);
-                    desShape.setValues(point.x, point.y);
-                    map.addShape(desShape, false);
-                }
-            }
-        });
+//        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+//            @Override
+//            public void onRotate(float rotate) {
+//                mapRotate = -rotate;
+//                cv.updateDirection(mapRotate + robotDirection);
+//                robotShape.setView(cv);
+//            }
+//        });
+//        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
+//            @Override
+//            public void onLongClick(PointF point) {
+//                if (isStart && !isAutoFind) {
+//                    rXY = mapToReal(point.x, point.y);
+//                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
+//                    map.setCanChange(false);
+//                    desShape.setValues(point.x, point.y);
+//                    map.addShape(desShape, false);
+//                }
+//            }
+//        });
         mapHeight = Constant.mapBitmap.getHeight();
     }
 
@@ -491,7 +491,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 hideUserIdPop();
                 break;
             case R.id.rl_add_userid:
-
+                rl_add_userid.setVisibility(View.GONE);
+                ll_add_userid.setVisibility(View.VISIBLE);
                 break;
             case R.id.rl_yes_userid:
                 String newUserId1 = et_userid.getText().toString().trim();
