@@ -780,7 +780,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 float[] floats = mapToReal(pointF.x, pointF.y, maphight);
                 rX = Float.parseFloat(String.format("%.2f", floats[0]));
                 rY = Float.parseFloat(String.format("%.2f", floats[1]));
-
                 tvShowPoint.setText(rX + " , " + rY);
             }
         });
@@ -795,10 +794,15 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mChooseCenterPointPop.hidePopupWindow();
-                SharedPrefHelper.putFloat(mContext, "firstX", rX);
-                SharedPrefHelper.putFloat(mContext, "firstY", rY);
-                ro.doAfterConfirm(rX, rY);
+                if (rX>=0&&rY>=0)
+                {
+                    mChooseCenterPointPop.hidePopupWindow();
+                    SharedPrefHelper.putFloat(mContext, "firstX", rX);
+                    SharedPrefHelper.putFloat(mContext, "firstY", rY);
+                    ro.doAfterConfirm(rX, rY);
+                }else {
+                    showToast("选取起始点越界");
+                }
             }
         });
     }

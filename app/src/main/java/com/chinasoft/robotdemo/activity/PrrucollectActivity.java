@@ -1082,10 +1082,14 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mChooseCenterPointPop.hidePopupWindow();
-                SharedPrefHelper.putFloat(mContext, "firstX", rX);
-                SharedPrefHelper.putFloat(mContext, "firstY", rY);
-                ro.doAfterConfirm(rX,rY);
+                if (rX >= 0 && rY >= 0) {
+                    mChooseCenterPointPop.hidePopupWindow();
+                    SharedPrefHelper.putFloat(mContext, "firstX", rX);
+                    SharedPrefHelper.putFloat(mContext, "firstY", rY);
+                    ro.doAfterConfirm(rX, rY);
+                } else {
+                    showToast("选取起始点越界");
+                }
             }
         });
     }
