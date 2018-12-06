@@ -987,6 +987,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private void startTestLine() {
         if (nowRouteList != null && nowRouteList.size() > 0) {
             if(nowRouteList.size()==locCount) {
+                map.removeShape("des");
                 showToast("路径测试开始");
             }else if(nowRouteList.size()<locCount){
                 showToast("路径测试恢复");
