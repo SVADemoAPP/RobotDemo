@@ -10,6 +10,7 @@ import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.View;
 import android.widget.EditText;
@@ -136,6 +137,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private int mode_opeleft=0;//操作左边按钮的状态，0为隐藏，1为恢复，2为清除
     private SuperPopupWindow mChooseCenterPointPop;
     private String mMapName;
+    private RelativeLayout rlBg;
 
 
     //防止多个请求同时响应产生的线程不安全问题
@@ -173,6 +175,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void initView() {
         map = findViewById(R.id.imagemap);
+        rlBg = findViewById(R.id.rl_bg2);
+//        rlBg.dispatchTouchEvent(new MotionEvent())
         iv_operation = findViewById(R.id.iv_operation);
         tv_home_back = findViewById(R.id.tv_home_back);
         tv_opeleft = findViewById(R.id.tv_opeleft);
