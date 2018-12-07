@@ -82,11 +82,11 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private boolean isAutoFind = false;
     private PrruModel nowCollectPrru;
     private int coorCount = 0;
-//    private Path path;
+    //    private Path path;
 //    private LineShape lineShape;
 //    private float lastX, lastY;
-    private  float nowX, nowY;
-    private float[] newF, desF, mXY, rXY,tempMXY;
+    private float nowX, nowY;
+    private float[] newF, desF, mXY, rXY, tempMXY;
     private String currentMap;
     private ImageView iv_operation;
     private RequestShape robotShape;
@@ -140,12 +140,12 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     private TextView tv_home_back;
     private TextView tv_opeleft;
-    private int mode_opeleft=0;//操作左边按钮的状态，0为隐藏，1为恢复，2为清除
+    private int mode_opeleft = 0;//操作左边按钮的状态，0为隐藏，1为恢复，2为清除
     private SuperPopupWindow mChooseCenterPointPop;
     private String mMapName;
-    private List<String> rsrpIdList=new ArrayList<>();
+    private List<String> rsrpIdList = new ArrayList<>();
 
-    private boolean connectResult=true;
+    private boolean connectResult = true;
     private RelativeLayout rlBg;
     private Animation fabOpenAnimation;
     private Animation fabCloseAnimation;
@@ -197,7 +197,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         tv_forcestop = findViewById(R.id.tv_forcestop);
         tv_useridsetting = findViewById(R.id.tv_useridsetting);
         tv_routesetting = findViewById(R.id.tv_routesetting);
-        mFucAcIv =findViewById(R.id.fuc_menu);
+        mFucAcIv = findViewById(R.id.fuc_menu);
         iv_operation.setOnClickListener(this);
         tv_home_back.setOnClickListener(this);
         tv_opeleft.setOnClickListener(this);
@@ -218,7 +218,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
         mMapName = currentMap;
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this,2000);
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this, 2000);
         ro.setNotify(true);
 //        ro.startOperation();
 
@@ -231,7 +231,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 //        map.setMapBitmap(Constant.mapBitmap);
 //        mapHeight = Constant.mapBitmap.getHeight();
 
-        if (connectResult&&ro != null && !ro.getContinue()) {
+        if (connectResult && ro != null && !ro.getContinue()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -312,7 +312,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private float[] realToMap(float rx, float ry) {
         return new float[]{rx * Constant.mapScale, mapHeight - ry * Constant.mapScale};
     }
-    private float[] realToMap(float rx, float ry,int height) {
+
+    private float[] realToMap(float rx, float ry, int height) {
         return new float[]{rx * Constant.mapScale, height - ry * Constant.mapScale};
     }
 
@@ -330,18 +331,18 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 finish();
                 break;
             case R.id.tv_opeleft: //操作左边的按钮
-                if(mode_opeleft==1){
-                    mode_opeleft=0;
+                if (mode_opeleft == 1) {
+                    mode_opeleft = 0;
                     tv_opeleft.setVisibility(View.GONE);
                     startTestLine();
-                }else if(mode_opeleft==2){
-                    mode_opeleft=0;
+                } else if (mode_opeleft == 2) {
+                    mode_opeleft = 0;
                     tv_opeleft.setVisibility(View.GONE);
                     clearLastTest();
                 }
                 break;
             case R.id.iv_operation:
-                if(isTestLine){
+                if (isTestLine) {
                     isTestLine = false;
                     iv_operation.setImageResource(R.mipmap.home_start);
                     drawPrruAfterTestLine();
@@ -349,11 +350,11 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                     showClear();
                     try {
                         ro.forceStop();
-                    }catch (Exception e){
-                        showToast("机器人异常："+e.toString());
+                    } catch (Exception e) {
+                        showToast("机器人异常：" + e.toString());
                     }
-                }else{
-                    if(mode_opeleft==2){
+                } else {
+                    if (mode_opeleft == 2) {
                         showToast("请先清除痕迹并重选路径");
                         return;
                     }
@@ -367,7 +368,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                     }
                     rsrpIdList.clear();
                     iv_operation.setImageResource(R.mipmap.home_stop);
-                    locCount=nowRouteList.size();
+                    locCount = nowRouteList.size();
                     isTestLine = true;
                     drawLineBeforeTestLine();
                     mpMap.clear();
@@ -386,7 +387,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 initUserIdPop();
                 break;
             case R.id.tv_routesetting:
-                if(mode_opeleft==2){
+                if (mode_opeleft == 2) {
                     showToast("请先清除痕迹");
                     return;
                 }
@@ -415,7 +416,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 break;
             case R.id.tv_forcestop:
                 ro.forceStop();
-                if(isTestLine){
+                if (isTestLine) {
                     showRegain();
                 }
                 break;
@@ -510,13 +511,13 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     }
 
     //清除上次测试痕迹
-    private void clearLastTest(){
+    private void clearLastTest() {
         removeRoute(locCount);
         map.removeShape("line");
-        for(String gpp:mpMap.keySet()){
+        for (String gpp : mpMap.keySet()) {
             map.removeShape(gpp);
         }
-        for(String id:rsrpIdList){
+        for (String id : rsrpIdList) {
             map.removeShape(id);
         }
     }
@@ -748,7 +749,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     }
 
 
-
     private long lastClickTime;
 
     @Override
@@ -863,13 +863,13 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void connectFailed(String errormsg) {
         showToast("机器人连接失败！");
-        connectResult=false;
+        connectResult = false;
         finish();
     }
 
     @Override
     public void catchError(String errormsg) {
-        if(isTestLine){
+        if (isTestLine) {
             showRegain();
         }
         showToast("异常断开");
@@ -885,7 +885,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         for (int i = 0, len = coorCount; i < len; i++) {
             float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
 //            CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, RsrpActivity.this, "dwf", R.mipmap.orbit_point);
-            CircleShape orbitShape=new CircleShape("coor"+i,R.color.gray_line_color,8f);
+            CircleShape orbitShape = new CircleShape("coor" + i, R.color.gray_line_color, 8f);
             orbitShape.setValues(tf[0], tf[1]);
             map.addShape(orbitShape, false);
         }
@@ -937,7 +937,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 }
             });
 
-             Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + ipList.get(0) + "&mapId=1", new Response.Listener<String>() {
+            Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + ipList.get(0) + "&mapId=1", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
                     LLog.getLog().e("getPhonePrru成功", s);
@@ -1025,15 +1025,14 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     }
 
 
-
     private void startTestLine() {
         ro.setShowOrbits(false);
         clearOrbits();
         map.removeShape("des");
         if (nowRouteList != null && nowRouteList.size() > 0) {
-            if(nowRouteList.size()==locCount) {
+            if (nowRouteList.size() == locCount) {
                 showToast("路径测试开始");
-            }else if(nowRouteList.size()<locCount){
+            } else if (nowRouteList.size() < locCount) {
                 showToast("路径测试恢复");
             }
             ro.moveTo(nowRouteList.get(0).x, nowRouteList.get(0).y);
@@ -1043,7 +1042,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     }
 
     private void continueTestLine() {
-        map.removeShape("routePoint"+(locCount-nowRouteList.size()));
+        map.removeShape("routePoint" + (locCount - nowRouteList.size()));
         nowRouteList.remove(0);
         if (nowRouteList.size() > 0) {
             ro.moveTo(nowRouteList.get(0).x, nowRouteList.get(0).y);
@@ -1058,15 +1057,15 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     }
 
     //显示清除按钮
-    private void showClear(){
-        mode_opeleft=2;
+    private void showClear() {
+        mode_opeleft = 2;
         tv_opeleft.setText("清除");
         tv_opeleft.setVisibility(View.VISIBLE);
     }
 
     //显示恢复按钮
-    private void showRegain(){
-        mode_opeleft=1;
+    private void showRegain() {
+        mode_opeleft = 1;
         tv_opeleft.setText("恢复");
         tv_opeleft.setVisibility(View.VISIBLE);
     }
@@ -1074,22 +1073,22 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     //mpMap按rsrp从大到小排序并画出前5个
     private void drawPrruAfterTestLine() {
-        List<Map.Entry<String,MaxrsrpPosition>> lists=new ArrayList<Map.Entry<String,MaxrsrpPosition>>(mpMap.entrySet());
+        List<Map.Entry<String, MaxrsrpPosition>> lists = new ArrayList<Map.Entry<String, MaxrsrpPosition>>(mpMap.entrySet());
         Collections.sort(lists, new Comparator<Map.Entry<String, MaxrsrpPosition>>() {
             @Override
             public int compare(Map.Entry<String, MaxrsrpPosition> o1, Map.Entry<String, MaxrsrpPosition> o2) {
-                float r1=o1.getValue().getRsrp();
-                float r2=o2.getValue().getRsrp();
-                if(r1>r2){
+                float r1 = o1.getValue().getRsrp();
+                float r2 = o2.getValue().getRsrp();
+                if (r1 > r2) {
                     return -1;
-                }else if(r1<r2){
+                } else if (r1 < r2) {
                     return 1;
-                }else{
+                } else {
                     return 0;
                 }
             }
         });
-        for(Map.Entry<String, MaxrsrpPosition> entry:lists.size()>5?lists.subList(0,5):lists){
+        for (Map.Entry<String, MaxrsrpPosition> entry : lists.size() > 5 ? lists.subList(0, 5) : lists) {
             PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
             pgShape.setNecodeText(entry.getKey());
             pgShape.setPaintColor(Color.parseColor("#febf0b"));
@@ -1136,7 +1135,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             if (i == 0) {
                 routeLinePath.moveTo(tempMXY[0], tempMXY[1]);
             } else {
-                routeLinePath.lineTo(mXY[0], mXY[1]);
+                routeLinePath.lineTo(tempMXY[0], tempMXY[1]);
             }
 
         }
@@ -1155,10 +1154,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         Bitmap bitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
         final int maphight = bitmap.getHeight();
         map.setMapBitmap(bitmap);
-        if (SharedPrefHelper.getFloat(mContext,"firstX")>0f&&SharedPrefHelper.getFloat(mContext,"firstY")>0f)
-        {
-            initDefaultCd(map,tvShowPoint,maphight);
-        }
+        initDefaultCd(map, tvShowPoint, maphight);
         PointF centerByImagePoint = map.getCenterByImagePoint();
         float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
         tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0])) + " , " + Float.parseFloat(String.format("%.2f", float1[1])));
@@ -1232,42 +1228,47 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         shape.setValues(mXY[0], mXY[1]);
         map.addShape(shape, false);
     }
+
     //初始化地图位置
-    private void initDefaultCd(final ImageMap1 map, final TextView textView, final int mapHeight){
-       new Thread(new Runnable() {
-           @Override
-           public void run() {
-               try {
-                   Thread.sleep(300);
-                   runOnUiThread(new Runnable() {
-                       @Override
-                       public void run() {
+    private void initDefaultCd(final ImageMap1 map, final TextView textView, final int mapHeight) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(300);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
 //                           float defaultX=SharedPrefHelper.getFloat(mContext,"firstX"); //获取设置页面设置坐标X
 //                           float defaultY=SharedPrefHelper.getFloat(mContext,"firstY"); //获取设置页面设置坐标Y
-                           float[] floats = realToMap(Constant.firstX, Constant.firstY,mapHeight);
-                           Shape shape = new CircleShape("default111", Color.TRANSPARENT);
-                           shape.setValues(floats[0],floats[1]);
-                           map.addShape(shape,true);
-                           textView.setText(Constant.firstX +" , "+Constant.firstY );
-                       }
-                   });
-               } catch (InterruptedException e) {
-                   e.printStackTrace();
-               }
-           }
-       }).start();
-      }
+                            float[] floats = realToMap(Constant.firstX, Constant.firstY, mapHeight);
+                            Shape shape = new CircleShape("default111", Color.TRANSPARENT);
+                            shape.setValues(floats[0], floats[1]);
+                            map.addShape(shape, true);
+                            textView.setText(Constant.firstX + " , " + Constant.firstY);
+                            rX=Constant.firstX;
+                            rY=Constant.firstY;
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 
 
     private void expandFabMenu() {
-        ViewCompat.animate(mFucAcIv).rotation(45.0F).withLayer().setDuration(500).setInterpolator(new OvershootInterpolator(10.0F)).start();
+//        tv_useridsetting.setVisibility(View.VISIBLE);
+//        tv_routesetting.setVisibility(View.VISIBLE);
+        ViewCompat.animate(mFucAcIv).rotation(45.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
         tv_useridsetting.startAnimation(fabOpenAnimation);
         tv_routesetting.startAnimation(fabOpenAnimation);
         isFabMenuOpen = true;
     }
 
     private void collapseFabMenu() {
-        ViewCompat.animate(mFucAcIv).rotation(0.0F).withLayer().setDuration(500).setInterpolator(new OvershootInterpolator(10.0F)).start();
+        ViewCompat.animate(mFucAcIv).rotation(0.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
         tv_useridsetting.startAnimation(fabCloseAnimation);
         tv_routesetting.startAnimation(fabCloseAnimation);
         isFabMenuOpen = false;
@@ -1275,7 +1276,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     private void getAnimations() {
         fabOpenAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_open);
-
         fabCloseAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_close);
     }
 

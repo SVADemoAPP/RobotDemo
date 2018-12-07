@@ -37,12 +37,13 @@
         <TextView
             android:id="@+id/coordinate_data"
             android:layout_width="100dp"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/coordinate_point"
+            android:layout_marginBottom="2dp"
             android:layout_toRightOf="@+id/coordinate_point"
             android:background="@color/black_text"
             android:gravity="center"
-            android:text="0.00,0.00"
+            android:text="0.00 , 0.00"
             android:textColor="@color/white"
             android:textSize="13dp" />
     </RelativeLayout>

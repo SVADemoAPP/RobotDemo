@@ -449,8 +449,8 @@ public class MaplistActivity extends BaseActivity {
 //            Constant.robotIp = wifiRobotIp;
 //            Constant.robotPort = wifiRobotPort;
 //        }
-        Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.6f);
-        Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.3f);
+        Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.0f);
+        Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.0f);
         Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
         Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
         Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
