@@ -1185,6 +1185,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             @Override
             public void onClick(View v) {
                 if (rX >= 0 && rY >= 0) {
+                    showProgressDialog("设置中...");
                     mChooseCenterPointPop.hidePopupWindow();
                     SharedPrefHelper.putFloat(mContext, "firstX", rX);
                     SharedPrefHelper.putFloat(mContext, "firstY", rY);
@@ -1226,6 +1227,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         } else {
             color = Color.BLACK;
         }
+        rsrpIdList.add(id);
         CircleShape shape = new CircleShape(id, color);
         shape.setValues(mXY[0], mXY[1]);
         map.addShape(shape, false);
