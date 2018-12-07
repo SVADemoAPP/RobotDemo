@@ -1259,18 +1259,21 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
 
     private void expandFabMenu() {
-//        tv_useridsetting.setVisibility(View.VISIBLE);
-//        tv_routesetting.setVisibility(View.VISIBLE);
+        tv_useridsetting.setVisibility(View.VISIBLE);
+        tv_routesetting.setVisibility(View.VISIBLE);
         ViewCompat.animate(mFucAcIv).rotation(45.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
-        tv_useridsetting.startAnimation(fabOpenAnimation);
-        tv_routesetting.startAnimation(fabOpenAnimation);
+//        tv_useridsetting.startAnimation(fabOpenAnimation);
+//        tv_routesetting.startAnimation(fabOpenAnimation);
+
         isFabMenuOpen = true;
     }
 
     private void collapseFabMenu() {
         ViewCompat.animate(mFucAcIv).rotation(0.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
-        tv_useridsetting.startAnimation(fabCloseAnimation);
-        tv_routesetting.startAnimation(fabCloseAnimation);
+        tv_useridsetting.setVisibility(View.GONE);
+        tv_routesetting.setVisibility(View.GONE);
+//        tv_useridsetting.startAnimation(fabCloseAnimation);
+//        tv_routesetting.startAnimation(fabCloseAnimation);
         isFabMenuOpen = false;
     }
 
