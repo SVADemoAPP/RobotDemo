@@ -15,8 +15,9 @@
         android:id="@+id/rl_bg2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:background="@mipmap/home_bg2" />
-
 
 
     <!--返回按钮-->
@@ -38,6 +39,7 @@
         android:textSize="12dp"
         android:textStyle="bold" />
 
+    <!--route-->
     <TextView
         android:id="@+id/tv_useridsetting"
         android:layout_width="32dp"
@@ -52,8 +54,9 @@
         android:text="u\ns\ne\nr\nId"
         android:textColor="@color/white"
         android:textSize="13dp"
-        android:textStyle="bold" />
-
+        android:textStyle="bold"
+        android:visibility="gone" />
+    <!--prru-->
     <TextView
         android:id="@+id/tv_routesetting"
         android:layout_width="32dp"
@@ -68,86 +71,96 @@
         android:text="r\no\nu\nt\ne"
         android:textColor="@color/white"
         android:textSize="13dp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/fuc_menu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignEnd="@+id/tv_home_back"
+        android:layout_alignParentBottom="true"
+        android:src="@mipmap/fuc_menu"
+        android:layout_marginBottom="130dp" />
 
 
+    <ImageView
+        android:id="@+id/iv_operation"
+        android:layout_width="92dp"
+        android:layout_height="92dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="18dp"
+        android:layout_marginRight="18dp"
+        android:gravity="center"
+        android:src="@mipmap/home_start" />
 
-            <ImageView
-                android:id="@+id/iv_operation"
-                android:layout_width="92dp"
-                android:layout_height="92dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_marginBottom="18dp"
-                android:layout_marginRight="18dp"
-                android:gravity="center"
-                android:src="@mipmap/home_start" />
     <TextView
-        android:visibility="gone"
         android:id="@+id/tv_opeleft"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_toLeftOf="@+id/iv_operation"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="24dp"
-        android:text="清除"
-        android:textColor="@color/white"
-        android:gravity="center"
-        android:textSize="18dp"
-        android:textStyle="bold"
         android:layout_marginRight="12dp"
         android:layout_marginTop="5dp"
-        android:background="@drawable/tv_round" />
+        android:layout_toLeftOf="@+id/iv_operation"
+        android:background="@drawable/tv_round"
+        android:gravity="center"
+        android:text="清除"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tv_forcestop"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_toLeftOf="@+id/iv_operation"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="90dp"
-        android:text="停止"
-        android:textColor="@color/white"
-        android:gravity="center"
-        android:textStyle="bold"
-        android:textSize="18dp"
         android:layout_marginRight="-10dp"
         android:layout_marginTop="5dp"
-        android:background="@drawable/tv_round" />
+        android:layout_toLeftOf="@+id/iv_operation"
+        android:background="@drawable/tv_round"
+        android:gravity="center"
+        android:text="停止"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        android:textStyle="bold" />
 
     <ImageView
-        android:visibility="gone"
         android:id="@+id/iv_collect"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginEnd="30dp"
         android:layout_marginBottom="120dp"
+        android:layout_marginEnd="30dp"
         android:layout_marginRight="0dp"
         android:layout_marginTop="5dp"
-        android:src="@mipmap/iv_collectoff" />
+        android:src="@mipmap/iv_collectoff"
+        android:visibility="gone" />
 
     <!--<LinearLayout-->
-        <!--android:id="@+id/ll_battery"-->
-        <!--android:layout_marginLeft="15dp"-->
-        <!--android:layout_marginTop="15dp"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:gravity="center"-->
-        <!--android:orientation="horizontal">-->
-        <!--<ImageView-->
-            <!--android:id="@+id/iv_battery"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:src="@mipmap/battery_100"/>-->
-        <!--<TextView-->
-            <!--android:id="@+id/tv_battery"-->
-            <!--android:layout_marginLeft="2dp"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="100%"-->
-            <!--android:textColor="@color/white"/>-->
+    <!--android:id="@+id/ll_battery"-->
+    <!--android:layout_marginLeft="15dp"-->
+    <!--android:layout_marginTop="15dp"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:gravity="center"-->
+    <!--android:orientation="horizontal">-->
+    <!--<ImageView-->
+    <!--android:id="@+id/iv_battery"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:src="@mipmap/battery_100"/>-->
+    <!--<TextView-->
+    <!--android:id="@+id/tv_battery"-->
+    <!--android:layout_marginLeft="2dp"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="100%"-->
+    <!--android:textColor="@color/white"/>-->
     <!--</LinearLayout>-->
 
 </RelativeLayout>

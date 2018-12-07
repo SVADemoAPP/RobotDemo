@@ -299,7 +299,7 @@ public class HighlightImageView1 extends TouchImageView1 implements
         onDrawWithCanvas(canvas);
     }
 
-    private void requestTranslate(PointF point)
+    public void requestTranslate(PointF point)
     {
         if (!mMapHandle.isAniming())
         {

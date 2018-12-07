@@ -42,7 +42,7 @@
             android:layout_toRightOf="@+id/coordinate_point"
             android:background="@color/black_text"
             android:gravity="center"
-            android:text="200.00,180.00"
+            android:text="0.00,0.00"
             android:textColor="@color/white"
             android:textSize="13dp" />
     </RelativeLayout>

@@ -9,10 +9,15 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -138,6 +143,10 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private SuperPopupWindow mChooseCenterPointPop;
     private String mMapName;
     private RelativeLayout rlBg;
+    private Animation fabOpenAnimation;
+    private Animation fabCloseAnimation;
+    private boolean isFabMenuOpen = false;
+    private ImageView mFucAcIv;
 
 
     //防止多个请求同时响应产生的线程不安全问题
@@ -169,9 +178,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     public void dealLogicBeforeInitView() {
         routeLinePath = new Path();
         routeLineShape = new LineShape("routeLine", R.color.green, 2, "#FF4081");
-
+        getAnimations();
     }
-
 
     @Override
     public void initView() {
@@ -185,6 +193,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         tv_forcestop = findViewById(R.id.tv_forcestop);
         tv_useridsetting = findViewById(R.id.tv_useridsetting);
         tv_routesetting = findViewById(R.id.tv_routesetting);
+        mFucAcIv =findViewById(R.id.fuc_menu);
         iv_operation.setOnClickListener(this);
         tv_home_back.setOnClickListener(this);
         tv_opeleft.setOnClickListener(this);
@@ -192,16 +201,22 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         tv_forcestop.setOnClickListener(this);
         tv_useridsetting.setOnClickListener(this);
         tv_routesetting.setOnClickListener(this);
+        mFucAcIv.setOnClickListener(this);
     }
-
+//
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        if (event.)
+//        return false;
+//    }
 
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
         mMapName = currentMap;
-//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this,2000);
-//        ro.setNotify(true);
-//        ro.startOperation();
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this,2000);
+        ro.setNotify(true);
+        ro.startOperation();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
         if (!TextUtils.isEmpty(userIds)) {
@@ -247,26 +262,26 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         map.setMapBitmap(Constant.mapBitmap);
         mapHeight = Constant.mapBitmap.getHeight();
         initShape();
-//        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
-//            @Override
-//            public void onRotate(float rotate) {
-//                mapRotate = -rotate;
-//                cv.updateDirection(mapRotate + robotDirection);
-//                robotShape.setView(cv);
-//            }
-//        });
-//        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
-//            @Override
-//            public void onLongClick(PointF point) {
-//                if (isStart && !isAutoFind) {
-//                    rXY = mapToReal(point.x, point.y);
-//                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
-//                    map.setCanChange(false);
-//                    desShape.setValues(point.x, point.y);
-//                    map.addShape(desShape, false);
-//                }
-//            }
-//        });
+        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+            @Override
+            public void onRotate(float rotate) {
+                mapRotate = -rotate;
+                cv.updateDirection(mapRotate + robotDirection);
+                robotShape.setView(cv);
+            }
+        });
+        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
+            @Override
+            public void onLongClick(PointF point) {
+                if (isStart && !isAutoFind) {
+                    rXY = mapToReal(point.x, point.y);
+                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
+                    map.setCanChange(false);
+                    desShape.setValues(point.x, point.y);
+                    map.addShape(desShape, false);
+                }
+            }
+        });
     }
 
 
@@ -297,6 +312,13 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void onClickEvent(View view) {
         switch (view.getId()) {
+            case R.id.fuc_menu:
+                if (isFabMenuOpen) {
+                    collapseFabMenu();
+                } else {
+                    expandFabMenu();
+                }
+                break;
             case R.id.tv_home_back:
                 finish();
                 break;
@@ -992,7 +1014,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private void startTestLine() {
         if (nowRouteList != null && nowRouteList.size() > 0) {
             if(nowRouteList.size()==locCount) {
-                map.removeShape("des");
                 showToast("路径测试开始");
             }else if(nowRouteList.size()<locCount){
                 showToast("路径测试恢复");
@@ -1116,6 +1137,10 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         Bitmap bitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
         final int maphight = bitmap.getHeight();
         map.setMapBitmap(bitmap);
+        if (SharedPrefHelper.getFloat(mContext,"firstX")>0f&&SharedPrefHelper.getFloat(mContext,"firstY")>0f)
+        {
+            initDefaultCd(map,tvShowPoint);
+        }
         PointF centerByImagePoint = map.getCenterByImagePoint();
         float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
         tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0])) + " , " + Float.parseFloat(String.format("%.2f", float1[1])));
@@ -1173,9 +1198,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         int color;
 
         if (-75 < prru && prru <= 0) {  //深绿色
-            color = Color.GREEN;
+            color = Color.parseColor("#006000");
         } else if (-95 < prru && prru <= -75) { //浅绿色
-            color = Color.CYAN;
+            color = Color.GREEN;
         } else if (-105 < prru && prru <= -95) {  //黄色
             color = Color.YELLOW;
         } else if (-120 < prru && prru <= -105) { //红色
@@ -1187,4 +1212,55 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         shape.setValues(mXY[0], mXY[1]);
         map.addShape(shape, false);
     }
+    //初始化地图位置
+    private void initDefaultCd(final ImageMap1 map, final TextView textView){
+       new Thread(new Runnable() {
+           @Override
+           public void run() {
+               try {
+                   Thread.sleep(300);
+                   runOnUiThread(new Runnable() {
+                       @Override
+                       public void run() {
+//                           float defaultX=SharedPrefHelper.getFloat(mContext,"firstX"); //获取设置页面设置坐标X
+//                           float defaultY=SharedPrefHelper.getFloat(mContext,"firstY"); //获取设置页面设置坐标Y
+                           float[] floats = realToMap(Constant.firstX, Constant.firstY );
+                           Shape shape = new CircleShape("default111", Color.TRANSPARENT);
+                           shape.setValues(floats[0],floats[1]);
+                           map.addShape(shape,true);
+                           textView.setText(Constant.firstX +" , "+Constant.firstY );
+                           rX=Constant.firstX;
+                           rY=Constant.firstY;
+                       }
+                   });
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               }
+           }
+       }).start();
+      }
+
+
+    private void expandFabMenu() {
+        ViewCompat.animate(mFucAcIv).rotation(45.0F).withLayer().setDuration(500).setInterpolator(new OvershootInterpolator(10.0F)).start();
+        tv_useridsetting.startAnimation(fabOpenAnimation);
+        tv_routesetting.startAnimation(fabOpenAnimation);
+        isFabMenuOpen = true;
+
+
+    }
+
+    private void collapseFabMenu() {
+        ViewCompat.animate(mFucAcIv).rotation(0.0F).withLayer().setDuration(500).setInterpolator(new OvershootInterpolator(10.0F)).start();
+        tv_useridsetting.startAnimation(fabCloseAnimation);
+        tv_routesetting.startAnimation(fabCloseAnimation);
+        isFabMenuOpen = false;
+    }
+
+    private void getAnimations() {
+        fabOpenAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_open);
+
+        fabCloseAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_close);
+    }
+
 }
