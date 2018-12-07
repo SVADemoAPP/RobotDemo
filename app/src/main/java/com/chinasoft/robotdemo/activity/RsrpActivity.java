@@ -172,6 +172,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     }
 
+
     @Override
     public void initView() {
         map = findViewById(R.id.imagemap);
@@ -198,9 +199,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
         mMapName = currentMap;
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this,2000);
-        ro.setNotify(true);
-        ro.startOperation();
+//        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this,2000);
+//        ro.setNotify(true);
+//        ro.startOperation();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
         if (!TextUtils.isEmpty(userIds)) {
@@ -246,26 +247,26 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         map.setMapBitmap(Constant.mapBitmap);
         mapHeight = Constant.mapBitmap.getHeight();
         initShape();
-        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
-            @Override
-            public void onRotate(float rotate) {
-                mapRotate = -rotate;
-                cv.updateDirection(mapRotate + robotDirection);
-                robotShape.setView(cv);
-            }
-        });
-        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
-            @Override
-            public void onLongClick(PointF point) {
-                if (isStart && !isAutoFind) {
-                    rXY = mapToReal(point.x, point.y);
-                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
-                    map.setCanChange(false);
-                    desShape.setValues(point.x, point.y);
-                    map.addShape(desShape, false);
-                }
-            }
-        });
+//        map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
+//            @Override
+//            public void onRotate(float rotate) {
+//                mapRotate = -rotate;
+//                cv.updateDirection(mapRotate + robotDirection);
+//                robotShape.setView(cv);
+//            }
+//        });
+//        map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
+//            @Override
+//            public void onLongClick(PointF point) {
+//                if (isStart && !isAutoFind) {
+//                    rXY = mapToReal(point.x, point.y);
+//                    ro.cancelAndMoveTo(rXY[0], rXY[1]);
+//                    map.setCanChange(false);
+//                    desShape.setValues(point.x, point.y);
+//                    map.addShape(desShape, false);
+//                }
+//            }
+//        });
     }
 
 
@@ -991,6 +992,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private void startTestLine() {
         if (nowRouteList != null && nowRouteList.size() > 0) {
             if(nowRouteList.size()==locCount) {
+                map.removeShape("des");
                 showToast("路径测试开始");
             }else if(nowRouteList.size()<locCount){
                 showToast("路径测试恢复");

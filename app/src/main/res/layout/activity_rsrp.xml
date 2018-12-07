@@ -116,6 +116,7 @@
         android:background="@drawable/tv_round" />
 
     <ImageView
+        android:visibility="gone"
         android:id="@+id/iv_collect"
         android:layout_width="60dp"
         android:layout_height="60dp"
