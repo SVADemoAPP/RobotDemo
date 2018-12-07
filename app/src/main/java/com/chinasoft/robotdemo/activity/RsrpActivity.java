@@ -1154,9 +1154,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         });
     }
 
-    public void showCenterPop() {
-        mChooseCenterPointPop.showPopupWindow();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1165,7 +1162,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             rl_add_route.setVisibility(View.GONE);
             ll_add_route.setVisibility(View.VISIBLE);
             newRouteJson = data.getStringExtra("routeJson");
-//            et_route.setText("默认");
+            et_route.requestFocus();
         }
     }
 
