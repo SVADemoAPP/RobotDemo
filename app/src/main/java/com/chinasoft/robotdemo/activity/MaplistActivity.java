@@ -455,7 +455,6 @@ public class MaplistActivity extends BaseActivity {
         Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
         Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
 
-        Constant.lineSpace = SharedPrefHelper.getFloat(this, "lineSpace", 0.3f);
     }
 
     @Override

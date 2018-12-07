@@ -931,7 +931,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         nowY = y;
         robotDirection = direc;
         if (!isTestLine) {
-            if (Math.sqrt((nowX - lastX) * (nowX - lastX) + (nowY - lastY) * (nowY - lastY)) > Constant.lineSpace) {
+            if (Math.sqrt((nowX - lastX) * (nowX - lastX) + (nowY - lastY) * (nowY - lastY)) > 0.3f) {
 //                            Log.e("handler","的点点滴滴顶顶顶顶顶顶顶顶顶大等等");
                 newF = realToMap(nowX, nowY);
                 path.lineTo(newF[0], newF[1]);
