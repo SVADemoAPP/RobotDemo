@@ -1216,9 +1216,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         int color;
 
         if (-75 < prru && prru <= 0) {  //深绿色
-            color = Color.GREEN;
+            color = Color.parseColor("#006000");
         } else if (-95 < prru && prru <= -75) { //浅绿色
-            color = Color.CYAN;
+            color = Color.GREEN;
         } else if (-105 < prru && prru <= -95) {  //黄色
             color = Color.YELLOW;
         } else if (-120 < prru && prru <= -105) { //红色
@@ -1262,8 +1262,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         tv_useridsetting.startAnimation(fabOpenAnimation);
         tv_routesetting.startAnimation(fabOpenAnimation);
         isFabMenuOpen = true;
-
-
     }
 
     private void collapseFabMenu() {
