@@ -55,7 +55,7 @@
         android:textColor="@color/white"
         android:textSize="13dp"
         android:textStyle="bold"
-        android:visibility="gone" />
+        android:visibility="invisible" />
     <!--prru-->
     <TextView
         android:id="@+id/tv_routesetting"
@@ -72,7 +72,7 @@
         android:textColor="@color/white"
         android:textSize="13dp"
         android:textStyle="bold"
-        android:visibility="gone" />
+        android:visibility="invisible" />
 
     <ImageView
         android:id="@+id/fuc_menu"
