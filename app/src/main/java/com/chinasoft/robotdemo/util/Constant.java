@@ -19,8 +19,6 @@ public class Constant {
     public static String robotIp;
     public static int robotPort;
     public static String sdPath;
-    //路过画线间隔
-    public static float lineSpace;
     public static Bitmap mapBitmap;
     public static String IP_ADDRESS ;
     public static InterRequestUtil interRequestUtil;

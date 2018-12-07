@@ -19,6 +19,12 @@ public class CircleShape extends Shape
         super(tag, coverColor);
     }
 
+    public CircleShape(Object tag, int coverColor,float radius)
+    {
+        super(tag, coverColor);
+        this.radius=radius;
+    }
+
     /**
      * Set Center,radius
      * 

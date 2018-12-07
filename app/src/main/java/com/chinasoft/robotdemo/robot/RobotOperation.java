@@ -54,7 +54,7 @@ public class RobotOperation {
     private Context context;
     private long updatePeriod; //更新间隔时间
     private boolean isAlwaysUpdate; //机器人是否始终定时更新位置（不管是否移动）
-
+    private boolean isShowOrbits; //是否显示规划轨迹点
     private boolean mContinue=false;
     public void setNotify(boolean notify) {
         isNotify = notify;
@@ -75,7 +75,9 @@ public class RobotOperation {
                     switch (platform.getCurrentAction().getStatus().toString()) {
                         case RUNNING:
                             onRobotListener.positionChange(nowX, nowY, robotDirection);
-                            onRobotListener.refreshOrbits(platform.searchPath(forwardLocation).getPoints());
+                            if(isShowOrbits) {
+                                onRobotListener.refreshOrbits(platform.searchPath(forwardLocation).getPoints());
+                            }
                             //如果机器人仅在移动时定时更新位置
                             if(!isAlwaysUpdate) {
                                 handler.postDelayed(runnable, updatePeriod);
@@ -119,6 +121,10 @@ public class RobotOperation {
     public void endOperation() {
         isAlwaysUpdate=false;
         handler.removeCallbacks(runnable);
+    }
+
+    public void setShowOrbits(boolean showOrbits) {
+        isShowOrbits = showOrbits;
     }
 
     //连接机器人
