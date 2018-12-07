@@ -312,7 +312,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private float[] realToMap(float rx, float ry) {
         return new float[]{rx * Constant.mapScale, mapHeight - ry * Constant.mapScale};
     }
-
+    private float[] realToMap(float rx, float ry,int height) {
+        return new float[]{rx * Constant.mapScale, height - ry * Constant.mapScale};
+    }
 
     @Override
     public void onClickEvent(View view) {
@@ -1134,7 +1136,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             if (i == 0) {
                 routeLinePath.moveTo(tempMXY[0], tempMXY[1]);
             } else {
-                routeLinePath.lineTo(tempMXY[0], tempMXY[1]);
+                routeLinePath.lineTo(mXY[0], mXY[1]);
             }
 
         }
@@ -1155,7 +1157,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         map.setMapBitmap(bitmap);
         if (SharedPrefHelper.getFloat(mContext,"firstX")>0f&&SharedPrefHelper.getFloat(mContext,"firstY")>0f)
         {
-            initDefaultCd(map,tvShowPoint);
+            initDefaultCd(map,tvShowPoint,maphight);
         }
         PointF centerByImagePoint = map.getCenterByImagePoint();
         float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
@@ -1183,7 +1185,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             @Override
             public void onClick(View v) {
                 if (rX >= 0 && rY >= 0) {
-                    showProgressDialog("设置中...");
                     mChooseCenterPointPop.hidePopupWindow();
                     SharedPrefHelper.putFloat(mContext, "firstX", rX);
                     SharedPrefHelper.putFloat(mContext, "firstY", rY);
@@ -1215,9 +1216,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         int color;
 
         if (-75 < prru && prru <= 0) {  //深绿色
-            color = Color.parseColor("#006000");
-        } else if (-95 < prru && prru <= -75) { //浅绿色
             color = Color.GREEN;
+        } else if (-95 < prru && prru <= -75) { //浅绿色
+            color = Color.CYAN;
         } else if (-105 < prru && prru <= -95) {  //黄色
             color = Color.YELLOW;
         } else if (-120 < prru && prru <= -105) { //红色
@@ -1225,13 +1226,12 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         } else {
             color = Color.BLACK;
         }
-        rsrpIdList.add(id);
         CircleShape shape = new CircleShape(id, color);
         shape.setValues(mXY[0], mXY[1]);
         map.addShape(shape, false);
     }
     //初始化地图位置
-    private void initDefaultCd(final ImageMap1 map, final TextView textView){
+    private void initDefaultCd(final ImageMap1 map, final TextView textView, final int mapHeight){
        new Thread(new Runnable() {
            @Override
            public void run() {
@@ -1242,13 +1242,11 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                        public void run() {
 //                           float defaultX=SharedPrefHelper.getFloat(mContext,"firstX"); //获取设置页面设置坐标X
 //                           float defaultY=SharedPrefHelper.getFloat(mContext,"firstY"); //获取设置页面设置坐标Y
-                           float[] floats = realToMap(Constant.firstX, Constant.firstY );
+                           float[] floats = realToMap(Constant.firstX, Constant.firstY,mapHeight);
                            Shape shape = new CircleShape("default111", Color.TRANSPARENT);
                            shape.setValues(floats[0],floats[1]);
                            map.addShape(shape,true);
                            textView.setText(Constant.firstX +" , "+Constant.firstY );
-                           rX=Constant.firstX;
-                           rY=Constant.firstY;
                        }
                    });
                } catch (InterruptedException e) {
