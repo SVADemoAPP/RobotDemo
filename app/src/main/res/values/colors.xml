@@ -24,4 +24,5 @@
     <color name="dark_green">#006000</color> <!--深绿色-->
     <color name="light_green">#a6ffa6</color> <!--浅绿色-->
     <color name="red">#fcff0000</color>
+    <color name="orbits">#f6ddcc</color>
 </resources>

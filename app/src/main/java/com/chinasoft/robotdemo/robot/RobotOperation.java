@@ -54,7 +54,7 @@ public class RobotOperation {
     private Context context;
     private long updatePeriod; //更新间隔时间
     private boolean isAlwaysUpdate; //机器人是否始终定时更新位置（不管是否移动）
-    private boolean isShowOrbits; //是否显示规划轨迹点
+    private boolean isShowOrbits =true; //是否显示规划轨迹点
     private boolean mContinue=false;
     public void setNotify(boolean notify) {
         isNotify = notify;

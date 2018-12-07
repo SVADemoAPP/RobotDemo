@@ -130,6 +130,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private String userIds;
 
     private boolean isTestLine = false;
+    private boolean isPause=false; //是否在暂停状态
     private int locCount;
     private LineShape routeLineShape;
     private Path routeLinePath;
@@ -277,8 +278,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
             @Override
             public void onLongClick(PointF point) {
-                if (isStart && !isAutoFind) {
-                    ro.setShowOrbits(true);
+                if (isStart && !isAutoFind&&(!isTestLine||isPause)) {
+//                    ro.setShowOrbits(true);
                     rXY = mapToReal(point.x, point.y);
                     ro.cancelAndMoveTo(rXY[0], rXY[1]);
 //                    map.setCanChange(false);
@@ -885,7 +886,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         for (int i = 0, len = coorCount; i < len; i++) {
             float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
 //            CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, RsrpActivity.this, "dwf", R.mipmap.orbit_point);
-            CircleShape orbitShape = new CircleShape("coor" + i, R.color.gray_line_color, 8f);
+            CircleShape orbitShape = new CircleShape("coor" + i, R.color.orbits, 7f);
             orbitShape.setValues(tf[0], tf[1]);
             map.addShape(orbitShape, false);
         }
@@ -1026,7 +1027,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
 
     private void startTestLine() {
-        ro.setShowOrbits(false);
+        isPause=false;
+//        ro.setShowOrbits(false);
         clearOrbits();
         map.removeShape("des");
         if (nowRouteList != null && nowRouteList.size() > 0) {
@@ -1065,6 +1067,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     //显示恢复按钮
     private void showRegain() {
+        isPause=true;
         mode_opeleft = 1;
         tv_opeleft.setText("恢复");
         tv_opeleft.setVisibility(View.VISIBLE);
@@ -1091,7 +1094,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         for (Map.Entry<String, MaxrsrpPosition> entry : lists.size() > 5 ? lists.subList(0, 5) : lists) {
             PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
             pgShape.setNecodeText(entry.getKey());
-            pgShape.setPaintColor(Color.parseColor("#febf0b"));
+            pgShape.setPaintColor(Color.parseColor("#ff0000"));
             tempMXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
             pgShape.setValues(tempMXY[0], tempMXY[1]);
             map.addShape(pgShape, false);
@@ -1212,8 +1215,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private void setPrruColorPoint(int prru, String id) {
         int color;
 
-        if (-75 < prru && prru <= 0) {  //深绿色
-            color = Color.parseColor("#006000");
+        if (-75 < prru && prru <= 0) {  //1e8449
+            color = Color.parseColor("#1e8449");
         } else if (-95 < prru && prru <= -75) { //浅绿色
             color = Color.GREEN;
         } else if (-105 < prru && prru <= -95) {  //黄色
