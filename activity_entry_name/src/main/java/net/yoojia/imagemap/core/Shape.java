@@ -40,7 +40,7 @@ public abstract class Shape {
         drawPaint.setStyle(Paint.Style.FILL);
         drawPaint.setAntiAlias(true);
         drawPaint.setFilterBitmap(true);
-        drawPaint.setTextSize(18);
+        drawPaint.setTextSize(20);
         drawPaints = new Paint();
         drawPaints.setColor(coverColor);
         drawPaints.setStyle(Paint.Style.FILL);

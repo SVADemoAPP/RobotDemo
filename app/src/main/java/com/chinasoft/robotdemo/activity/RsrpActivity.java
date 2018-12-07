@@ -886,7 +886,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         for (int i = 0, len = coorCount; i < len; i++) {
             float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
 //            CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, RsrpActivity.this, "dwf", R.mipmap.orbit_point);
-            CircleShape orbitShape = new CircleShape("coor" + i, R.color.orbits, 7f);
+            CircleShape orbitShape = new CircleShape("coor" + i, Color.parseColor("#f6ddcc"), 7f);
             orbitShape.setValues(tf[0], tf[1]);
             map.addShape(orbitShape, false);
         }
