@@ -12,5 +12,11 @@ public class LocAndPrruInfoResponse extends BaseReponse{
         public int status;
         public List<PrruSigalModel> prruData;
         public String userId;
+        public Data1 data;
+    }
+
+    public class Data1{
+        public float x;
+        public float y;
     }
 }

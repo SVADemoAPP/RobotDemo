@@ -49,7 +49,7 @@ public class RobotOperation {
     private final String RUNNING = "RUNNING";
     private final String FINISHED = "FINISHED";
     private boolean isMoving;  //机器人action状态是否在移动
-    private boolean isNotify; //是否通知进行采集
+    private boolean isNotify =true; //是否不断进行通知
     private String currentMap;
     private Context context;
     private long updatePeriod; //更新间隔时间

@@ -1,53 +1,66 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.bumptech.glide.Glide;
 import com.chinasoft.robotdemo.R;
+import com.chinasoft.robotdemo.adapter.RouteAdapter;
 import com.chinasoft.robotdemo.adapter.UserIdAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.MaxrsrpPosition;
+import com.chinasoft.robotdemo.bean.PrruData;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
+import com.chinasoft.robotdemo.db.dbflow.DirectionData;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.robot.OnRobotListener;
 import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
+import com.chinasoft.robotdemo.util.DBUtils;
 import com.chinasoft.robotdemo.util.LLog;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.chinasoft.robotdemo.view.MyListView;
 import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.google.gson.Gson;
-import com.kongqw.rockerlibrary.view.RockerView;
+import com.google.gson.reflect.TypeToken;
 import com.slamtec.slamware.robot.Location;
 
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
+import net.yoojia.imagemap.core.CircleShape;
 import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
 import net.yoojia.imagemap.core.PrruGkcShape;
 import net.yoojia.imagemap.core.RequestShape;
+import net.yoojia.imagemap.core.Shape;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -60,10 +73,11 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private boolean isAutoFind = false;
     private PrruModel nowCollectPrru;
     private int coorCount = 0;
-    private Path path;
-    private LineShape lineShape;
-    private float lastX, lastY, nowX, nowY;
-    private float[] newF, desF, mXY, rXY;
+    //    private Path path;
+//    private LineShape lineShape;
+//    private float lastX, lastY;
+    private float nowX, nowY;
+    private float[] newF, desF, mXY, rXY, tempMXY,rsrpMXY;
     private String currentMap;
     private ImageView iv_operation;
     private RequestShape robotShape;
@@ -73,9 +87,9 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private float maxRsrp, xWhenMax, yWhenMax;
     private float[] xyRobotWhenMax;
     private CustomShape desShape;
-    private SuperPopupWindow mUseridPopupWindow;
+    private SuperPopupWindow mUseridPopupWindow, mRoutePopupWindow;
     private Context mContext;
-    private View popupView_userid;
+    private View popupView_userid, popupView_route;
     private float mapRotate;
     private float robotDirection;
     private RobotOperation ro;
@@ -83,92 +97,53 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     private ImageView iv_collect;
     private TextView tv_forcestop, tv_useridsetting, popup_confirm_userid, popup_cancel_userid;
-    private MyListView lv_userid;
+    private TextView tv_routesetting, popup_confirm_route, popup_cancel_route;
+    private MyListView lv_userid, lv_route;
     private UserIdAdapter userIdAdapter;
+    private RouteAdapter routeAdapter;
     private List<String> userIdList = new ArrayList<>();
     private List<String> ipList = new ArrayList<>();
 
+    private List<DirectionData> routeList = new ArrayList<>();
+
     private LinearLayout ll_addshow_userid, ll_add_userid;
+    private LinearLayout ll_add_route;
     private RelativeLayout rl_add_userid, rl_yes_userid, rl_no_userid;
+    private RelativeLayout rl_add_route, rl_yes_route, rl_no_route;
+    private TextView tv_pop_route_title;
+    private String newRouteJson;
+    private String nowRouteName;
+    private List<PointF> nowRouteList = new ArrayList<>();
+    private DirectionData selectRouteModel;
+
     private EditText et_userid;
+    private EditText et_route;
     private String userIds;
 
-    private List<PointF> testLocList = new LinkedList<>();
     private boolean isTestLine = false;
-    private LineShape testLineShape;
-    private Path testLinePath;
+    private boolean isPause=false; //是否在暂停状态
+    private int locCount;
+    private LineShape routeLineShape;
+    private Path routeLinePath;
     private Map<String, MaxrsrpPosition> mpMap = new HashMap<>();
 
     private float rX;
     private float rY;
-    private boolean mFirstflag=false;
-//    private boolean showBattery=true;
-//    private LinearLayout ll_battery;
-//    private ImageView iv_battery;
-//    private TextView tv_battery;
-//    private int nowPercentPic=-1;
 
-//    private int moveCode;   //
-//    private Handler mMoveHandler = new Handler() {
-//        @Override
-//        public void handleMessage(Message msg) {
-//            super.handleMessage(msg);
-//            if (platform != null) {
-//                try {;
-//                    switch (msg.what) {
-//                        case 101:
-//                            platform.moveBy(MoveDirection.FORWARD);
-////                        platform.rotateTo(new Rotation((float) Math.PI/4));
-//                            break;
-//                        case 102:
-//                            platform.moveBy(MoveDirection.BACKWARD);
-//                            break;
-//                        case 103:
-//                            new Thread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    try {
-//                                        moveCode = 100;
-//                                        IMoveAction iMoveAction = platform.moveBy(MoveDirection.TURN_LEFT);
-//                                        iMoveAction.waitUntilDone();
-//                                        moveCode = 101;
-//                                    } catch (Exception e) {
-//                                        e.printStackTrace();
-//                                    }
-//                                }
-//                            }).start();
-////                            getRobotInfo();
-//                            break;
-//                        case 104:
-//                            new Thread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    try {
-//                                        moveCode = 100;
-//                                        IMoveAction iMoveAction = platform.moveBy(MoveDirection.TURN_RIGHT);
-//                                        iMoveAction.waitUntilDone();
-//                                        moveCode = 101;
-//                                    } catch (Exception e) {
-//                                        e.printStackTrace();
-//                                    }
-//                                }
-//                            }).start();
-//                            break;
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    };
-//    Timer mMoveTimer;
-
-
-    //    private List<PrruModel> mPrruModelList;
     private TextView tv_home_back;
-    private TextView mSwitch;
-    private RockerView mRockerView;
+    private TextView tv_opeleft;
+    private int mode_opeleft = 0;//操作左边按钮的状态，0为隐藏，1为恢复，2为清除
     private SuperPopupWindow mChooseCenterPointPop;
+    private String mMapName;
+    private List<String> rsrpIdList = new ArrayList<>();
+
+    private boolean connectResult = true;
+    private RelativeLayout rlBg;
+    private Animation fabOpenAnimation;
+    private Animation fabCloseAnimation;
+    private boolean isFabMenuOpen = false;
+    private ImageView mFucAcIv;
+    private LocAndPrruInfoResponse lap;
 
 
     //防止多个请求同时响应产生的线程不安全问题
@@ -198,37 +173,47 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     @Override
     public void dealLogicBeforeInitView() {
+        routeLinePath = new Path();
+        routeLineShape = new LineShape("routeLine", R.color.green, 2, "#FF4081");
+        getAnimations();
     }
 
     @Override
     public void initView() {
         map = findViewById(R.id.imagemap);
+        rlBg = findViewById(R.id.rl_bg2);
+//        rlBg.dispatchTouchEvent(new MotionEvent())
         iv_operation = findViewById(R.id.iv_operation);
         tv_home_back = findViewById(R.id.tv_home_back);
-        mSwitch = findViewById(R.id.tv_switch);
+        tv_opeleft = findViewById(R.id.tv_opeleft);
         iv_collect = findViewById(R.id.iv_collect);
         tv_forcestop = findViewById(R.id.tv_forcestop);
         tv_useridsetting = findViewById(R.id.tv_useridsetting);
+        tv_routesetting = findViewById(R.id.tv_routesetting);
+        mFucAcIv = findViewById(R.id.fuc_menu);
         iv_operation.setOnClickListener(this);
         tv_home_back.setOnClickListener(this);
-        mSwitch.setOnClickListener(this);
+        tv_opeleft.setOnClickListener(this);
         iv_collect.setOnClickListener(this);
         tv_forcestop.setOnClickListener(this);
         tv_useridsetting.setOnClickListener(this);
-
-//        ll_battery=findViewById(R.id.ll_bafttery);
-//        iv_battery=findViewById(R.id.iv_battery);
-//        tv_battery=findViewById(R.id.tv_battery);
+        tv_routesetting.setOnClickListener(this);
+        mFucAcIv.setOnClickListener(this);
     }
-
+//
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        if (event.)
+//        return false;
+//    }
 
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap,this,this,1000);
+        mMapName = currentMap;
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this, 2000);
         ro.setNotify(true);
-        ro.startOperation();
-        initRocker();
+//        ro.startOperation();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
         if (!TextUtils.isEmpty(userIds)) {
@@ -238,7 +223,8 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
 //        map.setMapBitmap(Constant.mapBitmap);
 //        mapHeight = Constant.mapBitmap.getHeight();
-        if (ro!=null&&!ro.getContinue()) {
+
+        if (connectResult && ro != null && !ro.getContinue()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -257,6 +243,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 }
             }).start();
         }
+
     }
 
     private void initShape() {
@@ -270,6 +257,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     private void initMap() {
         map.setMapBitmap(Constant.mapBitmap);
+        mapHeight = Constant.mapBitmap.getHeight();
         initShape();
         map.setOnRotateListener(new TouchImageView1.OnRotateListener() {
             @Override
@@ -282,16 +270,16 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
             @Override
             public void onLongClick(PointF point) {
-                if (isStart && !isAutoFind) {
+                if (isStart && !isAutoFind&&(!isTestLine||isPause)) {
+//                    ro.setShowOrbits(true);
                     rXY = mapToReal(point.x, point.y);
                     ro.cancelAndMoveTo(rXY[0], rXY[1]);
-                    map.setCanChange(false);
+//                    map.setCanChange(false);
                     desShape.setValues(point.x, point.y);
                     map.addShape(desShape, false);
                 }
             }
         });
-        mapHeight = Constant.mapBitmap.getHeight();
     }
 
 
@@ -299,11 +287,11 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         robotShape.setValues(x, y);
         map.addShape(robotShape, false);
         isStart = true;
-        path = new Path();
-        lastX = nowX;
-        lastY = nowY;
-        path.moveTo(x, y);
-        lineShape = new LineShape("line", R.color.green, 2, "#00ffba");
+//        path = new Path();
+//        lastX = nowX;
+//        lastY = nowY;
+//        path.moveTo(x, y);
+//        lineShape = new LineShape("line", R.color.green, 2, "#00ffba");
     }
 
     private float[] mapToReal(float mx, float my, int height) {
@@ -313,71 +301,72 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private float[] mapToReal(float mx, float my) {
         return new float[]{mx / Constant.mapScale, (mapHeight - my) / Constant.mapScale};
     }
+
     private float[] realToMap(float rx, float ry) {
         return new float[]{rx * Constant.mapScale, mapHeight - ry * Constant.mapScale};
     }
 
+    private float[] realToMap(float rx, float ry, int height) {
+        return new float[]{rx * Constant.mapScale, height - ry * Constant.mapScale};
+    }
 
     @Override
     public void onClickEvent(View view) {
         switch (view.getId()) {
+            case R.id.fuc_menu:
+                if (isFabMenuOpen) {
+                    collapseFabMenu();
+                } else {
+                    expandFabMenu();
+                }
+                break;
             case R.id.tv_home_back:
                 finish();
                 break;
-            case R.id.tv_switch: //切换操作模式
-                if (ipList.size() == 0) {
-                    showToast("用第一个userId测试，未配置");
-                    return;
+            case R.id.tv_opeleft: //操作左边的按钮
+                if (mode_opeleft == 1) {
+                    mode_opeleft = 0;
+                    tv_opeleft.setVisibility(View.GONE);
+                    startTestLine();
+                } else if (mode_opeleft == 2) {
+                    mode_opeleft = 0;
+                    tv_opeleft.setVisibility(View.GONE);
+                    clearLastTest();
                 }
-                List<PointF> pointList = new LinkedList<>();
-                testLocList.add(new PointF(1,0.3f));
-                testLocList.add(new PointF(2,0.3f));
-                testLocList.add(new PointF(3,0.3f));
-                testLocList.add(new PointF(1,0.3f));
-                startTestLine(testLocList);
-//                ro.forceStop();
-//                if (mSwitchAutoFlag == true)//切换为手动
-//                {
-//                    mSwitchAutoFlag = false;
-//                    iv_operation.setVisibility(View.GONE);
-//                    mRockerView.setVisibility(View.VISIBLE);
-//                    mSwitch.setText("手动");
-//                } else {                 //切换为自动
-//                    mSwitchAutoFlag = true;
-//                    iv_operation.setVisibility(View.VISIBLE);
-//                    mRockerView.setVisibility(View.GONE);
-//                    mSwitch.setText("自动");
-//                }
                 break;
             case R.id.iv_operation:
-//                if (isAutoFind) {
-//                    ro.forceStop();
-//                    isAutoFind = false;
-//                    iv_operation.setImageResource(R.mipmap.home_start);
-//                    return;
-//                }else{
-//                    if(nowCollectPrru==null){
-//                        showToast("请先选择Prru");
+                if (isTestLine) {
+                    isTestLine = false;
+                    iv_operation.setImageResource(R.mipmap.home_start);
+                    drawPrruAfterTestLine();
+                    showToast("路径测试结束");
+                    showClear();
+                    try {
+                        ro.forceStop();
+                    } catch (Exception e) {
+                        showToast("机器人异常：" + e.toString());
+                    }
+                } else {
+                    if (mode_opeleft == 2) {
+                        showToast("请先清除痕迹并重选路径");
+                        return;
+                    }
+//                    if (ipList.size() == 0) {
+//                        showToast("用第一个userId测试，未配置");
 //                        return;
 //                    }
-//                    desF=realToMap(nowCollectPrru.x,nowCollectPrru.y);
-//                    desShape.setValues(desF[0], desF[1]);
-//                    map.addShape(desShape, false);
-//                    isAutoFind = true;
-//                    iv_operation.setImageResource(R.mipmap.home_stop);
-//                    nowCollectNeCode = nowCollectPrru.neCode;
-//                    maxRsrp = Float.NEGATIVE_INFINITY;
-//                    xWhenMax = Float.NEGATIVE_INFINITY;
-//                    yWhenMax = Float.NEGATIVE_INFINITY;
-//                    if (nowCollectPrru.x  == nowX && nowCollectPrru.y == nowY) {
-//                        cStep = 1;
-//                        LLog.getLog().e("扫描", "1");
-//                        ro.moveTo(nowCollectPrru.x  + 0.5f, nowCollectPrru.y );
-//                    } else {
-//                        cStep = 0;
-//                        ro.moveTo(nowCollectPrru.x, nowCollectPrru.y );
-//                    }
-//                }
+                    if (nowRouteList.size() == 0) {
+                        showToast("未选择路径");
+                        return;
+                    }
+                    rsrpIdList.clear();
+                    iv_operation.setImageResource(R.mipmap.home_end);
+                    locCount = nowRouteList.size();
+                    isTestLine = true;
+//                    drawLineBeforeTestLine();
+                    mpMap.clear();
+                    startTestLine();
+                }
                 break;
             case R.id.tv_useridsetting:
                 if (isTestLine) {
@@ -390,6 +379,21 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 }
                 initUserIdPop();
                 break;
+            case R.id.tv_routesetting:
+                if (mode_opeleft == 2) {
+                    showToast("请先清除痕迹");
+                    return;
+                }
+                if (isTestLine) {
+                    showToast("请先关闭或完成路径测试");
+                    return;
+                }
+                if (isPrruCollect) {
+                    showToast("请先关闭采集");
+                    return;
+                }
+                initRoutePop();
+                break;
             case R.id.iv_collect:
                 if (isPrruCollect) {
                     isPrruCollect = false;
@@ -401,36 +405,13 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                     }
                     isPrruCollect = true;
                     Glide.with(this).load(R.mipmap.iv_collecton_gif).into(iv_collect);
-//                    iv_collect.setImageResource(R.mipmap.iv_collecton_gif);
-//                    Vector vector = new Vector();
-//                    Location location;
-//                    float x = 10.5f;
-//                    float y = 23.5f;
-//                    boolean flag = true;
-//                    for(int i = 0; i < 20; i++){
-//                        location = new Location();
-//                        location.setX(x);
-//                        location.setY(y);
-//                        location.setZ(0.0f);
-//                        if(i%2 == 0){
-//                            y += 0.5f;
-//                        }else {
-//                            if(flag){
-//                                x += 39.0f;
-//                                flag = false;
-//                            }else {
-//                                x -= 39.0f;
-//                                flag = true;
-//                            }
-//
-//                        }
-//                        vector.add(location);
-//                    }
-//                    ro.moveToVector(vector);
                 }
                 break;
             case R.id.tv_forcestop:
                 ro.forceStop();
+                if (isTestLine) {
+                    showRegain();
+                }
                 break;
             case R.id.popup_confirm_userid:
                 String newUserId = et_userid.getText().toString().trim();
@@ -471,9 +452,66 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             case R.id.rl_no_userid:
                 resetUserIdAdd();
                 break;
+            case R.id.popup_confirm_route:
+                if (selectRouteModel == null) {
+                    showToast("未选择路径");
+                    return;
+                }
+//                String newRouteName1 = et_route.getText().toString().trim();
+//                if (canRouteAdd(newRouteName1)) {
+//                    RouteModel rm=new RouteModel(newRouteName1,newRouteJson);
+//                    routeList.add(rm);
+//                }
+                nowRouteName = selectRouteModel.getRouteName();
+                removeRoute(nowRouteList.size());
+                nowRouteList = new Gson().fromJson(selectRouteModel.getPath(), new TypeToken<List<PointF>>() {
+                }.getType());
+                drawRoute(nowRouteList);
 
+                resetRouteAdd();
+                hideRoutePop();
+                break;
+            case R.id.popup_cancel_route:
+                resetRouteAdd();
+                hideRoutePop();
+                break;
+            case R.id.rl_add_route:
+                openActivityForResult(RouteActivity.class, 1);
+                break;
+            case R.id.rl_yes_route:
+                String newRouteName = et_route.getText().toString().trim();
+                if (canRouteAdd(newRouteName)) {
+//                    userIdList.add(newRoute1);
+//                    refreshRouteList(userIdList);
+
+                    DirectionData rm = new DirectionData(mMapName, newRouteName, newRouteJson);
+
+                    // 插入数据并更新routeList
+                    DBUtils.insert(rm);
+                    routeList.add(rm);
+                    resetRouteAdd();
+                    refreshRouteList(routeList);
+                } else {
+                    showToast("空白或重复添加");
+                }
+                break;
+            case R.id.rl_no_route:
+                resetRouteAdd();
+                break;
             default:
                 break;
+        }
+    }
+
+    //清除上次测试痕迹
+    private void clearLastTest() {
+        removeRoute(locCount);
+        map.removeShape("line");
+        for (String gpp : mpMap.keySet()) {
+            map.removeShape(gpp);
+        }
+        for (String id : rsrpIdList) {
+            map.removeShape(id);
         }
     }
 
@@ -489,12 +527,28 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         return true;
     }
 
+    private boolean canRouteAdd(String routeName) {
+        if (routeName.equals("")) {
+            return false;
+        }
+        for (DirectionData route : routeList) {
+            if (routeName.equals(route.getRouteName())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void resetUserIdAdd() {
         et_userid.setText("");
         rl_add_userid.setVisibility(View.VISIBLE);
         ll_add_userid.setVisibility(View.GONE);
+    }
 
-
+    private void resetRouteAdd() {
+        et_route.setText("");
+        rl_add_route.setVisibility(View.VISIBLE);
+        ll_add_route.setVisibility(View.GONE);
     }
 
     private void refreshUserIdList(List<String> userIdList) {
@@ -506,6 +560,12 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
         userIdAdapter.setUserIdList(userIdList);
         userIdAdapter.notifyDataSetChanged();
+    }
+
+    private void refreshRouteList(List<DirectionData> routeList) {
+        resetRouteAdd();
+        routeAdapter.setRouteList(routeList);
+        routeAdapter.notifyDataSetChanged();
     }
 
     private String prruDataToString(List<PrruSigalModel> prruSigalModelList) {
@@ -574,6 +634,89 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         mUseridPopupWindow.hidePopupWindow();
     }
 
+    /***
+     * 初始化开始popupwindow
+     */
+    private void initRoutePop() {
+        //   查询数据库，赋予routeList；
+        routeList = DBUtils.query(mMapName);
+
+        if (mRoutePopupWindow == null) {
+            mRoutePopupWindow = new SuperPopupWindow(mContext, R.layout.popup_route);
+            mRoutePopupWindow.setFocusable(true);
+            mRoutePopupWindow.setOutsideTouchable(true);
+            mRoutePopupWindow.setAnimotion(R.style.PopAnimation);
+            popupView_route = mRoutePopupWindow.getPopupView();
+            popup_confirm_route = popupView_route.findViewById(R.id.popup_confirm_route);
+            popup_cancel_route = popupView_route.findViewById(R.id.popup_cancel_route);
+            lv_route = popupView_route.findViewById(R.id.lv_route);
+            routeAdapter = new RouteAdapter(this, routeList);
+            lv_route.setAdapter(routeAdapter);
+            popup_confirm_route.setOnClickListener(this);
+            popup_cancel_route.setOnClickListener(this);
+            ll_add_route = popupView_route.findViewById(R.id.ll_add_route);
+            et_route = popupView_route.findViewById(R.id.et_route);
+            rl_add_route = popupView_route.findViewById(R.id.rl_add_route);
+            rl_no_route = popupView_route.findViewById(R.id.rl_no_route);
+            rl_yes_route = popupView_route.findViewById(R.id.rl_yes_route);
+            tv_pop_route_title = popupView_route.findViewById(R.id.tv_pop_route_title);
+            rl_yes_route.setOnClickListener(this);
+            rl_no_route.setOnClickListener(this);
+            rl_add_route.setOnClickListener(this);
+            routeAdapter.setOnRouteListener(new RouteAdapter.OnRouteListener() {
+                @Override
+                public void delete(DirectionData routeModel) {
+                    if (routeModel == selectRouteModel) {
+                        showToast("不能删除选择的路径");
+                        return;
+                    }
+                    //  删除数据库并更新routeList
+                    DBUtils.delete(routeModel);//删除
+                    routeList.remove(routeModel);
+                    refreshRouteList(routeList);
+                }
+
+                @Override
+                public void select(DirectionData routeModel) {
+                    if (routeModel != selectRouteModel) {
+                        selectRouteModel = routeModel;
+                        tv_pop_route_title.setText(selectRouteModel.getRouteName());
+                    }
+                }
+            });
+        }
+        showRoutePop();
+    }
+
+    /**
+     * 显示Popupwindow
+     */
+    private void showRoutePop() {
+        if (!TextUtils.isEmpty(nowRouteName)) {
+            tv_pop_route_title.setText(nowRouteName);
+            selectRouteModel = getRouteModelByRouteName(nowRouteName);
+        }
+        mRoutePopupWindow.showPopupWindow();
+    }
+
+    private DirectionData getRouteModelByRouteName(String routeName) {
+        for (DirectionData route : routeList) {
+            if (routeName.equals(route.getRouteName())) {
+                return route;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 隐藏Popupwindow
+     */
+    private void hideRoutePop() {
+        tv_pop_route_title.setText("");
+        selectRouteModel = null;
+        mRoutePopupWindow.hidePopupWindow();
+    }
+
 
     /***
      *
@@ -583,8 +726,8 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
      */
     private void saveRbLocationInfo(float x, float y, float scaleRuler) {
         SharedPrefHelper.putString(PrrucollectActivity.this, "currentMap", currentMap);
-        mXY = realToMap(x, y);
-        initStart(mXY[0], mXY[1]);
+        tempMXY = realToMap(x, y);
+        initStart(tempMXY[0], tempMXY[1]);
     }
 
 
@@ -597,125 +740,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
     }
 
-
-    /***
-     * 初始化摇杆
-     */
-    private void initRocker() {
-        mRockerView = findViewById(R.id.home_rockerView);
-//        // 设置回调模式
-//        mRockerView.setCallBackMode(RockerView.CallBackMode.CALL_BACK_MODE_STATE_CHANGE);
-//        //监听摇动方向
-//        mRockerView.setOnAngleChangeListener(new RockerView.OnAngleChangeListener() {
-//            @Override
-//            public void onStart() {
-//                //开始的方法
-////                RobotMoveUtils.goStraight(0);
-//            }
-//
-//            @Override
-//            public void angle(double v) {
-//                //角度
-////               RobotMoveUtils.setRobotMove(platform,RobotMoveUtils.fuzzyDirection(v), (HomeActivity) mContext);
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//                RobotMoveUtils.goStraight(0);
-//                //停止
-//            }
-//        });
-//        mRockerView.setOnShakeListener(RockerView.DirectionMode.DIRECTION_8, new RockerView.OnShakeListener() {
-//            @Override
-//            public void onStart() {
-//                Log.e("XHF", "Start");
-//                //开始循环监听状态值
-////                mMoveT？
-//            }
-//
-//            @Override
-//            public void direction(RockerView.Direction direction) {
-////                handRobotMove(direction);
-//                Log.e("XHF", "摇动方向 : " + getDirection(direction));
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//                Log.e("XHF", "Finish");
-////                mMoveTimer.cancel();
-//            }
-//        });
-    }
-
-    /**
-     * 获取遥感的方向
-     */
-    private String getDirection(RockerView.Direction direction) {
-        String directName = "";
-        switch (direction) {
-            case DIRECTION_UP:                       //方向向上
-                directName = "方向向上";
-                break;
-            case DIRECTION_DOWN:
-                directName = "方向向下";
-                break;
-            case DIRECTION_LEFT:
-                directName = "方向向左";
-                break;
-            case DIRECTION_RIGHT:
-                directName = "方向向右";
-                break;
-            case DIRECTION_CENTER:
-                directName = "方向居中";
-                break;
-            case DIRECTION_UP_LEFT:
-                directName = "方向左上";
-                break;
-            case DIRECTION_UP_RIGHT:
-                directName = "方向右上";
-                break;
-            case DIRECTION_DOWN_LEFT:
-                directName = "方向左下";
-                break;
-            case DIRECTION_DOWN_RIGHT:
-                directName = "方向右下";
-                break;
-            default:
-                break;
-        }
-        return directName;
-    }
-
-//    private void handRobotMove(RockerView.Direction direction) {
-//        if (platform != null) {
-//            switch (direction) {
-//                case DIRECTION_UP:
-//                    moveCode = 101;
-//                    break;
-//                case DIRECTION_DOWN:
-//                    moveCode = 102;
-//                    break;
-//                case DIRECTION_LEFT:
-//                    moveCode = 103;
-//                    break;
-//                case DIRECTION_RIGHT:
-//                    moveCode = 104;
-//                    break;
-//                case DIRECTION_CENTER:
-//                    break;
-//                case DIRECTION_UP_LEFT:
-//                    break;
-//                case DIRECTION_UP_RIGHT:
-//                    break;
-//                case DIRECTION_DOWN_LEFT:
-//                    break;
-//                case DIRECTION_DOWN_RIGHT:
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-//    }
 
     private long lastClickTime;
 
@@ -783,8 +807,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     }
 
 
-
-
     //移除轨迹点
     private void clearOrbits() {
         for (int i = 0, len = coorCount; i < len; i++) {
@@ -794,13 +816,13 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     //到达目的点
     private void arriveDes() {
-        map.setCanChange(true);
+//        map.setCanChange(true);
         newF = realToMap(nowX, nowY);
-        path.lineTo(newF[0], newF[1]);
-        lineShape.setPath(path);
-        map.addShape(lineShape, false);
-        lastX = nowX;
-        lastY = nowY;
+//        path.lineTo(newF[0], newF[1]);
+//        lineShape.setPath(path);
+//        map.addShape(lineShape, false);
+//        lastX = nowX;
+//        lastY = nowY;
         map.removeShape("des");
         updateRobotByReal();
     }
@@ -815,7 +837,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     @Override
     public void connectSuccess(float x, float y, float direc, boolean isContinue) {
-        showToast("机器人连接成功！");
+//        showToast("机器人连接成功！");
         initMap();
 
         nowX = x;
@@ -825,6 +847,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             float[] continueXY = realToMap(x, y);
             initStart(continueXY[0], continueXY[1]);
         } else {
+            dismissProgressDialog();
             saveRbLocationInfo(x, y, Constant.mapScale);
         }
     }
@@ -832,11 +855,15 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     @Override
     public void connectFailed(String errormsg) {
         showToast("机器人连接失败！");
+        connectResult = false;
         finish();
     }
 
     @Override
     public void catchError(String errormsg) {
+        if (isTestLine) {
+            showRegain();
+        }
         showToast("异常断开");
         LLog.getLog().e("异常断开", errormsg);
         //finish();
@@ -844,12 +871,13 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
 
     @Override
-    public void refreshOrbits(Vector<Location> locVector) {
+    public synchronized void refreshOrbits(Vector<Location> locVector) {
         clearOrbits();
         coorCount = locVector.size();
         for (int i = 0, len = coorCount; i < len; i++) {
             float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
-            CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.orbit_point);
+//            CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.orbit_point);
+            CircleShape orbitShape = new CircleShape("coor" + i, Color.parseColor("#f6ddcc"), 7f);
             orbitShape.setValues(tf[0], tf[1]);
             map.addShape(orbitShape, false);
         }
@@ -862,18 +890,21 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             return;
         }
         for (PrruSigalModel psm : prruSigalModelList) {
-            if (!mpMap.keySet().contains(psm.gpp)) {
-                MaxrsrpPosition mp = new MaxrsrpPosition();
-                mp.setX(x);
-                mp.setY(y);
-                mp.setRsrp(psm.rsrp);
-                mpMap.put(psm.gpp, mp);
-            } else {
-                tempMp = mpMap.get(psm.gpp);
-                if (psm.rsrp > tempMp.getRsrp()) {
-                    tempMp.setX(x);
-                    tempMp.setY(y);
-                    tempMp.setRsrp(psm.rsrp);
+            if (psm.rsrp > -950) {
+                LLog.getLog().robot(x + "," + y, psm.gpp + "____" + psm.rsrp);
+                if (!mpMap.keySet().contains(psm.gpp)) {
+                    MaxrsrpPosition mp = new MaxrsrpPosition();
+                    mp.setX(x);
+                    mp.setY(y);
+                    mp.setRsrp(psm.rsrp);
+                    mpMap.put(psm.gpp, mp);
+                } else {
+                    tempMp = mpMap.get(psm.gpp);
+                    if (psm.rsrp > tempMp.getRsrp()) {
+                        tempMp.setX(x);
+                        tempMp.setY(y);
+                        tempMp.setRsrp(psm.rsrp);
+                    }
                 }
             }
         }
@@ -882,11 +913,11 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     @Override
     public void notifyPrru(final float x, final float y) {
         if (isTestLine) {
-            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ipList.get(0) + "&mapId=1", new Response.Listener<String>() {
+            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
                     LLog.getLog().e("getLocAndPrruInfo成功", s);
-                    LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
+                    lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                     if (lap.code == 0) {
                         recordMaxrsrpPostion(x, y, lap.data.prruData);
                     }
@@ -895,6 +926,29 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
                     LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
+                }
+            });
+
+            Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
+                @Override
+                public void onResponse(String s) {
+                    LLog.getLog().e("getPhonePrru成功", s);
+                    LLog.getLog().robot(x + "," + y, s);
+
+                    PrruData prruData = new Gson().fromJson(s, PrruData.class);
+                    if (prruData.getCode() == 0) //成功
+                    {
+                        PrruData.DataBean data = prruData.getData();
+                        setPrruColorPoint(x,y,data.getRsrp(), data.getId());
+
+                    } else {
+                        Toast.makeText(mContext, "prru失败", Toast.LENGTH_LONG);
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    LLog.getLog().e("getPhonePrru错误", volleyError.toString());
                 }
             });
 
@@ -930,17 +984,17 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         nowX = x;
         nowY = y;
         robotDirection = direc;
-        if (!isTestLine) {
-            if (Math.sqrt((nowX - lastX) * (nowX - lastX) + (nowY - lastY) * (nowY - lastY)) > 0.3f) {
-//                            Log.e("handler","的点点滴滴顶顶顶顶顶顶顶顶顶大等等");
-                newF = realToMap(nowX, nowY);
-                path.lineTo(newF[0], newF[1]);
-                lineShape.setPath(path);
-                map.addShape(lineShape, false);
-                lastX = nowX;
-                lastY = nowY;
-            }
-        }
+//        if (!isTestLine) {
+//            if (Math.sqrt((nowX - lastX) * (nowX - lastX) + (nowY - lastY) * (nowY - lastY)) > 0.3f) {
+////                            Log.e("handler","的点点滴滴顶顶顶顶顶顶顶顶顶大等等");
+//                newF = realToMap(nowX, nowY);
+//                path.lineTo(newF[0], newF[1]);
+//                lineShape.setPath(path);
+//                map.addShape(lineShape, false);
+//                lastX = nowX;
+//                lastY = nowY;
+//            }
+//        }
         updateRobotByReal();
     }
 
@@ -952,7 +1006,16 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         clearOrbits();
         if (!isForce) {
             if (isTestLine) {
-                continueTestLine();
+                if(nowRouteList.size()==0){
+                    continueTestLine(false);
+                }else {
+                    //判断是否进入设立的点
+                    if(Math.sqrt(Math.pow((nowRouteList.get(0).x-x),2)+Math.pow((nowRouteList.get(0).y-y),2))>0.5f) {
+                        continueTestLine(false);
+                    }else {
+                        continueTestLine(true);
+                    }
+                }
             }
             if (isAutoFind) {
                 autoFind();
@@ -963,83 +1026,130 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     }
 
 
-    private void startTestLine(List<PointF> locList) {
-        if (locList != null && locList.size() > 0) {
-            testLocList = locList;
-            isTestLine = true;
-            showToast("路径测试开始");
-            drawLineBeforeTestLine();
-//            drawPrruAfterTestLine();
-            map.setCanChange(false);
-            mpMap.clear();
-            ro.moveTo(testLocList.get(0).x,testLocList.get(0).y);
+    private void startTestLine() {
+        isPause=false;
+//        ro.setShowOrbits(false);
+        clearOrbits();
+        map.removeShape("des");
+        if (nowRouteList != null && nowRouteList.size() > 0) {
+            if (nowRouteList.size() == locCount) {
+                showToast("路径测试开始");
+            } else if (nowRouteList.size() < locCount) {
+                showToast("路径测试恢复");
+            }
+            ro.moveTo(nowRouteList.get(0).x, nowRouteList.get(0).y);
         } else {
             showToast("路径为空");
         }
     }
 
-    private void continueTestLine() {
-        testLocList.remove(0);
-        if (testLocList.size() > 0) {
-            ro.moveTo(testLocList.get(0).x, testLocList.get(0).y);
+    private void continueTestLine(boolean isRemove) {
+        if(isRemove) {
+            tempMXY = realToMap(nowRouteList.get(0).x, nowRouteList.get(0).y);
+            CustomShape tShape = new CustomShape("routePoint" + (locCount - nowRouteList.size()), R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.destination_point_gray);
+            tShape.setValues(tempMXY[0], tempMXY[1]);
+            map.addShape(tShape, false);
+            nowRouteList.remove(0);
+        }
+        if (nowRouteList.size() > 0) {
+            ro.moveTo(nowRouteList.get(0).x, nowRouteList.get(0).y);
         } else {
             isTestLine = false;
-            map.setCanChange(true);
+            iv_operation.setImageResource(R.mipmap.home_start);
             drawPrruAfterTestLine();
             updateRobotByReal();
+            showClear();
             showToast("路径测试完成");
         }
-
-
     }
 
+    //显示清除按钮
+    private void showClear() {
+        mode_opeleft = 2;
+        tv_opeleft.setText("清除");
+        tv_opeleft.setVisibility(View.VISIBLE);
+    }
+
+    //显示恢复按钮
+    private void showRegain() {
+        isPause=true;
+        mode_opeleft = 1;
+        tv_opeleft.setText("恢复");
+        tv_opeleft.setVisibility(View.VISIBLE);
+    }
+
+
+    //mpMap按rsrp从大到小排序并画出前5个
     private void drawPrruAfterTestLine() {
-//        MaxrsrpPosition mp1=new MaxrsrpPosition();
-//        mp1.setX(5);
-//        mp1.setY(92);
-//        mpMap.put("111",mp1);
-//        MaxrsrpPosition mp2=new MaxrsrpPosition();
-//        mp2.setX(6);
-//        mp2.setY(62);
-//        mpMap.put("222",mp2);
-//        MaxrsrpPosition mp3=new MaxrsrpPosition();
-//        mp3.setX(44);
-//        mp3.setY(103);
-//        mpMap.put("333",mp3);
-//        MaxrsrpPosition mp4=new MaxrsrpPosition();
-//        mp4.setX(66);
-//        mp4.setY(64);
-//        mpMap.put("444",mp4);
-        for (Map.Entry<String, MaxrsrpPosition> entry : mpMap.entrySet()) {
-            System.out.println("key= " + entry.getKey() + " and value= "
-                    + entry.getValue());
+        List<Map.Entry<String, MaxrsrpPosition>> lists = new ArrayList<Map.Entry<String, MaxrsrpPosition>>(mpMap.entrySet());
+        Collections.sort(lists, new Comparator<Map.Entry<String, MaxrsrpPosition>>() {
+            @Override
+            public int compare(Map.Entry<String, MaxrsrpPosition> o1, Map.Entry<String, MaxrsrpPosition> o2) {
+                float r1 = o1.getValue().getRsrp();
+                float r2 = o2.getValue().getRsrp();
+                if (r1 > r2) {
+                    return -1;
+                } else if (r1 < r2) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+        for (Map.Entry<String, MaxrsrpPosition> entry : lists.size() > 5 ? lists.subList(0, 5) : lists) {
             PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, PrrucollectActivity.this);
             pgShape.setNecodeText(entry.getKey());
-            pgShape.setPaintColor(Color.parseColor("#442b87"));
-            mXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
-            pgShape.setValues(mXY[0], mXY[1]);
+            pgShape.setPaintColor(Color.parseColor("#ff0000"));
+            tempMXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
+            pgShape.setValues(tempMXY[0], tempMXY[1]);
             map.addShape(pgShape, false);
         }
+
     }
 
-    private void drawLineBeforeTestLine() {
-        for (int i = 0, len = testLocList.size(); i < len; i++) {
-            mXY = realToMap(testLocList.get(i).x, testLocList.get(i).y);
-            CustomShape tShape = new CustomShape("test" + i, R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.destination_point);
-            tShape.setValues(mXY[0], mXY[1]);
+    //移除路径显示
+    private void removeRoute(int pointSize) {
+        for (int i = 0; i < pointSize; i++) {
+            map.removeShape("routePoint" + i);
+        }
+        map.removeShape("routeLine");
+    }
+
+    private void drawRoute(List<PointF> routeList) {
+        routeLinePath.reset();
+        for (int i = 0, len = routeList.size(); i < len; i++) {
+            tempMXY = realToMap(routeList.get(i).x, routeList.get(i).y);
+            CustomShape tShape = new CustomShape("routePoint" + i, R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.destination_point);
+            tShape.setValues(tempMXY[0], tempMXY[1]);
             map.addShape(tShape, false);
             if (i == 0) {
-                testLinePath = new Path();
-                testLinePath.moveTo(mXY[0], mXY[1]);
+                routeLinePath.moveTo(tempMXY[0], tempMXY[1]);
             } else {
-                testLinePath.lineTo(mXY[0], mXY[1]);
+                routeLinePath.lineTo(tempMXY[0], tempMXY[1]);
             }
 
         }
-        testLineShape = new LineShape("testLine", R.color.green, 2, "#FF4081");
-        testLineShape.setPath(testLinePath);
-        map.addShape(testLineShape, false);
+        routeLineShape.setPath(routeLinePath);
+        map.addShape(routeLineShape, false);
     }
+
+//    private void drawLineBeforeTestLine() {
+//        routeLinePath.reset();
+//        for (int i = 0, len = nowRouteList.size(); i < len; i++) {
+//            tempMXY = realToMap(nowRouteList.get(i).x, nowRouteList.get(i).y);
+//            CustomShape tShape = new CustomShape("routePoint" + i, R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.destination_point);
+//            tShape.setValues(tempMXY[0], tempMXY[1]);
+//            map.addShape(tShape, false);
+//            if (i == 0) {
+//                routeLinePath.moveTo(tempMXY[0], tempMXY[1]);
+//            } else {
+//                routeLinePath.lineTo(tempMXY[0], tempMXY[1]);
+//            }
+//
+//        }
+//        routeLineShape.setPath(routeLinePath);
+//        map.addShape(routeLineShape, false);
+//    }
 
     private void initCenterPop() {
         mChooseCenterPointPop = new SuperPopupWindow(mContext, R.layout.pop_coordinate_layout);
@@ -1052,9 +1162,10 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         Bitmap bitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
         final int maphight = bitmap.getHeight();
         map.setMapBitmap(bitmap);
+        initDefaultCd(map, tvShowPoint, maphight);
         PointF centerByImagePoint = map.getCenterByImagePoint();
         float[] float1 = mapToReal(centerByImagePoint.x, centerByImagePoint.y, maphight);
-        tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0]))+ " , " +Float.parseFloat(String.format("%.2f", float1[1])));
+        tvShowPoint.setText(Float.parseFloat(String.format("%.2f", float1[0])) + " , " + Float.parseFloat(String.format("%.2f", float1[1])));
         rX = Float.parseFloat(String.format("%.2f", float1[0]));
         rY = Float.parseFloat(String.format("%.2f", float1[1]));
         map.setOnCenerPointListener(new TouchImageView1.OnCenterPointListener() {
@@ -1078,11 +1189,12 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             @Override
             public void onClick(View v) {
                 if (rX >= 0 && rY >= 0) {
+                    showProgressDialog("设置中...");
                     mChooseCenterPointPop.hidePopupWindow();
                     SharedPrefHelper.putFloat(mContext, "firstX", rX);
                     SharedPrefHelper.putFloat(mContext, "firstY", rY);
                     ro.doAfterConfirm(rX, rY);
-                    mChooseCenterPointPop=null;
+                    mChooseCenterPointPop = null;
                 } else {
                     showToast("选取起始点越界");
                 }
@@ -1090,7 +1202,93 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         });
     }
 
-    public void showCenterPop() {
-        mChooseCenterPointPop.showPopupWindow();
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == 2) {
+            rl_add_route.setVisibility(View.GONE);
+            ll_add_route.setVisibility(View.VISIBLE);
+            newRouteJson = data.getStringExtra("routeJson");
+            et_route.requestFocus();
+        }
     }
+
+    /**
+     * 设置 PrruColor
+     */
+    private void setPrruColorPoint(float x,float y,int prru, String id) {
+        int color;
+
+        if (-75 < prru && prru <= 0) {  //1e8449
+            color = Color.parseColor("#1e8449");
+        } else if (-95 < prru && prru <= -75) { //浅绿色
+            color = Color.GREEN;
+        } else if (-105 < prru && prru <= -95) {  //黄色
+            color = Color.YELLOW;
+        } else if (-120 < prru && prru <= -105) { //红色
+            color = Color.RED;
+        } else {
+            color = Color.BLACK;
+        }
+        rsrpIdList.add(id);
+        CircleShape shape = new CircleShape(id, color);
+        rsrpMXY=realToMap(x,y);
+        shape.setValues(rsrpMXY[0], rsrpMXY[1]);
+        map.addShape(shape, false);
+    }
+
+    //初始化地图位置
+    private void initDefaultCd(final ImageMap1 map, final TextView textView, final int mapHeight) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(300);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+//                           float defaultX=SharedPrefHelper.getFloat(mContext,"firstX"); //获取设置页面设置坐标X
+//                           float defaultY=SharedPrefHelper.getFloat(mContext,"firstY"); //获取设置页面设置坐标Y
+                            float[] floats = realToMap(Constant.firstX, Constant.firstY, mapHeight);
+                            Shape shape = new CircleShape("default111", Color.TRANSPARENT);
+                            shape.setValues(floats[0], floats[1]);
+                            map.addShape(shape, true);
+                            textView.setText(Constant.firstX + " , " + Constant.firstY);
+                            rX=Constant.firstX;
+                            rY=Constant.firstY;
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+
+    private void expandFabMenu() {
+        tv_useridsetting.setVisibility(View.VISIBLE);
+        tv_routesetting.setVisibility(View.VISIBLE);
+        ViewCompat.animate(mFucAcIv).rotation(45.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
+//        tv_useridsetting.startAnimation(fabOpenAnimation);
+//        tv_routesetting.startAnimation(fabOpenAnimation);
+
+        isFabMenuOpen = true;
+    }
+
+    private void collapseFabMenu() {
+        ViewCompat.animate(mFucAcIv).rotation(0.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
+        tv_useridsetting.setVisibility(View.GONE);
+        tv_routesetting.setVisibility(View.GONE);
+//        tv_useridsetting.startAnimation(fabCloseAnimation);
+//        tv_routesetting.startAnimation(fabCloseAnimation);
+        isFabMenuOpen = false;
+    }
+
+    private void getAnimations() {
+        fabOpenAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_open);
+        fabCloseAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_close);
+    }
+
 }

@@ -22,7 +22,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
-import com.chinasoft.robotdemo.adapter.MaplistAdapter;
 import com.chinasoft.robotdemo.adapter.PopMapListAdapter;
 import com.chinasoft.robotdemo.bean.AllPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.PrruModel;
@@ -33,6 +32,9 @@ import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.FileUtil;
 import com.chinasoft.robotdemo.util.InterRequestUtil;
 import com.chinasoft.robotdemo.util.LLog;
+import com.chinasoft.robotdemo.util.PrruSubscribe;
+import com.chinasoft.robotdemo.util.Subscription;
+import com.chinasoft.robotdemo.util.UpLoad;
 import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.google.gson.Gson;
 import com.slamtec.slamware.discovery.DeviceManager;
@@ -56,12 +58,8 @@ import java.util.Map;
 
 public class MaplistActivity extends BaseActivity {
     private List<String> mapList = new ArrayList();
-    private String currentMap, wifiRobotIp;
-    private int wifiRobotPort;
-    private int mode = 1;
     private List<PrruModel> mPrruModelList;
-    private DeviceManager deviceManager;
-    private TextView tv_modecollect, tv_modefind, tv_setting, tv_next;
+    private TextView   tv_setting, tv_next;
     private RadioButton mTvFucNetTest;
     private RadioButton mTvFucPrruFind;
     private RadioButton mTvFucAiPractice;
@@ -70,41 +68,13 @@ public class MaplistActivity extends BaseActivity {
     private int mChooseMark = -1;
     private SuperPopupWindow mMapChoosePop;
     private TextView mTvMF;
-    private static final int[] ATTRS = new int[]{
-            android.R.attr.fastScrollThumbDrawable,
-    };
     private int cNum = -1;
     private int tNum = -1;
     private String mChooseMap;
     private PopMapListAdapter mPopMapListAdapter;
-    //    private AbstractDiscover.DiscoveryListener discoveryListener = new AbstractDiscover.DiscoveryListener() {
-//        @Override
-//        public void onStartDiscovery(AbstractDiscover abstractDiscover) {
-//            LLog.getLog().e("discoveryListener", "onStartDiscovery");
-//        }
-//
-//        @Override
-//        public void onStopDiscovery(AbstractDiscover abstractDiscover) {
-//            LLog.getLog().e("discoveryListener", "onStopDiscovery");
-//        }
-//
-//        @Override
-//        public void onDiscoveryError(AbstractDiscover abstractDiscover, String s) {
-//            LLog.getLog().e("discoveryListener", "错误：" + s);
-//        }
-//
-//        @Override
-//        public void onDeviceFound(AbstractDiscover abstractDiscover, Device device) {
-//            LLog.getLog().e("discoveryListener", "找到device：" + device.toString());
-//            if (device instanceof BleDevice) {
-////                                    Log.e("msg","aa"+((BleDevice)device).getDevice());
-//            } else if (device instanceof MdnsDevice) {
-//                wifiRobotIp = ((MdnsDevice) device).getAddr();
-//                wifiRobotPort = ((MdnsDevice) device).getPort();
-//            }
-//        }
-//    };
-
+    private UpLoad upLoad;
+    private Subscription subscription;
+    private PrruSubscribe prruSubscribe;
 
     @Override
     public void setContentLayout() {
@@ -113,18 +83,20 @@ public class MaplistActivity extends BaseActivity {
 
     @Override
     public void dealLogicBeforeInitView() {
-
-        Constant.interRequestUtil = InterRequestUtil.getInstance(this);
-
+        upLoad=new UpLoad(this);
+        subscription=new Subscription(this);
+        prruSubscribe=new PrruSubscribe(this);
+        Constant.userId=upLoad.getLocaIpOrMac();
+        Constant.storeId=3;
         File dir = new File(Constant.sdPath + "/maps/");
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        File mapFile = new File(Constant.sdPath + "/maps/U5_2F.png");
+        File mapFile = new File(Constant.sdPath + "/maps/chinasoft_1f.png");
         if (!mapFile.exists()) {
             try {
                 mapFile.createNewFile();
-                FileUtil.writeBytesToFile(this.getAssets().open("U5_2F.png"), mapFile);
+                FileUtil.writeBytesToFile(this.getAssets().open("chinasoft_1f.png"), mapFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -153,20 +125,14 @@ public class MaplistActivity extends BaseActivity {
     public void initView() {
         tv_next = findViewById(R.id.tv_next);
         tv_setting = findViewById(R.id.tv_setting);
-        tv_modecollect = findViewById(R.id.tv_modecollect);
-        tv_modefind = findViewById(R.id.tv_modefind);
-
         mTvFucNetTest = findViewById(R.id.fuc_net_test);
         mTvFucPrruFind = findViewById(R.id.fuc_prru_find);
         mTvFucAiPractice = findViewById(R.id.fuc_ai_practice);
         mTvFucLoc = findViewById(R.id.fuc_loc);
         mFucRg = findViewById(R.id.fuc_Rg);
-
         mTvMF = findViewById(R.id.tv_find_map);
         tv_next.setOnClickListener(this);
         tv_setting.setOnClickListener(this);
-        tv_modecollect.setOnClickListener(this);
-        tv_modefind.setOnClickListener(this);
         mTvMF.setOnClickListener(this);
         mFucRg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -180,52 +146,13 @@ public class MaplistActivity extends BaseActivity {
                 } else if (checkedId == mTvFucLoc.getId()) {
                     mChooseMark = 4;
                 }
-                Log.e("XHF", mChooseMark + "");
             }
         });
-//        BlueUtils.getBlueUtils().setFindBlue(new BlueUtils.FindBlue() {
-//            @Override
-//            public void getBlues(BluetoothDevice bluetoothDevice) {
-//
-//                final BleDevice device = new BleDevice(bluetoothDevice);
-//                boolean f= device.canBeFoundWith(DiscoveryMode.MDNS);
-//                String wifiSSID = "LampSite";
-//                String wifiPassword = "1225sznp";
-//                // listener; // a concrete AbstractDiscover.BleConfigureListener object
-//                deviceManager.pair(device, wifiSSID, wifiPassword, new AbstractDiscover.BleConfigureListener() {
-//                    @Override
-//                    public void onConfigureSuccess() {
-//                        Log.e("start","success");
-////                        deviceManager.setListener(discoveryListener);
-////                        deviceManager.start(DiscoveryMode.BLE);
-////                        deviceManager.start(DiscoveryMode.MDNS);
-//                    }
-//
-//                    @Override
-//                    public void onConfigureFailure(String s) {
-//                        Log.e("start",s);
-//                    }
-//                });
-//            }
-//        });
-//        BlueUtils.getBlueUtils().getInitialization(this);
-////
-//        BlueUtils.getBlueUtils().startBlue();
-
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                deviceManager = new DeviceManager(MaplistActivity.this);
-//                deviceManager.setListener(discoveryListener);
-//                deviceManager.start(DiscoveryMode.MDNS);
-//            }
-//        }).start();
         Map<String, String> map = new HashMap();
         map.put("username", "admin");
         map.put("password", "admin");
         login(map);
     }
-////        });
 
     private void requestPruModel() {
         Constant.interRequestUtil.getAllPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getAllPrruInfo?mapId=2046", new Response.Listener<String>() {
@@ -234,12 +161,6 @@ public class MaplistActivity extends BaseActivity {
                 LLog.getLog().e("getAllPrruInfo成功", s);
                 AllPrruInfoResponse ap = new Gson().fromJson(s, AllPrruInfoResponse.class);
                 mPrruModelList = ap.data;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                    }
-                });
                 LLog.getLog().e("prruModelList", mPrruModelList + "");
             }
         }, new Response.ErrorListener() {
@@ -250,6 +171,11 @@ public class MaplistActivity extends BaseActivity {
         });
     }
 
+    private void subscription() {
+        subscription.toSubscription();
+        prruSubscribe.toSubscription();
+    }
+
 
     private void login(Map<String, String> map) {
         Constant.interRequestUtil.login(Request.Method.POST, Constant.IP_ADDRESS + "/tester/api/app/login", new Response.Listener<JSONObject>() {
@@ -258,7 +184,7 @@ public class MaplistActivity extends BaseActivity {
                     if (response.getInt("status") == 200) {
                         SharedPrefHelper.putString(MaplistActivity.this, "Cookie", response.getString("Cookie"));
                         LLog.getLog().e("登录", "成功");
-                        showToast("Tester登录成功");
+                        subscription();
                         requestPruModel();     //请求PruModelList信息
                         return;
                     }
@@ -285,9 +211,6 @@ public class MaplistActivity extends BaseActivity {
                 openActivityForResult(SettingActivity.class, 1);
                 break;
             case R.id.tv_next:
-                if (deviceManager != null) {
-                    deviceManager.stop(DiscoveryMode.MDNS);
-                }
                 if (TextUtils.isEmpty(mChooseMap)) {
                     showToast("必须选择地图");
                     return;
@@ -314,16 +237,6 @@ public class MaplistActivity extends BaseActivity {
                 }).start();
 
                 break;
-            case R.id.tv_modecollect:
-                mode = 1;
-                tv_modecollect.setBackgroundResource(R.mipmap.tv_mode_select);
-                tv_modefind.setBackgroundResource(R.mipmap.tv_mode_unselect);
-                break;
-            case R.id.tv_modefind:
-                mode = 2;
-                tv_modecollect.setBackgroundResource(R.mipmap.tv_mode_unselect);
-                tv_modefind.setBackgroundResource(R.mipmap.tv_mode_select);
-                break;
             case R.id.tv_find_map:
                 if (mMapChoosePop != null) {
                     mPopMapListAdapter.setNum(cNum);
@@ -339,26 +252,18 @@ public class MaplistActivity extends BaseActivity {
     private void initGlobalParams() {
         Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.0f);
         Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.0f);
-        Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
+        Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 20f);
         Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
         Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
 
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (deviceManager != null) {
-            deviceManager.stop(DiscoveryMode.MDNS);
-        }
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == 2) {
-//            (SharedPrefHelper.getBoolean(this, "https", false) ? "https://" : "http://")
-            Constant.IP_ADDRESS = "https://"
+            Constant.IP_ADDRESS = (SharedPrefHelper.getBoolean(this, "https", false) ? "https://" : "http://")
                     + SharedPrefHelper.getString(this, "serverIp", "218.4.33.215")
                     + ":" + SharedPrefHelper.getInt(this, "serverPort", 8083);
             Map<String, String> map = new HashMap();
@@ -434,7 +339,7 @@ public class MaplistActivity extends BaseActivity {
                 openActivity(PrrucollectActivity.class, bundle);
                 break;
             case 4:
-                openActivity(RouteActivity.class);
+                openActivity(LocationaccActivity.class,bundle);
                 break;
             default:
                 break;

@@ -65,7 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-public class PrrufindActivity extends BaseActivity implements OnRobotListener {
+public class LocationaccActivity extends BaseActivity implements OnRobotListener {
     private ImageMap1 map;
     private int mapHeight;
     private boolean isStart = false;
@@ -73,11 +73,11 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     private boolean isAutoFind = false;
     private PrruModel nowCollectPrru;
     private int coorCount = 0;
-    //    private Path path;
-//    private LineShape lineShape;
-//    private float lastX, lastY;
+    private Path path;
+    private LineShape lineShape;
+    private float lastX, lastY;
     private float nowX, nowY;
-    private float[] newF, desF, mXY, rXY, tempMXY,rsrpMXY;
+    private float[] newF, desF, mXY, rXY, tempMXY,locMXY;
     private String currentMap;
     private ImageView iv_operation;
     private RequestShape robotShape;
@@ -122,10 +122,10 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 
     private boolean isTestLine = false;
     private boolean isPause=false; //是否在暂停状态
-    private int locCount;
+    private int lapCount=0;
     private LineShape routeLineShape;
     private Path routeLinePath;
-    private Map<String, MaxrsrpPosition> mpMap = new HashMap<>();
+//    private Map<String, MaxrsrpPosition> mpMap = new HashMap<>();
 
     private float rX;
     private float rY;
@@ -135,7 +135,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     private int mode_opeleft = 0;//操作左边按钮的状态，0为隐藏，1为恢复，2为清除
     private SuperPopupWindow mChooseCenterPointPop;
     private String mMapName;
-    private List<String> rsrpIdList = new ArrayList<>();
+    private int locCount=0;
 
     private boolean connectResult = true;
     private RelativeLayout rlBg;
@@ -166,8 +166,8 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void setContentLayout() {
-        mContext = PrrufindActivity.this;
-        setContentView(R.layout.activity_prrufind);
+        mContext = LocationaccActivity.this;
+        setContentView(R.layout.activity_locationacc);
     }
 
 
@@ -247,12 +247,12 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
     private void initShape() {
-        cv = new CompassView(PrrufindActivity.this);
+        cv = new CompassView(LocationaccActivity.this);
         cv.setId(0);
         cv.setImageResource(R.mipmap.icon_robot);
         cv.updateDirection(mapRotate + robotDirection);
-        robotShape = new RequestShape("s", -16776961, cv, PrrufindActivity.this);
-        desShape = new CustomShape("des", R.color.blue, PrrufindActivity.this, "dwf", R.mipmap.destination_point);
+        robotShape = new RequestShape("s", -16776961, cv, LocationaccActivity.this);
+        desShape = new CustomShape("des", R.color.blue, LocationaccActivity.this, "dwf", R.mipmap.destination_point);
     }
 
     private void initMap() {
@@ -287,11 +287,8 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         robotShape.setValues(x, y);
         map.addShape(robotShape, false);
         isStart = true;
-//        path = new Path();
-//        lastX = nowX;
-//        lastY = nowY;
-//        path.moveTo(x, y);
-//        lineShape = new LineShape("line", R.color.green, 2, "#00ffba");
+        path = new Path();
+        lineShape = new LineShape("line", R.color.green, 2, "#00ffba");
     }
 
     private float[] mapToReal(float mx, float my, int height) {
@@ -338,7 +335,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 if (isTestLine) {
                     isTestLine = false;
                     iv_operation.setImageResource(R.mipmap.home_start);
-                    drawPrruAfterTestLine();
                     showToast("路径测试结束");
                     showClear();
                     try {
@@ -359,12 +355,17 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                         showToast("未选择路径");
                         return;
                     }
-                    rsrpIdList.clear();
+                    lapCount=0;
                     iv_operation.setImageResource(R.mipmap.home_end);
                     locCount = nowRouteList.size();
                     isTestLine = true;
 //                    drawLineBeforeTestLine();
-                    mpMap.clear();
+//                    mpMap.clear();
+                    lastX = nowX;
+                    lastY = nowY;
+                    path.reset();
+                    tempMXY=realToMap(nowX,nowY);
+                    path.moveTo(tempMXY[0], tempMXY[1]);
                     startTestLine();
                 }
                 break;
@@ -507,11 +508,11 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     private void clearLastTest() {
         removeRoute(locCount);
         map.removeShape("line");
-        for (String gpp : mpMap.keySet()) {
-            map.removeShape(gpp);
-        }
-        for (String id : rsrpIdList) {
-            map.removeShape(id);
+//        for (String gpp : mpMap.keySet()) {
+//            map.removeShape(gpp);
+//        }
+        for(int i=0;i<lapCount;i++){
+            map.removeShape("lap"+i);
         }
     }
 
@@ -725,7 +726,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
      * @param scaleRuler
      */
     private void saveRbLocationInfo(float x, float y, float scaleRuler) {
-        SharedPrefHelper.putString(PrrufindActivity.this, "currentMap", currentMap);
+        SharedPrefHelper.putString(LocationaccActivity.this, "currentMap", currentMap);
         tempMXY = realToMap(x, y);
         initStart(tempMXY[0], tempMXY[1]);
     }
@@ -796,7 +797,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 iv_operation.setImageResource(R.mipmap.home_start);
                 if (maxRsrp > -10000f) {
                     xyRobotWhenMax = realToMap(xWhenMax, yWhenMax);
-                    CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, PrrufindActivity.this, "dwf");
+                    CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, LocationaccActivity.this, "dwf");
                     maxRsrpPointShape.setValues(xyRobotWhenMax[0], xyRobotWhenMax[1]);
                     map.addShape(maxRsrpPointShape, false);
                 }
@@ -817,7 +818,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     //到达目的点
     private void arriveDes() {
 //        map.setCanChange(true);
-        newF = realToMap(nowX, nowY);
+//        newF = realToMap(nowX, nowY);
 //        path.lineTo(newF[0], newF[1]);
 //        lineShape.setPath(path);
 //        map.addShape(lineShape, false);
@@ -876,39 +877,14 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         coorCount = locVector.size();
         for (int i = 0, len = coorCount; i < len; i++) {
             float[] tf = realToMap(locVector.get(i).getX(), locVector.get(i).getY());
-//            CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, PrrufindActivity.this, "dwf", R.mipmap.orbit_point);
+//            CustomShape orbitShape = new CustomShape("coor" + i, R.color.blue, LocationaccActivity.this, "dwf", R.mipmap.orbit_point);
             CircleShape orbitShape = new CircleShape("coor" + i, Color.parseColor("#f6ddcc"), 7f);
             orbitShape.setValues(tf[0], tf[1]);
             map.addShape(orbitShape, false);
         }
     }
 
-    private MaxrsrpPosition tempMp;
 
-    private synchronized void recordMaxrsrpPostion(float x, float y, List<PrruSigalModel> prruSigalModelList) {
-        if (prruSigalModelList == null) {
-            return;
-        }
-        for (PrruSigalModel psm : prruSigalModelList) {
-            if (psm.rsrp > -950) {
-                LLog.getLog().robot(x + "," + y, psm.gpp + "____" + psm.rsrp);
-                if (!mpMap.keySet().contains(psm.gpp)) {
-                    MaxrsrpPosition mp = new MaxrsrpPosition();
-                    mp.setX(x);
-                    mp.setY(y);
-                    mp.setRsrp(psm.rsrp);
-                    mpMap.put(psm.gpp, mp);
-                } else {
-                    tempMp = mpMap.get(psm.gpp);
-                    if (psm.rsrp > tempMp.getRsrp()) {
-                        tempMp.setX(x);
-                        tempMp.setY(y);
-                        tempMp.setRsrp(psm.rsrp);
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     public void notifyPrru(final float x, final float y) {
@@ -919,7 +895,9 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                     LLog.getLog().e("getLocAndPrruInfo成功", s);
                     lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                     if (lap.code == 0) {
-                        recordMaxrsrpPostion(x, y, lap.data.prruData);
+                        if(lap.data.data!=null){
+                            setLocPoint(lap.data.data.x,lap.data.data.y);
+                        }
                     }
                 }
             }, new Response.ErrorListener() {
@@ -929,51 +907,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 }
             });
 
-            Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
-                @Override
-                public void onResponse(String s) {
-                    LLog.getLog().e("getPhonePrru成功", s);
-                    LLog.getLog().robot(x + "," + y, s);
 
-                    PrruData prruData = new Gson().fromJson(s, PrruData.class);
-                    if (prruData.getCode() == 0) //成功
-                    {
-                        PrruData.DataBean data = prruData.getData();
-                        setPrruColorPoint(x,y,data.getRsrp(), data.getId());
-
-                    } else {
-                        Toast.makeText(mContext, "prru失败", Toast.LENGTH_LONG);
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    LLog.getLog().e("getPhonePrru错误", volleyError.toString());
-                }
-            });
-
-        } else if (isPrruCollect) {
-            for (String ip : ipList) {
-                Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ip + "&mapId=1", new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String s) {
-                        LLog.getLog().e("getLocAndPrruInfo成功", s);
-                        LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
-                        if (lap.code == 0 && lap.data.prruData != null) {
-                            LLog.getLog().prru(x + "," + y, prruDataToString(lap.data.prruData), lap.data.userId);
-                            if (isAutoFind) {
-                                Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
-                                recordMaxRsrp(rsrp, x, y);
-                            }
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
-                    }
-                });
-            }
         }
 
 
@@ -984,17 +918,14 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         nowX = x;
         nowY = y;
         robotDirection = direc;
-//        if (!isTestLine) {
-//            if (Math.sqrt((nowX - lastX) * (nowX - lastX) + (nowY - lastY) * (nowY - lastY)) > 0.3f) {
-////                            Log.e("handler","的点点滴滴顶顶顶顶顶顶顶顶顶大等等");
-//                newF = realToMap(nowX, nowY);
-//                path.lineTo(newF[0], newF[1]);
-//                lineShape.setPath(path);
-//                map.addShape(lineShape, false);
-//                lastX = nowX;
-//                lastY = nowY;
-//            }
-//        }
+        if (isTestLine) {
+                newF = realToMap(nowX, nowY);
+                path.lineTo(newF[0], newF[1]);
+                lineShape.setPath(path);
+                map.addShape(lineShape, false);
+                lastX = nowX;
+                lastY = nowY;
+        }
         updateRobotByReal();
     }
 
@@ -1046,7 +977,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     private void continueTestLine(boolean isRemove) {
         if(isRemove) {
             tempMXY = realToMap(nowRouteList.get(0).x, nowRouteList.get(0).y);
-            CustomShape tShape = new CustomShape("routePoint" + (locCount - nowRouteList.size()), R.color.blue, PrrufindActivity.this, "dwf", R.mipmap.destination_point_gray);
+            CustomShape tShape = new CustomShape("routePoint" + (locCount - nowRouteList.size()), R.color.blue, LocationaccActivity.this, "dwf", R.mipmap.destination_point_gray);
             tShape.setValues(tempMXY[0], tempMXY[1]);
             map.addShape(tShape, false);
             nowRouteList.remove(0);
@@ -1056,7 +987,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         } else {
             isTestLine = false;
             iv_operation.setImageResource(R.mipmap.home_start);
-            drawPrruAfterTestLine();
             updateRobotByReal();
             showClear();
             showToast("路径测试完成");
@@ -1079,33 +1009,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     }
 
 
-    //mpMap按rsrp从大到小排序并画出前5个
-    private void drawPrruAfterTestLine() {
-        List<Map.Entry<String, MaxrsrpPosition>> lists = new ArrayList<Map.Entry<String, MaxrsrpPosition>>(mpMap.entrySet());
-        Collections.sort(lists, new Comparator<Map.Entry<String, MaxrsrpPosition>>() {
-            @Override
-            public int compare(Map.Entry<String, MaxrsrpPosition> o1, Map.Entry<String, MaxrsrpPosition> o2) {
-                float r1 = o1.getValue().getRsrp();
-                float r2 = o2.getValue().getRsrp();
-                if (r1 > r2) {
-                    return -1;
-                } else if (r1 < r2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
-        for (Map.Entry<String, MaxrsrpPosition> entry : lists.size() > 5 ? lists.subList(0, 5) : lists) {
-            PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, PrrufindActivity.this);
-            pgShape.setNecodeText(entry.getKey());
-            pgShape.setPaintColor(Color.parseColor("#ff0000"));
-            tempMXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
-            pgShape.setValues(tempMXY[0], tempMXY[1]);
-            map.addShape(pgShape, false);
-        }
-
-    }
 
     //移除路径显示
     private void removeRoute(int pointSize) {
@@ -1119,7 +1022,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         routeLinePath.reset();
         for (int i = 0, len = routeList.size(); i < len; i++) {
             tempMXY = realToMap(routeList.get(i).x, routeList.get(i).y);
-            CustomShape tShape = new CustomShape("routePoint" + i, R.color.blue, PrrufindActivity.this, "dwf", R.mipmap.destination_point);
+            CustomShape tShape = new CustomShape("routePoint" + i, R.color.blue, LocationaccActivity.this, "dwf", R.mipmap.destination_point);
             tShape.setValues(tempMXY[0], tempMXY[1]);
             map.addShape(tShape, false);
             if (i == 0) {
@@ -1137,7 +1040,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 //        routeLinePath.reset();
 //        for (int i = 0, len = nowRouteList.size(); i < len; i++) {
 //            tempMXY = realToMap(nowRouteList.get(i).x, nowRouteList.get(i).y);
-//            CustomShape tShape = new CustomShape("routePoint" + i, R.color.blue, PrrufindActivity.this, "dwf", R.mipmap.destination_point);
+//            CustomShape tShape = new CustomShape("routePoint" + i, R.color.blue, LocationaccActivity.this, "dwf", R.mipmap.destination_point);
 //            tShape.setValues(tempMXY[0], tempMXY[1]);
 //            map.addShape(tShape, false);
 //            if (i == 0) {
@@ -1217,24 +1120,11 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
     /**
      * 设置 PrruColor
      */
-    private void setPrruColorPoint(float x,float y,int prru, String id) {
-        int color;
-
-        if (-75 < prru && prru <= 0) {  //1e8449
-            color = Color.parseColor("#1e8449");
-        } else if (-95 < prru && prru <= -75) { //浅绿色
-            color = Color.GREEN;
-        } else if (-105 < prru && prru <= -95) {  //黄色
-            color = Color.YELLOW;
-        } else if (-120 < prru && prru <= -105) { //红色
-            color = Color.RED;
-        } else {
-            color = Color.BLACK;
-        }
-        rsrpIdList.add(id);
-        CircleShape shape = new CircleShape(id, color);
-        rsrpMXY=realToMap(x,y);
-        shape.setValues(rsrpMXY[0], rsrpMXY[1]);
+    private synchronized void setLocPoint(float x,float y) {
+        CircleShape shape = new CircleShape("lap"+locCount, Color.CYAN,7f);
+        lapCount++;
+        locMXY=realToMap(x,y);
+        shape.setValues(locMXY[0], locMXY[1]);
         map.addShape(shape, false);
     }
 
