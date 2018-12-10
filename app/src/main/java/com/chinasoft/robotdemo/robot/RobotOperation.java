@@ -41,7 +41,7 @@ import java.util.Vector;
 
 public class RobotOperation {
     private OnRobotListener onRobotListener;
-    private AbstractSlamwarePlatform platform;
+    private static AbstractSlamwarePlatform platform;
     private Location forwardLocation;
     private Pose nowPose;
     private float nowX, nowY, initZ, robotDirection;
@@ -109,10 +109,9 @@ public class RobotOperation {
      */
     public static boolean testConnection(String robotIp, int robotPort) {
         try {
-            AbstractSlamwarePlatform platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人
+             platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人
             if (platform!=null)
             {
-                platform.disconnect();
                 return true;                                                               //不为空返回连接成功
             }
         } catch (Exception e) {
@@ -150,7 +149,10 @@ public class RobotOperation {
     //连接机器人
     private void connect(String robotIp, int robotPort) {
         try {
-            platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
+            if (platform==null)
+            {
+                platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
+            }
             nowPose = platform.getPose();// 当前机器人的位置,
             nowX = nowPose.getX();
             nowY = nowPose.getY();
