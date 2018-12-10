@@ -28,6 +28,7 @@ import com.chinasoft.robotdemo.bean.AllPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
+import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.FileUtil;
 import com.chinasoft.robotdemo.util.InterRequestUtil;
@@ -54,9 +55,7 @@ import java.util.Map;
  */
 
 public class MaplistActivity extends BaseActivity {
-//    private ListView lv_maplist;
     private List<String> mapList = new ArrayList();
-//    private MaplistAdapter maplistAdapter;
     private String currentMap, wifiRobotIp;
     private int wifiRobotPort;
     private int mode = 1;
@@ -71,12 +70,12 @@ public class MaplistActivity extends BaseActivity {
     private int mChooseMark = -1;
     private SuperPopupWindow mMapChoosePop;
     private TextView mTvMF;
-    private static final int[] ATTRS = new int[] {
+    private static final int[] ATTRS = new int[]{
             android.R.attr.fastScrollThumbDrawable,
     };
-    private  int cNum=-1;
-    private  int tNum=-1;
-    private String  mChooseMap;
+    private int cNum = -1;
+    private int tNum = -1;
+    private String mChooseMap;
     private PopMapListAdapter mPopMapListAdapter;
     //    private AbstractDiscover.DiscoveryListener discoveryListener = new AbstractDiscover.DiscoveryListener() {
 //        @Override
@@ -148,16 +147,10 @@ public class MaplistActivity extends BaseActivity {
         for (String str : fileUrls) {
             mapList.add(str);
         }
-//        maplistAdapter = new MaplistAdapter(this, mapList);
-//        currentMap = mapList.get(0);
-//        showProgressDialog("地图识别中...");
-//        Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
-//        dismissProgressDialog();
     }
 
     @Override
     public void initView() {
-//        lv_maplist = findViewById(R.id.lv_maplist);
         tv_next = findViewById(R.id.tv_next);
         tv_setting = findViewById(R.id.tv_setting);
         tv_modecollect = findViewById(R.id.tv_modecollect);
@@ -240,10 +233,6 @@ public class MaplistActivity extends BaseActivity {
             public void onResponse(String s) {
                 LLog.getLog().e("getAllPrruInfo成功", s);
                 AllPrruInfoResponse ap = new Gson().fromJson(s, AllPrruInfoResponse.class);
-//                        P lap=new Gson().fromJson(s,LocAndPrruInfoResponse.class);
-//                        if(lap.code==0) {
-//                            LLog.getLog().prru( "," , prruDataToString(lap.data.prruData));
-//                        }
                 mPrruModelList = ap.data;
                 runOnUiThread(new Runnable() {
                     @Override
@@ -271,75 +260,6 @@ public class MaplistActivity extends BaseActivity {
                         LLog.getLog().e("登录", "成功");
                         showToast("Tester登录成功");
                         requestPruModel();     //请求PruModelList信息
-                        //                        Constant.interRequestUtil.getMapData(
-//                                response.getString("Cookie"), 1,
-//                                Constant.IP_ADDRESS
-//                                        + "/tester/api/app/getMapDataByIp",
-//                                new Response.Listener<JSONObject>() {
-//                                    public void onResponse(JSONObject jsonobj) {
-//                                        Log.e("地图数据",
-//                                                jsonobj.toString());
-//                                        try {
-//                                            JSONArray array = jsonobj
-//                                                    .getJSONArray("data");
-//                                            int i = 0;
-//                                            while (i < array.length()) {
-//                                                try {
-//                                                    Floor f = new Floor();
-//                                                    JSONObject o = array
-//                                                            .getJSONObject(i);
-//                                                    f.setFloor(o
-//                                                            .getString("floor"));
-//                                                    f.setPath(o
-//                                                            .getString("path"));
-//                                                    f.setPlace(o
-//                                                            .getString("place"));
-//                                                    f.setXo(Float.valueOf(
-//                                                            o.getString("xo"))
-//                                                            .floatValue());
-//                                                    f.setYo(Float.valueOf(
-//                                                            o.getString("yo"))
-//                                                            .floatValue());
-//                                                    f.setScale(Float
-//                                                            .valueOf(
-//                                                                    o.getString("scale"))
-//                                                            .floatValue());
-//                                                    f.setUpdateTime(o
-//                                                            .getString("updateTime"));
-//                                                    f.setCoordinate(o
-//                                                            .getString("coordinate"));
-//                                                    f.setImgWidth(o
-//                                                            .getInt("imgWidth"));
-//                                                    f.setImgHeight(o
-//                                                            .getInt("imgHeight"));
-//                                                    f.setAngle((float) o
-//                                                            .getInt("angle"));
-//                                                    f.setId(o.getString("id"));
-//                                                    f.setMapId(o
-//                                                            .getString("mapId"));
-//                                                    f.setSiteId(o
-//                                                            .getInt("siteId"));
-//                                                    Constant.mapData.add(f);
-//                                                    i++;
-//                                                } catch (JSONException e) {
-//                                                    return;
-//                                                }
-//                                            }
-//                                            for (Floor f : Constant.mapData) {
-//                                                if (f.getMapId().equals("2046")) {
-//                                                    Constant.currentFloor = f;
-//                                                    break;
-//                                                }
-//                                            }
-//                                        } catch (Exception e2) {
-//                                        }
-//                                    }
-//                                }, new Response.ErrorListener() {
-//                                    public void onErrorResponse(
-//                                            VolleyError error) {
-//                                    }
-//                                });
-
                         return;
                     }
                 } catch (JSONException e) {
@@ -356,19 +276,6 @@ public class MaplistActivity extends BaseActivity {
     @Override
     public void dealLogicAfterInitView() {
         initPop();
-//        maplistAdapter.setCurrentMap(currentMap);
-//        lv_maplist.setAdapter(maplistAdapter);
-//        maplistAdapter.setOnMaplistClickListener(new MaplistAdapter.OnMaplistClickListener() {
-//            @Override
-//            public void click(String map) {
-//                currentMap = map;
-//                maplistAdapter.setCurrentMap(currentMap);
-//                maplistAdapter.notifyDataSetChanged();
-//                showProgressDialog("切换中...");
-//                Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + currentMap);
-//                dismissProgressDialog();
-//            }
-//        });
     }
 
     @Override
@@ -378,46 +285,34 @@ public class MaplistActivity extends BaseActivity {
                 openActivityForResult(SettingActivity.class, 1);
                 break;
             case R.id.tv_next:
-//                if (mode == 0) {
-//                    showToast("必须选择模式");
-//                    return;
-//                }
                 if (deviceManager != null) {
                     deviceManager.stop(DiscoveryMode.MDNS);
                 }
-                initGlobalParams();
-                if(TextUtils.isEmpty(mChooseMap)){
+                if (TextUtils.isEmpty(mChooseMap)) {
                     showToast("必须选择地图");
                     return;
                 }
-                Bundle bundle = new Bundle();
-                bundle.putString("currentMap", mChooseMap);
-                switch (mChooseMark){
-                    case -1:
-                        showToast("请选择模块");
-                        break;
-                    case 1:
-                        openActivity(RsrpActivity.class, bundle);
-                        break;
-                    case 2:
-                        bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
-                        openActivity(PrrufindActivity.class, bundle);
-                        break;
-                    case 3:
-                        openActivity(PrrucollectActivity.class, bundle);
-                        break;
-                    case 4:
-                        openActivity(RouteActivity.class);
-                        break;
-                    default:
-                        break;
-                }
-//                if (mode == 1) {
-//                    openActivity(PrrucollectActivity.class, bundle);
-//                } else if (mode == 2) {
-//                    bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
-//                    openActivity(PrrufindActivity.class, bundle);
-//                }
+                showProgressDialog("正在连接机器人");//转圈显示连接进度
+                initGlobalParams();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        final boolean connectionFlag = RobotOperation.testConnection(Constant.robotIp, Constant.robotPort);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dismissProgressDialog();//转圈关闭
+                                if (connectionFlag) {   //连接成功
+                                    showToast("连接机器人成功");
+                                    chooseActivity();
+                                } else {                //连接失败
+                                    showToast("连接机器人失败");
+                                }
+                            }
+                        });
+                    }
+                }).start();
+
                 break;
             case R.id.tv_modecollect:
                 mode = 1;
@@ -442,13 +337,6 @@ public class MaplistActivity extends BaseActivity {
     }
 
     private void initGlobalParams() {
-//        if (TextUtils.isEmpty(wifiRobotIp)) {
-//            Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
-//            Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
-//        } else {
-//            Constant.robotIp = wifiRobotIp;
-//            Constant.robotPort = wifiRobotPort;
-//        }
         Constant.firstX = SharedPrefHelper.getFloat(this, "firstX", 0.0f);
         Constant.firstY = SharedPrefHelper.getFloat(this, "firstY", 0.0f);
         Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 100f);
@@ -493,14 +381,13 @@ public class MaplistActivity extends BaseActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cNum=tNum;
+                cNum = tNum;
                 mMapChoosePop.hidePopupWindow();
                 mTvMF.setText(mChooseMap);
-                if(Constant.mapBitmap!=null) {
+                if (Constant.mapBitmap != null) {
                     Constant.mapBitmap.recycle();
                 }
                 Constant.mapBitmap = BitmapFactory.decodeFile(Constant.sdPath + "/maps/" + mChooseMap);
-//                SharedPrefHelper.putString(MaplistActivity.this, "currentMap", mChooseMap);
             }
         });
         cancel.setOnClickListener(new View.OnClickListener() {
@@ -519,13 +406,39 @@ public class MaplistActivity extends BaseActivity {
         mPopMapListAdapter.setOnMaplistClickListener(new PopMapListAdapter.OnMaplistClickListener() {
 
             @Override
-            public void click(String map,int n) {
-                mChooseMap=map;
-                tNum=n;
-                Log.e("XHF",mChooseMap);
+            public void click(String map, int n) {
+                mChooseMap = map;
+                tNum = n;
             }
         });
     }
 
+    /**
+     * 选择进入不同的activity
+     */
+    private void chooseActivity() {
+        Bundle bundle = new Bundle();
+        bundle.putString("currentMap", mChooseMap);
+        switch (mChooseMark) {
+            case -1:
+                showToast("请选择模块");
+                break;
+            case 1:
+                openActivity(RsrpActivity.class, bundle);
+                break;
+            case 2:
+                bundle.putSerializable("PrruModelList", (Serializable) mPrruModelList);
+                openActivity(PrrufindActivity.class, bundle);
+                break;
+            case 3:
+                openActivity(PrrucollectActivity.class, bundle);
+                break;
+            case 4:
+                openActivity(RouteActivity.class);
+                break;
+            default:
+                break;
+        }
+    }
 
 }

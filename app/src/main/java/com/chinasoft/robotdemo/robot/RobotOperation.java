@@ -54,8 +54,9 @@ public class RobotOperation {
     private Context context;
     private long updatePeriod; //更新间隔时间
     private boolean isAlwaysUpdate; //机器人是否始终定时更新位置（不管是否移动）
-    private boolean isShowOrbits =true; //是否显示规划轨迹点
-    private boolean mContinue=false;
+    private boolean isShowOrbits = true; //是否显示规划轨迹点
+    private boolean mContinue = false;
+
     public void setNotify(boolean notify) {
         isNotify = notify;
     }
@@ -75,11 +76,11 @@ public class RobotOperation {
                     switch (platform.getCurrentAction().getStatus().toString()) {
                         case RUNNING:
                             onRobotListener.positionChange(nowX, nowY, robotDirection);
-                            if(isShowOrbits) {
+                            if (isShowOrbits) {
                                 onRobotListener.refreshOrbits(platform.searchPath(forwardLocation).getPoints());
                             }
                             //如果机器人仅在移动时定时更新位置
-                            if(!isAlwaysUpdate) {
+                            if (!isAlwaysUpdate) {
                                 handler.postDelayed(runnable, updatePeriod);
                             }
                             break;
@@ -95,17 +96,36 @@ public class RobotOperation {
                 errorDisconnect(e.toString());
             }
             //如果机器人始终定时更新位置
-            if(isAlwaysUpdate) {
+            if (isAlwaysUpdate) {
                 handler.postDelayed(runnable, updatePeriod);
             }
         }
     };
 
-    public RobotOperation(String robotIp, int robotPort, String currentMap, OnRobotListener onRobotListener, Context context,long updatePeriod) {
+    /**
+     * 测试连接
+     *
+     * @return
+     */
+    public static boolean testConnection(String robotIp, int robotPort) {
+        try {
+            AbstractSlamwarePlatform platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人
+            if (platform!=null)
+            {
+                platform.disconnect();
+                return true;                                                               //不为空返回连接成功
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
+    }
+
+    public RobotOperation(String robotIp, int robotPort, String currentMap, OnRobotListener onRobotListener, Context context, long updatePeriod) {
         this.context = context;
         this.currentMap = currentMap;
         this.onRobotListener = onRobotListener;
-        this.updatePeriod=updatePeriod;
+        this.updatePeriod = updatePeriod;
         handler = new Handler();
         forwardLocation = new Location();
         connect(robotIp, robotPort);
@@ -113,13 +133,13 @@ public class RobotOperation {
 
     //机器人始终更新位置（不管是否移动）
     public void startOperation() {
-        isAlwaysUpdate=true;
+        isAlwaysUpdate = true;
         handler.post(runnable);
     }
 
     //结束机器人更新位置
     public void endOperation() {
-        isAlwaysUpdate=false;
+        isAlwaysUpdate = false;
         handler.removeCallbacks(runnable);
     }
 
@@ -144,9 +164,9 @@ public class RobotOperation {
             if ((nowX > 0.1f || nowY > 0.1f) && currentMap.equals(SharedPrefHelper.getString(context, "currentMap", ""))) {
                 robotDirection = yawToDirec(nowPose.getYaw());
                 onRobotListener.connectSuccess(nowX, nowY, robotDirection, true);
-                mContinue=true;
-            }else {
-                mContinue=false;
+                mContinue = true;
+            } else {
+                mContinue = false;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -188,7 +208,7 @@ public class RobotOperation {
         try {
 //            onRobotListener.refreshOrbits(platform.searchPath(forwardLocation).getPoints());
             platform.moveTo(forwardLocation);
-            if(!isAlwaysUpdate) {
+            if (!isAlwaysUpdate) {
                 handler.post(runnable);
             }
         } catch (Exception e) {
@@ -200,7 +220,7 @@ public class RobotOperation {
 
     //取消动作并移动
     public void cancelAndMoveTo(float toX, float toY) {
-        if(!isAlwaysUpdate) {
+        if (!isAlwaysUpdate) {
             handler.removeCallbacks(runnable);
         }
         cancelAction();
@@ -244,7 +264,6 @@ public class RobotOperation {
     }
 
 
-
     /**
      * 在第一次进入点击坐标确认后执行
      */
@@ -262,7 +281,7 @@ public class RobotOperation {
             }
             platform.setPose(pose);
             robotDirection = 0;
-            onRobotListener.connectSuccess(x,y, robotDirection, false);
+            onRobotListener.connectSuccess(x, y, robotDirection, false);
         } catch (RequestFailException e) {
             e.printStackTrace();
         } catch (ConnectionFailException e) {
@@ -278,7 +297,7 @@ public class RobotOperation {
         }
     }
 
-    public boolean getContinue(){
+    public boolean getContinue() {
         return mContinue;
     }
 }
