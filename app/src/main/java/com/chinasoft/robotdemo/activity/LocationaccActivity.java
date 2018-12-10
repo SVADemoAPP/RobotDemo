@@ -69,9 +69,6 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
     private ImageMap1 map;
     private int mapHeight;
     private boolean isStart = false;
-    private boolean isPrruCollect = false;
-    private boolean isAutoFind = false;
-    private PrruModel nowCollectPrru;
     private int coorCount = 0;
     private Path path;
     private LineShape lineShape;
@@ -82,33 +79,23 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
     private ImageView iv_operation;
     private RequestShape robotShape;
     private CompassView cv;
-    private int cStep;
-    private String nowCollectNeCode;
-    private float maxRsrp, xWhenMax, yWhenMax;
-    private float[] xyRobotWhenMax;
     private CustomShape desShape;
-    private SuperPopupWindow mUseridPopupWindow, mRoutePopupWindow;
+    private SuperPopupWindow  mRoutePopupWindow;
     private Context mContext;
-    private View popupView_userid, popupView_route;
+    private View  popupView_route;
     private float mapRotate;
     private float robotDirection;
     private RobotOperation ro;
-    private boolean mSwitchAutoFlag = true; //默认为自动
 
     private ImageView iv_collect;
-    private TextView tv_forcestop, tv_useridsetting, popup_confirm_userid, popup_cancel_userid;
+    private TextView tv_forcestop;
     private TextView tv_routesetting, popup_confirm_route, popup_cancel_route;
-    private MyListView lv_userid, lv_route;
-    private UserIdAdapter userIdAdapter;
+    private MyListView  lv_route;
     private RouteAdapter routeAdapter;
-    private List<String> userIdList = new ArrayList<>();
-    private List<String> ipList = new ArrayList<>();
 
     private List<DirectionData> routeList = new ArrayList<>();
 
-    private LinearLayout ll_addshow_userid, ll_add_userid;
     private LinearLayout ll_add_route;
-    private RelativeLayout rl_add_userid, rl_yes_userid, rl_no_userid;
     private RelativeLayout rl_add_route, rl_yes_route, rl_no_route;
     private TextView tv_pop_route_title;
     private String newRouteJson;
@@ -116,16 +103,13 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
     private List<PointF> nowRouteList = new ArrayList<>();
     private DirectionData selectRouteModel;
 
-    private EditText et_userid;
     private EditText et_route;
-    private String userIds;
 
     private boolean isTestLine = false;
     private boolean isPause=false; //是否在暂停状态
     private int lapCount=0;
     private LineShape routeLineShape;
     private Path routeLinePath;
-//    private Map<String, MaxrsrpPosition> mpMap = new HashMap<>();
 
     private float rX;
     private float rY;
@@ -138,31 +122,11 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
     private int locCount=0;
 
     private boolean connectResult = true;
-    private RelativeLayout rlBg;
-    private Animation fabOpenAnimation;
-    private Animation fabCloseAnimation;
     private boolean isFabMenuOpen = false;
     private ImageView mFucAcIv;
     private LocAndPrruInfoResponse lap;
 
 
-    //防止多个请求同时响应产生的线程不安全问题
-    private synchronized void recordMaxRsrp(Float rsrp, float logX, float logY) {
-        if (rsrp != null && rsrp - maxRsrp >= 0) {
-            xWhenMax = logX;
-            yWhenMax = logY;
-            maxRsrp = rsrp;
-        }
-    }
-
-    private Float getRsrpByGpp(String gpp, List<PrruSigalModel> prruSigalModelList) {
-        for (PrruSigalModel p : prruSigalModelList) {
-            if (gpp.equals(p.gpp)) {
-                return p.rsrp;
-            }
-        }
-        return null;
-    }
 
     @Override
     public void setContentLayout() {
@@ -175,20 +139,16 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
     public void dealLogicBeforeInitView() {
         routeLinePath = new Path();
         routeLineShape = new LineShape("routeLine", R.color.green, 2, "#FF4081");
-        getAnimations();
     }
 
     @Override
     public void initView() {
         map = findViewById(R.id.imagemap);
-        rlBg = findViewById(R.id.rl_bg2);
-//        rlBg.dispatchTouchEvent(new MotionEvent())
         iv_operation = findViewById(R.id.iv_operation);
         tv_home_back = findViewById(R.id.tv_home_back);
         tv_opeleft = findViewById(R.id.tv_opeleft);
         iv_collect = findViewById(R.id.iv_collect);
         tv_forcestop = findViewById(R.id.tv_forcestop);
-        tv_useridsetting = findViewById(R.id.tv_useridsetting);
         tv_routesetting = findViewById(R.id.tv_routesetting);
         mFucAcIv = findViewById(R.id.fuc_menu);
         iv_operation.setOnClickListener(this);
@@ -196,31 +156,15 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
         tv_opeleft.setOnClickListener(this);
         iv_collect.setOnClickListener(this);
         tv_forcestop.setOnClickListener(this);
-        tv_useridsetting.setOnClickListener(this);
         tv_routesetting.setOnClickListener(this);
         mFucAcIv.setOnClickListener(this);
     }
-//
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        if (event.)
-//        return false;
-//    }
 
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
         mMapName = currentMap;
         ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this, 2000);
-        ro.setNotify(true);
-//        ro.startOperation();
-
-        userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
-        if (!TextUtils.isEmpty(userIds)) {
-            for (String str : userIds.split(";")) {
-                ipList.add(str);
-            }
-        }
 //        map.setMapBitmap(Constant.mapBitmap);
 //        mapHeight = Constant.mapBitmap.getHeight();
 
@@ -270,7 +214,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
         map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
             @Override
             public void onLongClick(PointF point) {
-                if (isStart && !isAutoFind&&(!isTestLine||isPause)) {
+                if (isStart && (!isTestLine||isPause)) {
 //                    ro.setShowOrbits(true);
                     rXY = mapToReal(point.x, point.y);
                     ro.cancelAndMoveTo(rXY[0], rXY[1]);
@@ -359,26 +303,13 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
                     iv_operation.setImageResource(R.mipmap.home_end);
                     locCount = nowRouteList.size();
                     isTestLine = true;
-//                    drawLineBeforeTestLine();
-//                    mpMap.clear();
-                    lastX = nowX;
-                    lastY = nowY;
                     path.reset();
                     tempMXY=realToMap(nowX,nowY);
                     path.moveTo(tempMXY[0], tempMXY[1]);
+                    lastX = nowX;
+                    lastY = nowY;
                     startTestLine();
                 }
-                break;
-            case R.id.tv_useridsetting:
-                if (isTestLine) {
-                    showToast("请先关闭或完成路径测试");
-                    return;
-                }
-                if (isPrruCollect) {
-                    showToast("请先关闭采集");
-                    return;
-                }
-                initUserIdPop();
                 break;
             case R.id.tv_routesetting:
                 if (mode_opeleft == 2) {
@@ -389,69 +320,13 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
                     showToast("请先关闭或完成路径测试");
                     return;
                 }
-                if (isPrruCollect) {
-                    showToast("请先关闭采集");
-                    return;
-                }
                 initRoutePop();
-                break;
-            case R.id.iv_collect:
-                if (isPrruCollect) {
-                    isPrruCollect = false;
-                    iv_collect.setImageResource(R.mipmap.iv_collectoff);
-                } else {
-                    if (ipList.size() == 0) {
-                        showToast("至少配置一个userId");
-                        return;
-                    }
-                    isPrruCollect = true;
-                    Glide.with(this).load(R.mipmap.iv_collecton_gif).into(iv_collect);
-                }
                 break;
             case R.id.tv_forcestop:
                 ro.forceStop();
                 if (isTestLine) {
                     showRegain();
                 }
-                break;
-            case R.id.popup_confirm_userid:
-                String newUserId = et_userid.getText().toString().trim();
-                if (canUserIdAdd(newUserId)) {
-                    userIdList.add(newUserId);
-                }
-                ipList.clear();
-                if (userIdList.size() > 0) {
-                    StringBuffer sb = new StringBuffer();
-                    for (String str : userIdList) {
-                        ipList.add(str);
-                        sb.append(";" + str);
-                    }
-                    SharedPrefHelper.putString(this, "userId", sb.substring(1));
-                } else {
-                    SharedPrefHelper.putString(this, "userId", "");
-                }
-                resetUserIdAdd();
-                hideUserIdPop();
-                break;
-            case R.id.popup_cancel_userid:
-                resetUserIdAdd();
-                hideUserIdPop();
-                break;
-            case R.id.rl_add_userid:
-                rl_add_userid.setVisibility(View.GONE);
-                ll_add_userid.setVisibility(View.VISIBLE);
-                break;
-            case R.id.rl_yes_userid:
-                String newUserId1 = et_userid.getText().toString().trim();
-                if (canUserIdAdd(newUserId1)) {
-                    userIdList.add(newUserId1);
-                    refreshUserIdList(userIdList);
-                } else {
-                    showToast("空白或重复添加");
-                }
-                break;
-            case R.id.rl_no_userid:
-                resetUserIdAdd();
                 break;
             case R.id.popup_confirm_route:
                 if (selectRouteModel == null) {
@@ -482,11 +357,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
             case R.id.rl_yes_route:
                 String newRouteName = et_route.getText().toString().trim();
                 if (canRouteAdd(newRouteName)) {
-//                    userIdList.add(newRoute1);
-//                    refreshRouteList(userIdList);
-
                     DirectionData rm = new DirectionData(mMapName, newRouteName, newRouteJson);
-
                     // 插入数据并更新routeList
                     DBUtils.insert(rm);
                     routeList.add(rm);
@@ -508,25 +379,11 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
     private void clearLastTest() {
         removeRoute(locCount);
         map.removeShape("line");
-//        for (String gpp : mpMap.keySet()) {
-//            map.removeShape(gpp);
-//        }
         for(int i=0;i<lapCount;i++){
             map.removeShape("lap"+i);
         }
     }
 
-    private boolean canUserIdAdd(String newUserId) {
-        if (newUserId.equals("")) {
-            return false;
-        }
-        for (String str : userIdList) {
-            if (str.equals(newUserId)) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     private boolean canRouteAdd(String routeName) {
         if (routeName.equals("")) {
@@ -540,11 +397,6 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
         return true;
     }
 
-    private void resetUserIdAdd() {
-        et_userid.setText("");
-        rl_add_userid.setVisibility(View.VISIBLE);
-        ll_add_userid.setVisibility(View.GONE);
-    }
 
     private void resetRouteAdd() {
         et_route.setText("");
@@ -552,16 +404,6 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
         ll_add_route.setVisibility(View.GONE);
     }
 
-    private void refreshUserIdList(List<String> userIdList) {
-        resetUserIdAdd();
-        if (userIdList.size() < 10) {
-            ll_addshow_userid.setVisibility(View.VISIBLE);
-        } else {
-            ll_addshow_userid.setVisibility(View.GONE);
-        }
-        userIdAdapter.setUserIdList(userIdList);
-        userIdAdapter.notifyDataSetChanged();
-    }
 
     private void refreshRouteList(List<DirectionData> routeList) {
         resetRouteAdd();
@@ -569,71 +411,8 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
         routeAdapter.notifyDataSetChanged();
     }
 
-    private String prruDataToString(List<PrruSigalModel> prruSigalModelList) {
-        if (prruSigalModelList == null || prruSigalModelList.size() == 0) {
-            return "null";
-        }
-        StringBuffer sb = new StringBuffer();
-        for (PrruSigalModel p : prruSigalModelList) {
-            sb.append(";" + p.toString());
-        }
-        return sb.substring(1);
-    }
 
-    /***
-     * 初始化开始popupwindow
-     */
-    private void initUserIdPop() {
-        userIdList.clear();
-        for (String str : ipList) {
-            userIdList.add(str);
-        }
-        if (mUseridPopupWindow == null) {
-            mUseridPopupWindow = new SuperPopupWindow(mContext, R.layout.popup_userid);
-            mUseridPopupWindow.setFocusable(true);
-            mUseridPopupWindow.setOutsideTouchable(true);
-            mUseridPopupWindow.setAnimotion(R.style.PopAnimation);
-            popupView_userid = mUseridPopupWindow.getPopupView();
-            popup_confirm_userid = popupView_userid.findViewById(R.id.popup_confirm_userid);
-            popup_cancel_userid = popupView_userid.findViewById(R.id.popup_cancel_userid);
-            lv_userid = popupView_userid.findViewById(R.id.lv_userid);
-            userIdAdapter = new UserIdAdapter(this, userIdList);
-            lv_userid.setAdapter(userIdAdapter);
-            popup_confirm_userid.setOnClickListener(this);
-            popup_cancel_userid.setOnClickListener(this);
-            ll_addshow_userid = popupView_userid.findViewById(R.id.ll_addshow_userid);
-            ll_add_userid = popupView_userid.findViewById(R.id.ll_add_userid);
-            et_userid = popupView_userid.findViewById(R.id.et_userid);
-            rl_add_userid = popupView_userid.findViewById(R.id.rl_add_userid);
-            rl_no_userid = popupView_userid.findViewById(R.id.rl_no_userid);
-            rl_yes_userid = popupView_userid.findViewById(R.id.rl_yes_userid);
-            rl_yes_userid.setOnClickListener(this);
-            rl_no_userid.setOnClickListener(this);
-            rl_add_userid.setOnClickListener(this);
-            userIdAdapter.setOnUserIdListener(new UserIdAdapter.OnUserIdListener() {
-                @Override
-                public void delete(int position) {
-                    userIdList.remove(position);
-                    refreshUserIdList(userIdList);
-                }
-            });
-        }
-        showUserIdPop();
-    }
 
-    /**
-     * 显示Popupwindow
-     */
-    private void showUserIdPop() {
-        mUseridPopupWindow.showPopupWindow();
-    }
-
-    /**
-     * 隐藏Popupwindow
-     */
-    private void hideUserIdPop() {
-        mUseridPopupWindow.hidePopupWindow();
-    }
 
     /***
      * 初始化开始popupwindow
@@ -755,57 +534,6 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
         }
     }
 
-    private void autoFind() {
-        cStep++;
-        switch (cStep) {
-            case 1:
-                LLog.getLog().e("扫描", "1");
-                ro.moveTo(nowCollectPrru.x + 0.5f, nowCollectPrru.y);
-                break;
-            case 2:
-                LLog.getLog().e("扫描", "2");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
-                break;
-            case 3:
-                LLog.getLog().e("扫描", "3");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y + 0.5f);
-                break;
-            case 4:
-                LLog.getLog().e("扫描", "4");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
-                break;
-            case 5:
-                LLog.getLog().e("扫描", "5");
-                ro.moveTo(nowCollectPrru.x - 0.5f, nowCollectPrru.y);
-                break;
-            case 6:
-                LLog.getLog().e("扫描", "6");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
-                break;
-            case 7:
-                LLog.getLog().e("扫描", "7");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y - 0.5f);
-                break;
-            case 8:
-                LLog.getLog().e("扫描", "8");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
-                break;
-            case 9:
-                LLog.getLog().e("扫描", "9");
-                isAutoFind = false;
-                arriveDes();
-                iv_operation.setImageResource(R.mipmap.home_start);
-                if (maxRsrp > -10000f) {
-                    xyRobotWhenMax = realToMap(xWhenMax, yWhenMax);
-                    CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, LocationaccActivity.this, "dwf");
-                    maxRsrpPointShape.setValues(xyRobotWhenMax[0], xyRobotWhenMax[1]);
-                    map.addShape(maxRsrpPointShape, false);
-                }
-                break;
-            default:
-                break;
-        }
-    }
 
 
     //移除轨迹点
@@ -948,9 +676,6 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
                     }
                 }
             }
-            if (isAutoFind) {
-                autoFind();
-            }
         } else {
             arriveDes();
         }
@@ -1036,23 +761,6 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
         map.addShape(routeLineShape, false);
     }
 
-//    private void drawLineBeforeTestLine() {
-//        routeLinePath.reset();
-//        for (int i = 0, len = nowRouteList.size(); i < len; i++) {
-//            tempMXY = realToMap(nowRouteList.get(i).x, nowRouteList.get(i).y);
-//            CustomShape tShape = new CustomShape("routePoint" + i, R.color.blue, LocationaccActivity.this, "dwf", R.mipmap.destination_point);
-//            tShape.setValues(tempMXY[0], tempMXY[1]);
-//            map.addShape(tShape, false);
-//            if (i == 0) {
-//                routeLinePath.moveTo(tempMXY[0], tempMXY[1]);
-//            } else {
-//                routeLinePath.lineTo(tempMXY[0], tempMXY[1]);
-//            }
-//
-//        }
-//        routeLineShape.setPath(routeLinePath);
-//        map.addShape(routeLineShape, false);
-//    }
 
     private void initCenterPop() {
         mChooseCenterPointPop = new SuperPopupWindow(mContext, R.layout.pop_coordinate_layout);
@@ -1158,27 +866,16 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
 
 
     private void expandFabMenu() {
-        tv_useridsetting.setVisibility(View.VISIBLE);
         tv_routesetting.setVisibility(View.VISIBLE);
         ViewCompat.animate(mFucAcIv).rotation(45.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
-//        tv_useridsetting.startAnimation(fabOpenAnimation);
-//        tv_routesetting.startAnimation(fabOpenAnimation);
-
         isFabMenuOpen = true;
     }
 
     private void collapseFabMenu() {
         ViewCompat.animate(mFucAcIv).rotation(0.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
-        tv_useridsetting.setVisibility(View.GONE);
         tv_routesetting.setVisibility(View.GONE);
-//        tv_useridsetting.startAnimation(fabCloseAnimation);
-//        tv_routesetting.startAnimation(fabCloseAnimation);
         isFabMenuOpen = false;
     }
 
-    private void getAnimations() {
-        fabOpenAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_open);
-        fabCloseAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_close);
-    }
 
 }

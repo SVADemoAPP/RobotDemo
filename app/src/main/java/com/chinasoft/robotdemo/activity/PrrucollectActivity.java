@@ -70,22 +70,17 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private int mapHeight;
     private boolean isStart = false;
     private boolean isPrruCollect = false;
-    private boolean isAutoFind = false;
-    private PrruModel nowCollectPrru;
     private int coorCount = 0;
-    //    private Path path;
-//    private LineShape lineShape;
-//    private float lastX, lastY;
+    private Path path;
+    private LineShape lineShape;
+    private float lastX, lastY;
     private float nowX, nowY;
     private float[] newF, desF, mXY, rXY, tempMXY,rsrpMXY;
     private String currentMap;
     private ImageView iv_operation;
     private RequestShape robotShape;
     private CompassView cv;
-    private int cStep;
-    private String nowCollectNeCode;
     private float maxRsrp, xWhenMax, yWhenMax;
-    private float[] xyRobotWhenMax;
     private CustomShape desShape;
     private SuperPopupWindow mUseridPopupWindow, mRoutePopupWindow;
     private Context mContext;
@@ -93,7 +88,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private float mapRotate;
     private float robotDirection;
     private RobotOperation ro;
-    private boolean mSwitchAutoFlag = true; //默认为自动
 
     private ImageView iv_collect;
     private TextView tv_forcestop, tv_useridsetting, popup_confirm_userid, popup_cancel_userid;
@@ -125,7 +119,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private int locCount;
     private LineShape routeLineShape;
     private Path routeLinePath;
-    private Map<String, MaxrsrpPosition> mpMap = new HashMap<>();
 
     private float rX;
     private float rY;
@@ -135,34 +128,12 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private int mode_opeleft = 0;//操作左边按钮的状态，0为隐藏，1为恢复，2为清除
     private SuperPopupWindow mChooseCenterPointPop;
     private String mMapName;
-    private List<String> rsrpIdList = new ArrayList<>();
 
     private boolean connectResult = true;
-    private RelativeLayout rlBg;
-    private Animation fabOpenAnimation;
-    private Animation fabCloseAnimation;
     private boolean isFabMenuOpen = false;
     private ImageView mFucAcIv;
     private LocAndPrruInfoResponse lap;
 
-
-    //防止多个请求同时响应产生的线程不安全问题
-    private synchronized void recordMaxRsrp(Float rsrp, float logX, float logY) {
-        if (rsrp != null && rsrp - maxRsrp >= 0) {
-            xWhenMax = logX;
-            yWhenMax = logY;
-            maxRsrp = rsrp;
-        }
-    }
-
-    private Float getRsrpByGpp(String gpp, List<PrruSigalModel> prruSigalModelList) {
-        for (PrruSigalModel p : prruSigalModelList) {
-            if (gpp.equals(p.gpp)) {
-                return p.rsrp;
-            }
-        }
-        return null;
-    }
 
     @Override
     public void setContentLayout() {
@@ -175,14 +146,11 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     public void dealLogicBeforeInitView() {
         routeLinePath = new Path();
         routeLineShape = new LineShape("routeLine", R.color.green, 2, "#FF4081");
-        getAnimations();
     }
 
     @Override
     public void initView() {
         map = findViewById(R.id.imagemap);
-        rlBg = findViewById(R.id.rl_bg2);
-//        rlBg.dispatchTouchEvent(new MotionEvent())
         iv_operation = findViewById(R.id.iv_operation);
         tv_home_back = findViewById(R.id.tv_home_back);
         tv_opeleft = findViewById(R.id.tv_opeleft);
@@ -200,20 +168,16 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         tv_routesetting.setOnClickListener(this);
         mFucAcIv.setOnClickListener(this);
     }
-//
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        if (event.)
-//        return false;
-//    }
 
     @Override
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
         mMapName = currentMap;
         ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this, 2000);
-        ro.setNotify(true);
-//        ro.startOperation();
+        ro.startOperation();
+
+//        map.setMapBitmap(Constant.mapBitmap);
+//        mapHeight = Constant.mapBitmap.getHeight();
 
         userIds = SharedPrefHelper.getString(this, "userId", "");//临时取出赋值给UserId
         if (!TextUtils.isEmpty(userIds)) {
@@ -221,8 +185,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 ipList.add(str);
             }
         }
-//        map.setMapBitmap(Constant.mapBitmap);
-//        mapHeight = Constant.mapBitmap.getHeight();
+
 
         if (connectResult && ro != null && !ro.getContinue()) {
             new Thread(new Runnable() {
@@ -270,7 +233,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         map.setOnLongClickListener1(new TouchImageView1.OnLongClickListener1() {
             @Override
             public void onLongClick(PointF point) {
-                if (isStart && !isAutoFind&&(!isTestLine||isPause)) {
+                if (isStart&&(!isTestLine||isPause)) {
 //                    ro.setShowOrbits(true);
                     rXY = mapToReal(point.x, point.y);
                     ro.cancelAndMoveTo(rXY[0], rXY[1]);
@@ -287,11 +250,11 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         robotShape.setValues(x, y);
         map.addShape(robotShape, false);
         isStart = true;
-//        path = new Path();
-//        lastX = nowX;
-//        lastY = nowY;
-//        path.moveTo(x, y);
-//        lineShape = new LineShape("line", R.color.green, 2, "#00ffba");
+        path = new Path();
+        lastX = nowX;
+        lastY = nowY;
+        path.moveTo(x, y);
+        lineShape = new LineShape("line", R.color.green, 2, "#00ffba");
     }
 
     private float[] mapToReal(float mx, float my, int height) {
@@ -338,7 +301,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 if (isTestLine) {
                     isTestLine = false;
                     iv_operation.setImageResource(R.mipmap.home_start);
-                    drawPrruAfterTestLine();
                     showToast("路径测试结束");
                     showClear();
                     try {
@@ -351,28 +313,17 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                         showToast("请先清除痕迹并重选路径");
                         return;
                     }
-//                    if (ipList.size() == 0) {
-//                        showToast("用第一个userId测试，未配置");
-//                        return;
-//                    }
                     if (nowRouteList.size() == 0) {
                         showToast("未选择路径");
                         return;
                     }
-                    rsrpIdList.clear();
                     iv_operation.setImageResource(R.mipmap.home_end);
                     locCount = nowRouteList.size();
                     isTestLine = true;
-//                    drawLineBeforeTestLine();
-                    mpMap.clear();
                     startTestLine();
                 }
                 break;
             case R.id.tv_useridsetting:
-                if (isTestLine) {
-                    showToast("请先关闭或完成路径测试");
-                    return;
-                }
                 if (isPrruCollect) {
                     showToast("请先关闭采集");
                     return;
@@ -386,10 +337,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 }
                 if (isTestLine) {
                     showToast("请先关闭或完成路径测试");
-                    return;
-                }
-                if (isPrruCollect) {
-                    showToast("请先关闭采集");
                     return;
                 }
                 initRoutePop();
@@ -457,11 +404,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                     showToast("未选择路径");
                     return;
                 }
-//                String newRouteName1 = et_route.getText().toString().trim();
-//                if (canRouteAdd(newRouteName1)) {
-//                    RouteModel rm=new RouteModel(newRouteName1,newRouteJson);
-//                    routeList.add(rm);
-//                }
                 nowRouteName = selectRouteModel.getRouteName();
                 removeRoute(nowRouteList.size());
                 nowRouteList = new Gson().fromJson(selectRouteModel.getPath(), new TypeToken<List<PointF>>() {
@@ -481,11 +423,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
             case R.id.rl_yes_route:
                 String newRouteName = et_route.getText().toString().trim();
                 if (canRouteAdd(newRouteName)) {
-//                    userIdList.add(newRoute1);
-//                    refreshRouteList(userIdList);
-
                     DirectionData rm = new DirectionData(mMapName, newRouteName, newRouteJson);
-
                     // 插入数据并更新routeList
                     DBUtils.insert(rm);
                     routeList.add(rm);
@@ -507,12 +445,12 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private void clearLastTest() {
         removeRoute(locCount);
         map.removeShape("line");
-        for (String gpp : mpMap.keySet()) {
-            map.removeShape(gpp);
-        }
-        for (String id : rsrpIdList) {
-            map.removeShape(id);
-        }
+
+        path.reset();
+        tempMXY=realToMap(nowX,nowY);
+        path.moveTo(tempMXY[0], tempMXY[1]);
+        lastX = nowX;
+        lastY = nowY;
     }
 
     private boolean canUserIdAdd(String newUserId) {
@@ -754,57 +692,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
     }
 
-    private void autoFind() {
-        cStep++;
-        switch (cStep) {
-            case 1:
-                LLog.getLog().e("扫描", "1");
-                ro.moveTo(nowCollectPrru.x + 0.5f, nowCollectPrru.y);
-                break;
-            case 2:
-                LLog.getLog().e("扫描", "2");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
-                break;
-            case 3:
-                LLog.getLog().e("扫描", "3");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y + 0.5f);
-                break;
-            case 4:
-                LLog.getLog().e("扫描", "4");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
-                break;
-            case 5:
-                LLog.getLog().e("扫描", "5");
-                ro.moveTo(nowCollectPrru.x - 0.5f, nowCollectPrru.y);
-                break;
-            case 6:
-                LLog.getLog().e("扫描", "6");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
-                break;
-            case 7:
-                LLog.getLog().e("扫描", "7");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y - 0.5f);
-                break;
-            case 8:
-                LLog.getLog().e("扫描", "8");
-                ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
-                break;
-            case 9:
-                LLog.getLog().e("扫描", "9");
-                isAutoFind = false;
-                arriveDes();
-                iv_operation.setImageResource(R.mipmap.home_start);
-                if (maxRsrp > -10000f) {
-                    xyRobotWhenMax = realToMap(xWhenMax, yWhenMax);
-                    CollectPointShape maxRsrpPointShape = new CollectPointShape(nowCollectPrru.neCode, R.color.route_color, PrrucollectActivity.this, "dwf");
-                    maxRsrpPointShape.setValues(xyRobotWhenMax[0], xyRobotWhenMax[1]);
-                    map.addShape(maxRsrpPointShape, false);
-                }
-                break;
-            default:
-                break;
-        }
-    }
 
 
     //移除轨迹点
@@ -818,11 +705,11 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private void arriveDes() {
 //        map.setCanChange(true);
         newF = realToMap(nowX, nowY);
-//        path.lineTo(newF[0], newF[1]);
-//        lineShape.setPath(path);
-//        map.addShape(lineShape, false);
-//        lastX = nowX;
-//        lastY = nowY;
+        path.lineTo(newF[0], newF[1]);
+        lineShape.setPath(path);
+        map.addShape(lineShape, false);
+        lastX = nowX;
+        lastY = nowY;
         map.removeShape("des");
         updateRobotByReal();
     }
@@ -885,86 +772,18 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     private MaxrsrpPosition tempMp;
 
-    private synchronized void recordMaxrsrpPostion(float x, float y, List<PrruSigalModel> prruSigalModelList) {
-        if (prruSigalModelList == null) {
-            return;
-        }
-        for (PrruSigalModel psm : prruSigalModelList) {
-            if (psm.rsrp > -950) {
-                LLog.getLog().robot(x + "," + y, psm.gpp + "____" + psm.rsrp);
-                if (!mpMap.keySet().contains(psm.gpp)) {
-                    MaxrsrpPosition mp = new MaxrsrpPosition();
-                    mp.setX(x);
-                    mp.setY(y);
-                    mp.setRsrp(psm.rsrp);
-                    mpMap.put(psm.gpp, mp);
-                } else {
-                    tempMp = mpMap.get(psm.gpp);
-                    if (psm.rsrp > tempMp.getRsrp()) {
-                        tempMp.setX(x);
-                        tempMp.setY(y);
-                        tempMp.setRsrp(psm.rsrp);
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     public void notifyPrru(final float x, final float y) {
-        if (isTestLine) {
-            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
-                @Override
-                public void onResponse(String s) {
-                    LLog.getLog().e("getLocAndPrruInfo成功", s);
-                    lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
-                    if (lap.code == 0) {
-                        recordMaxrsrpPostion(x, y, lap.data.prruData);
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
-                }
-            });
-
-            Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
-                @Override
-                public void onResponse(String s) {
-                    LLog.getLog().e("getPhonePrru成功", s);
-                    LLog.getLog().robot(x + "," + y, s);
-
-                    PrruData prruData = new Gson().fromJson(s, PrruData.class);
-                    if (prruData.getCode() == 0) //成功
-                    {
-                        PrruData.DataBean data = prruData.getData();
-                        setPrruColorPoint(x,y,data.getRsrp(), data.getId());
-
-                    } else {
-                        Toast.makeText(mContext, "prru失败", Toast.LENGTH_LONG);
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    LLog.getLog().e("getPhonePrru错误", volleyError.toString());
-                }
-            });
-
-        } else if (isPrruCollect) {
+         if (isPrruCollect) {
             for (String ip : ipList) {
                 Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ip + "&mapId=1", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
                         LLog.getLog().e("getLocAndPrruInfo成功", s);
-                        LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
+                        lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                         if (lap.code == 0 && lap.data.prruData != null) {
                             LLog.getLog().prru(x + "," + y, prruDataToString(lap.data.prruData), lap.data.userId);
-                            if (isAutoFind) {
-                                Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
-                                recordMaxRsrp(rsrp, x, y);
-                            }
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -984,17 +803,14 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         nowX = x;
         nowY = y;
         robotDirection = direc;
-//        if (!isTestLine) {
-//            if (Math.sqrt((nowX - lastX) * (nowX - lastX) + (nowY - lastY) * (nowY - lastY)) > 0.3f) {
-////                            Log.e("handler","的点点滴滴顶顶顶顶顶顶顶顶顶大等等");
-//                newF = realToMap(nowX, nowY);
-//                path.lineTo(newF[0], newF[1]);
-//                lineShape.setPath(path);
-//                map.addShape(lineShape, false);
-//                lastX = nowX;
-//                lastY = nowY;
-//            }
-//        }
+            if (Math.sqrt(Math.pow((nowX - lastX),2 ) + Math.pow((nowY - lastY) ,2)) > 0.3f) {
+                newF = realToMap(nowX, nowY);
+                path.lineTo(newF[0], newF[1]);
+                lineShape.setPath(path);
+                map.addShape(lineShape, false);
+                lastX = nowX;
+                lastY = nowY;
+            }
         updateRobotByReal();
     }
 
@@ -1016,9 +832,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                         continueTestLine(true);
                     }
                 }
-            }
-            if (isAutoFind) {
-                autoFind();
             }
         } else {
             arriveDes();
@@ -1056,7 +869,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         } else {
             isTestLine = false;
             iv_operation.setImageResource(R.mipmap.home_start);
-            drawPrruAfterTestLine();
             updateRobotByReal();
             showClear();
             showToast("路径测试完成");
@@ -1079,33 +891,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     }
 
 
-    //mpMap按rsrp从大到小排序并画出前5个
-    private void drawPrruAfterTestLine() {
-        List<Map.Entry<String, MaxrsrpPosition>> lists = new ArrayList<Map.Entry<String, MaxrsrpPosition>>(mpMap.entrySet());
-        Collections.sort(lists, new Comparator<Map.Entry<String, MaxrsrpPosition>>() {
-            @Override
-            public int compare(Map.Entry<String, MaxrsrpPosition> o1, Map.Entry<String, MaxrsrpPosition> o2) {
-                float r1 = o1.getValue().getRsrp();
-                float r2 = o2.getValue().getRsrp();
-                if (r1 > r2) {
-                    return -1;
-                } else if (r1 < r2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
-        for (Map.Entry<String, MaxrsrpPosition> entry : lists.size() > 5 ? lists.subList(0, 5) : lists) {
-            PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, PrrucollectActivity.this);
-            pgShape.setNecodeText(entry.getKey());
-            pgShape.setPaintColor(Color.parseColor("#ff0000"));
-            tempMXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
-            pgShape.setValues(tempMXY[0], tempMXY[1]);
-            map.addShape(pgShape, false);
-        }
-
-    }
 
     //移除路径显示
     private void removeRoute(int pointSize) {
@@ -1214,29 +999,6 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         }
     }
 
-    /**
-     * 设置 PrruColor
-     */
-    private void setPrruColorPoint(float x,float y,int prru, String id) {
-        int color;
-
-        if (-75 < prru && prru <= 0) {  //1e8449
-            color = Color.parseColor("#1e8449");
-        } else if (-95 < prru && prru <= -75) { //浅绿色
-            color = Color.GREEN;
-        } else if (-105 < prru && prru <= -95) {  //黄色
-            color = Color.YELLOW;
-        } else if (-120 < prru && prru <= -105) { //红色
-            color = Color.RED;
-        } else {
-            color = Color.BLACK;
-        }
-        rsrpIdList.add(id);
-        CircleShape shape = new CircleShape(id, color);
-        rsrpMXY=realToMap(x,y);
-        shape.setValues(rsrpMXY[0], rsrpMXY[1]);
-        map.addShape(shape, false);
-    }
 
     //初始化地图位置
     private void initDefaultCd(final ImageMap1 map, final TextView textView, final int mapHeight) {
@@ -1286,9 +1048,5 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         isFabMenuOpen = false;
     }
 
-    private void getAnimations() {
-        fabOpenAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_open);
-        fabCloseAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_close);
-    }
 
 }

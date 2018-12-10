@@ -7,7 +7,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.os.Handler;
 import android.support.v4.view.ViewCompat;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
@@ -35,6 +37,7 @@ import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.DBUtils;
 import com.chinasoft.robotdemo.util.LLog;
+import com.chinasoft.robotdemo.util.UpdateCommunityInfo;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.chinasoft.robotdemo.view.MyListView;
 import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
@@ -104,14 +107,14 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private int mode_opeleft = 0;//操作左边按钮的状态，0为隐藏，1为恢复，2为清除
     private SuperPopupWindow mChooseCenterPointPop;
     private String mMapName;
-    private List<String> rsrpIdList = new ArrayList<>();
     private boolean connectResult = true;
-    private RelativeLayout rlBg;
     private boolean isFabMenuOpen = false;
     private ImageView mFucAcIv;
     private LocAndPrruInfoResponse lap;
     private MaxrsrpPosition tempMp;
     private long lastClickTime;
+    private UpdateCommunityInfo updateCommunityInfo;
+    private int rsrpCount=0;
 
     @Override
     public void setContentLayout() {
@@ -122,6 +125,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void dealLogicBeforeInitView() {
+        updateCommunityInfo=new UpdateCommunityInfo(this, (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE),new Handler());
+        updateCommunityInfo.startUpdateData();
         routeLinePath = new Path();
         routeLineShape = new LineShape("routeLine", R.color.green, 2, "#FF4081");
     }
@@ -129,7 +134,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void initView() {
         map = findViewById(R.id.imagemap);
-        rlBg = findViewById(R.id.rl_bg2);
         iv_operation = findViewById(R.id.iv_operation);
         tv_home_back = findViewById(R.id.tv_home_back);
         tv_opeleft = findViewById(R.id.tv_opeleft);
@@ -149,8 +153,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         currentMap = getIntent().getExtras().getString("currentMap");
         mMapName = currentMap;
         ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this, 2000);
-        map.setMapBitmap(Constant.mapBitmap);
-        mapHeight = Constant.mapBitmap.getHeight();
+//        map.setMapBitmap(Constant.mapBitmap);
+//        mapHeight = Constant.mapBitmap.getHeight();
         if (connectResult && ro != null && !ro.getContinue()) {
             new Thread(new Runnable() {
                 @Override
@@ -279,7 +283,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                         showToast("未选择路径");
                         return;
                     }
-                    rsrpIdList.clear();
+                    rsrpCount=0;
                     iv_operation.setImageResource(R.mipmap.home_end);
                     locCount = nowRouteList.size();
                     isTestLine = true;
@@ -362,8 +366,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         for (String gpp : mpMap.keySet()) {
             map.removeShape(gpp);
         }
-        for (String id : rsrpIdList) {
-            map.removeShape(id);
+        for(int i=0;i<rsrpCount;i++){
+            map.removeShape("rsrp"+i);
         }
     }
 
@@ -646,6 +650,14 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 }
             });
 
+            /**
+             * RSRP打点
+             */
+            try{
+                setPrruColorPoint(x,y, Long.parseLong(updateCommunityInfo.RSRP));
+            }catch (Exception e){
+                LLog.getLog().e("RSRP异常",e.toString());
+            }
 //            Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
 //                @Override
 //                public void onResponse(String s) {
@@ -668,10 +680,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 //                    LLog.getLog().e("getPhonePrru错误", volleyError.toString());
 //                }
 //            });
-
         }
-
-
     }
 
     @Override
@@ -880,9 +889,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     /**
      * 设置 PrruColor
      */
-    private void setPrruColorPoint(float x,float y,int prru, String id) {
+    private synchronized void setPrruColorPoint(float x,float y,long prru) {
         int color;
-
         if (-75 < prru && prru <= 0) {  //1e8449
             color = Color.parseColor("#1e8449");
         } else if (-95 < prru && prru <= -75) { //浅绿色
@@ -894,8 +902,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         } else {
             color = Color.BLACK;
         }
-        rsrpIdList.add(id);
-        CircleShape shape = new CircleShape(id, color);
+        CircleShape shape = new CircleShape("rsrp"+rsrpCount, color);
+        rsrpCount++;
         rsrpMXY=realToMap(x,y);
         shape.setValues(rsrpMXY[0], rsrpMXY[1]);
         map.addShape(shape, false);
