@@ -108,6 +108,10 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     private String newRouteJson;
     private String nowRouteName;
     private List<PointF> nowRouteList = new ArrayList<>();
+
+    private List<PointF> saveRouteList = new ArrayList<>();
+    private boolean isForward; //是否正向路径
+
     private DirectionData selectRouteModel;
 
     private EditText et_userid;
@@ -173,7 +177,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     public void dealLogicAfterInitView() {
         currentMap = getIntent().getExtras().getString("currentMap");
         mMapName = currentMap;
-        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this, 2000);
+        ro = new RobotOperation(Constant.robotIp, Constant.robotPort, currentMap, this, this, 1000);
         ro.startOperation();
 
 //        map.setMapBitmap(Constant.mapBitmap);
@@ -248,12 +252,13 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     private void initStart(float x, float y) {
         robotShape.setValues(x, y);
+        mXY=new float[]{x,y};
         map.addShape(robotShape, false);
         isStart = true;
         path = new Path();
+        path.moveTo(x, y);
         lastX = nowX;
         lastY = nowY;
-        path.moveTo(x, y);
         lineShape = new LineShape("line", R.color.green, 2, "#00ffba");
     }
 
@@ -302,6 +307,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                     isTestLine = false;
                     iv_operation.setImageResource(R.mipmap.home_start);
                     showToast("路径测试结束");
+                    nowRouteList.clear();
                     showClear();
                     try {
                         ro.forceStop();
@@ -318,7 +324,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                         return;
                     }
                     iv_operation.setImageResource(R.mipmap.home_end);
-                    locCount = nowRouteList.size();
+//                    locCount = nowRouteList.size();
                     isTestLine = true;
                     startTestLine();
                 }
@@ -408,6 +414,12 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
                 removeRoute(nowRouteList.size());
                 nowRouteList = new Gson().fromJson(selectRouteModel.getPath(), new TypeToken<List<PointF>>() {
                 }.getType());
+                locCount=nowRouteList.size();
+                saveRouteList.clear();
+                for(PointF p:nowRouteList){
+                    saveRouteList.add(p);
+                }
+                isForward=true;
                 drawRoute(nowRouteList);
 
                 resetRouteAdd();
@@ -447,8 +459,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         map.removeShape("line");
 
         path.reset();
-        tempMXY=realToMap(nowX,nowY);
-        path.moveTo(tempMXY[0], tempMXY[1]);
+        path.moveTo(mXY[0], mXY[1]);
         lastX = nowX;
         lastY = nowY;
     }
@@ -777,7 +788,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
     public void notifyPrru(final float x, final float y) {
          if (isPrruCollect) {
             for (String ip : ipList) {
-                Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ip + "&mapId=1", new Response.Listener<String>() {
+                Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + ip + "&mapId="+Constant.mapId, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
                         LLog.getLog().e("getLocAndPrruInfo成功", s);
@@ -845,11 +856,7 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
         clearOrbits();
         map.removeShape("des");
         if (nowRouteList != null && nowRouteList.size() > 0) {
-            if (nowRouteList.size() == locCount) {
                 showToast("路径测试开始");
-            } else if (nowRouteList.size() < locCount) {
-                showToast("路径测试恢复");
-            }
             ro.moveTo(nowRouteList.get(0).x, nowRouteList.get(0).y);
         } else {
             showToast("路径为空");
@@ -858,21 +865,37 @@ public class PrrucollectActivity extends BaseActivity implements OnRobotListener
 
     private void continueTestLine(boolean isRemove) {
         if(isRemove) {
-            tempMXY = realToMap(nowRouteList.get(0).x, nowRouteList.get(0).y);
-            CustomShape tShape = new CustomShape("routePoint" + (locCount - nowRouteList.size()), R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.destination_point_gray);
-            tShape.setValues(tempMXY[0], tempMXY[1]);
-            map.addShape(tShape, false);
+//            tempMXY = realToMap(nowRouteList.get(0).x, nowRouteList.get(0).y);
+//            CustomShape tShape = new CustomShape("routePoint" + (locCount - nowRouteList.size()), R.color.blue, PrrucollectActivity.this, "dwf", R.mipmap.destination_point_gray);
+//            tShape.setValues(tempMXY[0], tempMXY[1]);
+//            map.addShape(tShape, false);
             nowRouteList.remove(0);
         }
-        if (nowRouteList.size() > 0) {
-            ro.moveTo(nowRouteList.get(0).x, nowRouteList.get(0).y);
-        } else {
-            isTestLine = false;
-            iv_operation.setImageResource(R.mipmap.home_start);
-            updateRobotByReal();
-            showClear();
-            showToast("路径测试完成");
+        //如果PointF集合为0，则说明走完了一遍路径
+        if(nowRouteList.size()==0){
+            if(isForward){
+                //当前为正向则反向开始移动
+                isForward=false;
+                for(int i=locCount-2;i>=0;i--){
+                    nowRouteList.add(saveRouteList.get(i));
+                }
+            }else{
+                //当前为反向则正向开始移动
+                isForward=true;
+                for(int i=1;i<locCount;i++){
+                    nowRouteList.add(saveRouteList.get(i));
+                }
+            }
         }
+//        if (nowRouteList.size() > 0) {
+            ro.moveTo(nowRouteList.get(0).x, nowRouteList.get(0).y);
+//        } else {
+//            iv_operation.setImageResource(R.mipmap.home_start);
+//            arriveDes();
+//            showClear();
+//            showToast("路径测试完成");
+//            isTestLine = false;
+//        }
     }
 
     //显示清除按钮

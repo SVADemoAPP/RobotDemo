@@ -4,9 +4,18 @@ public class MaxrsrpPosition {
     private float x;
     private float y;
     private float rsrp;
+    private int num;
 
     public float getX() {
         return x;
+    }
+
+    public int getNum() {
+        return num;
+    }
+
+    public void setNum(int num) {
+        this.num = num;
     }
 
     public void setX(float x) {
@@ -35,6 +44,7 @@ public class MaxrsrpPosition {
                 "x=" + x +
                 ", y=" + y +
                 ", rsrp=" + rsrp +
+                ", num=" + num +
                 '}';
     }
 }

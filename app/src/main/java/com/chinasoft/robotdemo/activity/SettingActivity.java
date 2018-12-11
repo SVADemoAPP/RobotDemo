@@ -7,10 +7,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
+import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
+import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
+import com.google.gson.Gson;
 
 /**
  * Created by chinasoft_gyr on 2018/11/12.
@@ -59,6 +65,27 @@ public class SettingActivity extends BaseActivity {
         mTvhttp.setOnClickListener(this);
         mTvHttps.setOnClickListener(this);
         defaultData();
+
+//        testLocation();
+    }
+
+    private void testLocation(){
+        Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId="+Constant.mapId, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                LLog.getLog().e("getLocAndPrruInfo成功", s);
+                LocAndPrruInfoResponse lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
+                if (lap.code == 0) {
+                    if(lap.data.data!=null){
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
+            }
+        });
     }
 
     @Override

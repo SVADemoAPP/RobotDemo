@@ -44,7 +44,7 @@
         android:layout_height="130dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="180dp"
+        android:layout_marginBottom="230dp"
         android:layout_marginRight="12dp"
         android:background="@drawable/prru_setting"
         android:gravity="center"
@@ -62,7 +62,7 @@
         android:layout_alignEnd="@+id/tv_home_back"
         android:layout_alignParentBottom="true"
         android:src="@mipmap/fuc_menu"
-        android:layout_marginBottom="130dp" />
+        android:layout_marginBottom="180dp" />
 
 
     <ImageView

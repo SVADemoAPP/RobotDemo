@@ -229,6 +229,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
 
     private void initStart(float x, float y) {
         robotShape.setValues(x, y);
+        mXY=new float[]{x,y};
         map.addShape(robotShape, false);
         isStart = true;
         path = new Path();
@@ -304,8 +305,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
                     locCount = nowRouteList.size();
                     isTestLine = true;
                     path.reset();
-                    tempMXY=realToMap(nowX,nowY);
-                    path.moveTo(tempMXY[0], tempMXY[1]);
+                    path.moveTo(mXY[0], mXY[1]);
                     lastX = nowX;
                     lastY = nowY;
                     startTestLine();
@@ -545,15 +545,16 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
 
     //到达目的点
     private void arriveDes() {
-//        map.setCanChange(true);
-//        newF = realToMap(nowX, nowY);
-//        path.lineTo(newF[0], newF[1]);
-//        lineShape.setPath(path);
-//        map.addShape(lineShape, false);
-//        lastX = nowX;
-//        lastY = nowY;
-        map.removeShape("des");
         updateRobotByReal();
+        if (isTestLine){
+            path.lineTo(mXY[0], mXY[1]);
+            lineShape.setPath(path);
+            map.addShape(lineShape, false);
+            lastX = nowX;
+            lastY = nowY;
+        }else {
+            map.removeShape("des");
+        }
     }
 
     //根据实际坐标更新机器人图标
@@ -617,7 +618,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
     @Override
     public void notifyPrru(final float x, final float y) {
         if (isTestLine) {
-            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
+            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId="+Constant.mapId, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
                     LLog.getLog().e("getLocAndPrruInfo成功", s);
@@ -710,11 +711,11 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
         if (nowRouteList.size() > 0) {
             ro.moveTo(nowRouteList.get(0).x, nowRouteList.get(0).y);
         } else {
-            isTestLine = false;
             iv_operation.setImageResource(R.mipmap.home_start);
-            updateRobotByReal();
+            arriveDes();
             showClear();
             showToast("路径测试完成");
+            isTestLine = false;
         }
     }
 

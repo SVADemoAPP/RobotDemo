@@ -90,7 +90,9 @@ public class MaplistActivity extends BaseActivity {
         subscription=new Subscription(this);
         prruSubscribe=new PrruSubscribe(this);
         Constant.userId=upLoad.getLocaIpOrMac();
+//        Constant.userId="10.95.163.179";
         Constant.storeId=3;
+        Constant.mapId=5122;
         File dir = new File(Constant.sdPath + "/maps/");
         if (!dir.exists()) {
             dir.mkdirs();

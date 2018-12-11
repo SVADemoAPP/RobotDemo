@@ -214,6 +214,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     private void initStart(float x, float y) {
         robotShape.setValues(x, y);
+        mXY=new float[]{x,y};
         map.addShape(robotShape, false);
         isStart = true;
     }
@@ -398,16 +399,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         routeAdapter.notifyDataSetChanged();
     }
 
-    private String prruDataToString(List<PrruSigalModel> prruSigalModelList) {
-        if (prruSigalModelList == null || prruSigalModelList.size() == 0) {
-            return "null";
-        }
-        StringBuffer sb = new StringBuffer();
-        for (PrruSigalModel p : prruSigalModelList) {
-            sb.append(";" + p.toString());
-        }
-        return sb.substring(1);
-    }
 
 
 
@@ -540,14 +531,15 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     //到达目的点
     private void arriveDes() {
 //        map.setCanChange(true);
-        newF = realToMap(nowX, nowY);
+//        newF = realToMap(nowX, nowY);
 //        path.lineTo(newF[0], newF[1]);
 //        lineShape.setPath(path);
 //        map.addShape(lineShape, false);
 //        lastX = nowX;
 //        lastY = nowY;
-        map.removeShape("des");
         updateRobotByReal();
+        map.removeShape("des");
+
     }
 
     //根据实际坐标更新机器人图标
@@ -615,13 +607,15 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 LLog.getLog().robot(x + "," + y, psm.gpp + "____" + psm.rsrp);
                 if (!mpMap.keySet().contains(psm.gpp)) {
                     MaxrsrpPosition mp = new MaxrsrpPosition();
+                    mp.setNum(1); //出现次数为1
                     mp.setX(x);
                     mp.setY(y);
                     mp.setRsrp(psm.rsrp);
                     mpMap.put(psm.gpp, mp);
                 } else {
                     tempMp = mpMap.get(psm.gpp);
-                    if (psm.rsrp > tempMp.getRsrp()) {
+                    tempMp.setNum(tempMp.getNum()+1); //出现次数+1
+                    if (psm.rsrp > tempMp.getRsrp()) { //判断是否更新最大rsrp值及位置
                         tempMp.setX(x);
                         tempMp.setY(y);
                         tempMp.setRsrp(psm.rsrp);
@@ -634,7 +628,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     @Override
     public void notifyPrru(final float x, final float y) {
         if (isTestLine) {
-            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
+            Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId="+Constant.mapId, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
                     LLog.getLog().e("getLocAndPrruInfo成功", s);
@@ -658,7 +652,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             }catch (Exception e){
                 LLog.getLog().e("RSRP异常",e.toString());
             }
-//            Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + Constant.userId + "&mapId=1", new Response.Listener<String>() {
+//            Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + Constant.userId + "&mapId="+Constant.mapId, new Response.Listener<String>() {
 //                @Override
 //                public void onResponse(String s) {
 //                    LLog.getLog().e("getPhonePrru成功", s);
@@ -743,12 +737,12 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         if (nowRouteList.size() > 0) {
             ro.moveTo(nowRouteList.get(0).x, nowRouteList.get(0).y);
         } else {
-            isTestLine = false;
             iv_operation.setImageResource(R.mipmap.home_start);
             drawPrruAfterTestLine();
             updateRobotByReal();
             showClear();
             showToast("路径测试完成");
+            isTestLine = false;
         }
     }
 
@@ -774,11 +768,11 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         Collections.sort(lists, new Comparator<Map.Entry<String, MaxrsrpPosition>>() {
             @Override
             public int compare(Map.Entry<String, MaxrsrpPosition> o1, Map.Entry<String, MaxrsrpPosition> o2) {
-                float r1 = o1.getValue().getRsrp();
-                float r2 = o2.getValue().getRsrp();
-                if (r1 > r2) {
+                float n1 = o1.getValue().getNum();
+                float n2 = o2.getValue().getNum();
+                if (n1 > n2) {
                     return -1;
-                } else if (r1 < r2) {
+                } else if (n1 < n2) {
                     return 1;
                 } else {
                     return 0;
@@ -789,6 +783,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
             pgShape.setNecodeText(entry.getKey());
             pgShape.setPaintColor(Color.parseColor("#ff0000"));
+            LLog.getLog().e("Prru次数前5",entry.getValue().toString());
             tempMXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
             pgShape.setValues(tempMXY[0], tempMXY[1]);
             map.addShape(pgShape, false);

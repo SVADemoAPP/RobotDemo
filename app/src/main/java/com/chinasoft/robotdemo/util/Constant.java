@@ -26,4 +26,5 @@ public class Constant {
     public static String identification = "IP";
     public static String userId;
     public static int storeId;
+    public static int mapId;
 }
