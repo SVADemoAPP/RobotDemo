@@ -35,6 +35,8 @@ public class SettingActivity extends BaseActivity {
     private TextView mEdtSettingScale;
     private TextView mEdtSettingPointX;
     private TextView mEdtSettingPointY;
+    private TextView mEdtSettingStoreId;
+    private TextView mEdtSettingMapId;
     @Override
     public void setContentLayout() {
         setContentView(R.layout.activity_setting);
@@ -59,6 +61,8 @@ public class SettingActivity extends BaseActivity {
         mEdtSettingScale = findViewById(R.id.edt_setting_scale);
         mEdtSettingPointX = findViewById(R.id.edt_setting_pointX);
         mEdtSettingPointY = findViewById(R.id.edt_setting_pointY);
+        mEdtSettingStoreId = findViewById(R.id.edt_setting_storeId);
+        mEdtSettingMapId= findViewById(R.id.edt_setting_mapId);
         mTvExit.setOnClickListener(this);
         mTvReset.setOnClickListener(this);
         mTvSave.setOnClickListener(this);
@@ -135,14 +139,16 @@ public class SettingActivity extends BaseActivity {
      * 设置默认设置
      */
     private void defaultData() {
-        mEdtRbIp.setText(SharedPrefHelper.getString(SettingActivity.this, "robotIp", ""));
-        mEdtRbPort.setText(SharedPrefHelper.getInt(SettingActivity.this, "robotPort")==-1?"":String.valueOf(SharedPrefHelper.getInt(SettingActivity.this, "robotPort")));
-        mEdtServerIp.setText(SharedPrefHelper.getString(SettingActivity.this, "serverIp", ""));
-        mEdtServerPort.setText(SharedPrefHelper.getInt(SettingActivity.this, "serverPort")==-1?"":String.valueOf(SharedPrefHelper.getInt(SettingActivity.this, "serverPort")));
-        mEdtSettingPointX.setText(SharedPrefHelper.getFloat(SettingActivity.this, "firstX")==-1?"":String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstX")));
-        mEdtSettingPointY.setText(SharedPrefHelper.getFloat(SettingActivity.this, "firstY")==-1?"":String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "firstY")));
-        mEdtSettingScale.setText(SharedPrefHelper.getFloat(SettingActivity.this, "mapScale")==-1?"":String.valueOf(SharedPrefHelper.getFloat(SettingActivity.this, "mapScale")));
-        httpsFlag = SharedPrefHelper.getBoolean(SettingActivity.this, "https", false);
+        mEdtRbIp.setText(SharedPrefHelper.getString(SettingActivity.this, "robotIp", "192.168.11.1"));
+        mEdtRbPort.setText(SharedPrefHelper.getInt(SettingActivity.this, "robotPort",1445)+"");
+        mEdtServerIp.setText(SharedPrefHelper.getString(SettingActivity.this, "serverIp", "218.4.33.215"));
+        mEdtServerPort.setText(SharedPrefHelper.getInt(SettingActivity.this, "serverPort",8083)+"");
+        mEdtSettingPointX.setText(SharedPrefHelper.getFloat(SettingActivity.this, "firstX",0)+"");
+        mEdtSettingPointY.setText(SharedPrefHelper.getFloat(SettingActivity.this, "firstY",0)+"");
+        mEdtSettingStoreId.setText(SharedPrefHelper.getInt(SettingActivity.this, "storeId",2)+"");
+        mEdtSettingMapId.setText(SharedPrefHelper.getInt(SettingActivity.this, "mapId",2046)+"");
+        mEdtSettingScale.setText(SharedPrefHelper.getFloat(SettingActivity.this, "mapScale",20)+"");
+        httpsFlag = SharedPrefHelper.getBoolean(SettingActivity.this, "https", true);
         setHttpState(httpsFlag);
         mEdtServerIp.requestFocus();
     }
@@ -157,6 +163,8 @@ public class SettingActivity extends BaseActivity {
         mEdtServerPort.setText("");
         mEdtSettingPointX.setText("");
         mEdtSettingPointY.setText("");
+        mEdtSettingStoreId.setText("");
+        mEdtSettingMapId.setText("");
         mEdtSettingScale.setText("");
         httpsFlag = false;
         setHttpState(httpsFlag);
@@ -173,6 +181,8 @@ public class SettingActivity extends BaseActivity {
         String rbPort = mEdtRbPort.getText().toString().trim();
         String pointX = mEdtSettingPointX.getText().toString().trim();
         String pointY = mEdtSettingPointY.getText().toString().trim();
+        String storeId = mEdtSettingStoreId.getText().toString().trim();
+        String mapId = mEdtSettingMapId.getText().toString().trim();
         String scale = mEdtSettingScale.getText().toString().trim();
         if (TextUtils.isEmpty(serverIp)) {
             mEdtServerIp.requestFocus();
@@ -209,6 +219,16 @@ public class SettingActivity extends BaseActivity {
             showToast("请填写地图比例尺");
             return;
         }
+        if (TextUtils.isEmpty(storeId)) {
+            mEdtSettingStoreId.requestFocus();
+            showToast("请填写storeId");
+            return;
+        }
+        if (TextUtils.isEmpty(mapId)) {
+            mEdtSettingMapId.requestFocus();
+            showToast("请填写mapId");
+            return;
+        }
         SharedPrefHelper.putBoolean(SettingActivity.this, "https", httpsFlag);
         SharedPrefHelper.putString(SettingActivity.this, "serverIp", serverIp);
         SharedPrefHelper.putInt(SettingActivity.this, "serverPort", Integer.parseInt(serverPort));
@@ -217,6 +237,8 @@ public class SettingActivity extends BaseActivity {
         SharedPrefHelper.putFloat(SettingActivity.this, "firstX", Float.valueOf(pointX));
         SharedPrefHelper.putFloat(SettingActivity.this, "firstY", Float.valueOf(pointY));
         SharedPrefHelper.putFloat(SettingActivity.this, "mapScale", Float.valueOf(scale));
+        SharedPrefHelper.putInt(SettingActivity.this, "storeId", Integer.valueOf(storeId));
+        SharedPrefHelper.putInt(SettingActivity.this, "mapId", Integer.valueOf(mapId));
         showToast("保存成功");
         setResult(2);
         finish();

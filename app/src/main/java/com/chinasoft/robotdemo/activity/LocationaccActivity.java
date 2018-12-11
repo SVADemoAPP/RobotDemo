@@ -625,7 +625,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
                     lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                     if (lap.code == 0) {
                         if(lap.data.data!=null){
-                            setLocPoint(lap.data.data.x,lap.data.data.y);
+                            setLocPoint(lap.data.data.x/10,lap.data.data.y/10);
                         }
                     }
                 }
@@ -830,7 +830,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
      * 设置 PrruColor
      */
     private synchronized void setLocPoint(float x,float y) {
-        CircleShape shape = new CircleShape("lap"+locCount, Color.CYAN,7f);
+        CircleShape shape = new CircleShape("lap"+lapCount, Color.CYAN,7f);
         lapCount++;
         locMXY=realToMap(x,y);
         shape.setValues(locMXY[0], locMXY[1]);

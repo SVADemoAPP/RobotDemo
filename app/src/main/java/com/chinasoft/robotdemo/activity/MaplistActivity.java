@@ -91,8 +91,8 @@ public class MaplistActivity extends BaseActivity {
         prruSubscribe=new PrruSubscribe(this);
         Constant.userId=upLoad.getLocaIpOrMac();
 //        Constant.userId="10.95.163.179";
-        Constant.storeId=3;
-        Constant.mapId=5122;
+        Constant.storeId=SharedPrefHelper.getInt(MaplistActivity.this, "storeId",2);
+        Constant.mapId=SharedPrefHelper.getInt(MaplistActivity.this, "mapId",2046);
         File dir = new File(Constant.sdPath + "/maps/");
         if (!dir.exists()) {
             dir.mkdirs();
@@ -268,7 +268,9 @@ public class MaplistActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == 2) {
-            Constant.IP_ADDRESS = (SharedPrefHelper.getBoolean(this, "https", false) ? "https://" : "http://")
+            Constant.storeId=SharedPrefHelper.getInt(MaplistActivity.this, "storeId",2);
+            Constant.mapId=SharedPrefHelper.getInt(MaplistActivity.this, "mapId",2046);
+            Constant.IP_ADDRESS = (SharedPrefHelper.getBoolean(this, "https", true) ? "https://" : "http://")
                     + SharedPrefHelper.getString(this, "serverIp", "218.4.33.215")
                     + ":" + SharedPrefHelper.getInt(this, "serverPort", 8083);
             Map<String, String> map = new HashMap();

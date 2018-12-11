@@ -24,7 +24,7 @@ public class MyApplication extends Application {
         Constant.mRequestQueue = Volley.newRequestQueue(mContext);
         Constant.interRequestUtil = InterRequestUtil.getInstance(mContext);
 //        (SharedPrefHelper.getBoolean(mContext, "https", false)?"https://":"http://")
-        Constant.IP_ADDRESS = "https://"
+        Constant.IP_ADDRESS = (SharedPrefHelper.getBoolean(this, "https", true) ? "https://" : "http://")
         +SharedPrefHelper.getString(mContext, "serverIp", "218.4.33.215")
         +":"+SharedPrefHelper.getInt(mContext, "serverPort", 8083);
         Constant.sdPath=new StringBuilder(String.valueOf(Environment.getExternalStorageDirectory().getAbsolutePath())).append(File.separator).append("robotdemo").toString();

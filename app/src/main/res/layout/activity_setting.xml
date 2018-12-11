@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
     android:background="@mipmap/setting_bg">
 
 
+<View
+    android:layout_width="match_parent"
+    android:layout_height="40dp"/>
     <RelativeLayout
         android:id="@+id/rl_settitle"
         android:layout_width="match_parent"
         android:layout_height="67dp"
-        android:layout_marginTop="0dp"
         android:background="@mipmap/setting_titlebg">
 
         <TextView
@@ -27,306 +31,388 @@
             android:textSize="12dp" />
     </RelativeLayout>
 
-    <!--服务器地址-->
-    <RelativeLayout
-        android:id="@+id/rl_server"
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/rl_settitle"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="25dp"
-        android:layout_marginTop="10dp">
+        android:layout_height="0dp"
+        android:layout_marginTop="15dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+            <!--服务器地址-->
+            <RelativeLayout
+                android:id="@+id/rl_server"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/rl_settitle"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="25dp">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="服务器地址"
+                            android:textColor="@color/white"
+                            android:textSize="15dp"
+                            android:typeface="serif" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tv_http"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@drawable/tv_http_l_selector"
+                                android:gravity="center"
+                                android:text="Http"
+                                android:textColor="#00b5ff"
+                                android:textSize="12dp"
+                                android:typeface="serif" />
+
+                            <TextView
+                                android:id="@+id/tv_https"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@drawable/tv_https_r_selector"
+                                android:gravity="center"
+                                android:text="Https"
+                                android:textColor="@color/white"
+                                android:textSize="12dp"
+                                android:typeface="serif" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="36dp"
+                        android:layout_marginTop="2dp"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/et_server_ip"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="5"
+                            android:background="@drawable/tv_selector"
+                            android:digits="0123456789."
+                            android:gravity="center"
+                            android:hint="0.0.0.0"
+                            android:inputType="number"
+                            android:singleLine="true"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/gray_stroken"
+                            android:textSize="17dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:text=":"
+                            android:textColor="@color/blue_colon"
+                            android:textSize="13dp" />
+
+                        <EditText
+                            android:id="@+id/et_server_port"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="2"
+                            android:background="@drawable/tv_port"
+                            android:gravity="center"
+                            android:hint="0"
+                            android:inputType="number"
+                            android:singleLine="true"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/gray_stroken"
+                            android:textSize="17dp" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!--机器人Ip-->
+            <RelativeLayout
+                android:id="@+id/rl_setrb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/rl_server"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="25dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="机器人IP"
+                        android:textColor="@color/white"
+                        android:textSize="15dp"
+                        android:typeface="serif" />
+
+                    <EditText
+                        android:id="@+id/et_rb_ip"
+                        android:layout_width="match_parent"
+                        android:layout_height="36dp"
+                        android:background="@drawable/tv_selector"
+                        android:digits="0123456789."
+                        android:gravity="center"
+                        android:hint="0.0.0.0"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:textColor="@color/white"
+                        android:textColorHint="@color/gray_stroken"
+                        android:textSize="17dp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!--机器人端口-->
+            <RelativeLayout
+                android:id="@+id/rl_set_rb_port"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/rl_setrb"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="25dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="机器人端口"
+                        android:textColor="@color/white"
+                        android:textSize="15dp"
+                        android:typeface="serif" />
+
+                    <EditText
+                        android:id="@+id/et_rb_port"
+                        android:layout_width="match_parent"
+                        android:layout_height="36dp"
+                        android:background="@drawable/tv_selector"
+                        android:gravity="center"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:textColor="@color/white"
+                        android:textColorHint="@color/gray_stroken"
+                        android:textSize="17dp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!--设置机器人信息-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="服务器地址"
-                    android:textColor="@color/white"
-                    android:textSize="15dp"
-                    android:typeface="serif" />
-
+                android:layout_below="@+id/rl_set_rb_port"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+                <!--初始x y坐标-->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="25dp"
                     android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tv_http"
+                    <!--x坐标-->
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/tv_http_l_selector"
-                        android:gravity="center"
-                        android:text="Http"
-                        android:textColor="#00b5ff"
-                        android:textSize="12dp"
-                        android:typeface="serif" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="初始X坐标"
+                            android:textColor="@color/white"
+                            android:textSize="15dp"
+                            android:typeface="serif" />
+
+                        <EditText
+                            android:id="@+id/edt_setting_pointX"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/tv_selector"
+                            android:gravity="center"
+                            android:hint="0.0"
+                            android:inputType="numberDecimal"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/gray_stroken"
+                            android:textSize="17dp"
+                            android:typeface="serif" />
+                    </LinearLayout>
+                    <!--y坐标-->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:text="初始Y坐标"
+                            android:textColor="@color/white"
+                            android:textSize="15dp"
+                            android:typeface="serif" />
+
+                        <EditText
+                            android:id="@+id/edt_setting_pointY"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/tv_selector"
+                            android:gravity="center"
+                            android:hint="0.0"
+                            android:inputType="numberDecimal"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/gray_stroken"
+                            android:textSize="17dp"
+                            android:typeface="serif" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!--机器人端口-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="25dp"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tv_https"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/tv_https_r_selector"
-                        android:gravity="center"
-                        android:text="Https"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="地图比例尺"
                         android:textColor="@color/white"
-                        android:textSize="12dp"
+                        android:textSize="15dp"
+                        android:typeface="serif" />
+
+                    <EditText
+                        android:id="@+id/edt_setting_scale"
+                        android:layout_width="match_parent"
+                        android:layout_height="36dp"
+                        android:background="@drawable/tv_selector"
+                        android:gravity="center"
+                        android:hint="0.0"
+                        android:inputType="numberDecimal"
+                        android:textColor="@color/white"
+                        android:textColorHint="@color/gray_stroken"
+                        android:textSize="17dp"
                         android:typeface="serif" />
                 </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_marginTop="2dp"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/et_server_ip"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="5"
-                    android:background="@drawable/tv_selector"
-                    android:digits="0123456789."
-                    android:gravity="center"
-                    android:hint="0.0.0.0"
-                    android:inputType="number"
-                    android:singleLine="true"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/gray_stroken"
-                    android:textSize="17dp" />
-
-                <TextView
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:text=":"
-                    android:textSize="13dp"
-                    android:textColor="@color/blue_colon"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content" />
-
-                <EditText
-                    android:id="@+id/et_server_port"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="2"
-                    android:background="@drawable/tv_port"
-                    android:gravity="center"
-                    android:hint="0"
-                    android:inputType="number"
-                    android:singleLine="true"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/gray_stroken"
-                    android:textSize="17dp" />
-            </LinearLayout>
-
-        </LinearLayout>
-    </RelativeLayout>
-
-    <!--机器人Ip-->
-    <RelativeLayout
-        android:id="@+id/rl_setrb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/rl_server"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="25dp"
-        android:layout_marginTop="10dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="机器人IP"
-                android:textColor="@color/white"
-                android:textSize="15dp"
-                android:typeface="serif" />
-
-            <EditText
-                android:id="@+id/et_rb_ip"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:background="@drawable/tv_selector"
-                android:digits="0123456789."
-                android:gravity="center"
-                android:hint="0.0.0.0"
-                android:inputType="number"
-                android:singleLine="true"
-                android:textColor="@color/white"
-                android:textColorHint="@color/gray_stroken"
-                android:textSize="17dp" />
-        </LinearLayout>
-    </RelativeLayout>
-
-    <!--机器人端口-->
-    <RelativeLayout
-        android:id="@+id/rl_set_rb_port"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/rl_setrb"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="25dp"
-        android:layout_marginTop="10dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="机器人端口"
-                android:textColor="@color/white"
-                android:textSize="15dp"
-                android:typeface="serif" />
-
-            <EditText
-                android:id="@+id/et_rb_port"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:background="@drawable/tv_selector"
-                android:gravity="center"
-                android:hint="0"
-                android:inputType="number"
-                android:singleLine="true"
-                android:textColor="@color/white"
-                android:textColorHint="@color/gray_stroken"
-                android:textSize="17dp" />
-        </LinearLayout>
-    </RelativeLayout>
-
-    <!--设置机器人信息-->
-    <LinearLayout
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/rl_set_rb_port"
-        android:orientation="vertical">
-        <!--初始x y坐标-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="25dp"
-            android:layout_marginTop="15dp"
-            android:orientation="horizontal">
-            <!--x坐标-->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="初始X坐标"
-                    android:textColor="@color/white"
-                    android:textSize="15dp"
-                    android:typeface="serif" />
-
-                <EditText
-                    android:id="@+id/edt_setting_pointX"
+                <!--初始storeId mapId-->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="36dp"
-                    android:layout_marginRight="10dp"
-                    android:background="@drawable/tv_selector"
-                    android:gravity="center"
-                    android:hint="0.0"
-                    android:inputType="numberDecimal"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/gray_stroken"
-                    android:textSize="17dp"
-                    android:typeface="serif" />
-            </LinearLayout>
-            <!--y坐标-->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:text="初始Y坐标"
-                    android:textColor="@color/white"
-                    android:textSize="15dp"
-                    android:typeface="serif" />
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="25dp"
+                    android:orientation="horizontal">
+                    <!--x坐标-->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                <EditText
-                    android:id="@+id/edt_setting_pointY"
-                    android:layout_width="match_parent"
-                    android:layout_height="36dp"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/tv_selector"
-                    android:gravity="center"
-                    android:hint="0.0"
-                    android:inputType="numberDecimal"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/gray_stroken"
-                    android:textSize="17dp"
-                    android:typeface="serif" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="storeId"
+                            android:textColor="@color/white"
+                            android:textSize="15dp"
+                            android:typeface="serif" />
+
+                        <EditText
+                            android:id="@+id/edt_setting_storeId"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/tv_selector"
+                            android:gravity="center"
+                            android:hint="0"
+                            android:inputType="number"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/gray_stroken"
+                            android:textSize="17dp"
+                            android:typeface="serif" />
+                    </LinearLayout>
+                    <!--y坐标-->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:text="mapId"
+                            android:textColor="@color/white"
+                            android:textSize="15dp"
+                            android:typeface="serif" />
+
+                        <EditText
+                            android:id="@+id/edt_setting_mapId"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/tv_selector"
+                            android:gravity="center"
+                            android:hint="0"
+                            android:inputType="number"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/gray_stroken"
+                            android:textSize="17dp"
+                            android:typeface="serif" />
+                    </LinearLayout>
+                </LinearLayout>
+
             </LinearLayout>
         </LinearLayout>
 
-        <!--机器人端口-->
-        <LinearLayout
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="25dp"
-            android:orientation="vertical">
+    </ScrollView>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="地图比例尺"
-                android:textColor="@color/white"
-                android:textSize="15dp"
-                android:typeface="serif" />
-
-            <EditText
-                android:id="@+id/edt_setting_scale"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:background="@drawable/tv_selector"
-                android:gravity="center"
-                android:hint="0.0"
-                android:inputType="numberDecimal"
-                android:textColor="@color/white"
-                android:textColorHint="@color/gray_stroken"
-                android:textSize="17dp"
-                android:typeface="serif" />
-        </LinearLayout>
-    </LinearLayout>
     <!--底部设置按钮-->
     <LinearLayout
+        android:layout_marginTop="40dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dp"
         android:orientation="horizontal">
         <TextView
             android:id="@+id/tv_reset"
@@ -343,7 +429,7 @@
             android:id="@+id/tv_save"
             android:layout_width="130dp"
             android:layout_height="50dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="10dp"
             android:background="@drawable/setting_tv"
             android:gravity="center"
             android:text="保存设置"
@@ -353,6 +439,8 @@
 
     </LinearLayout>
 
-
-</RelativeLayout>
+<View
+    android:layout_width="match_parent"
+    android:layout_height="35dp"/>
+</LinearLayout>
 
