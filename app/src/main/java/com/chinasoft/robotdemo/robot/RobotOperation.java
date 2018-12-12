@@ -178,7 +178,7 @@ public class RobotOperation {
     }
 
     private boolean initCompositeMap(Pose pose) {
-        String path = Constant.sdPath + "/stcms/U9.stcm";
+        String path = Constant.sdPath + "/stcms/"+currentMap.replace(".png",".stcm");
         if (new File(path).exists()) {
             CompositeMapHelper compositeMapHelper = new CompositeMapHelper();
             CompositeMap compositeMap = compositeMapHelper.loadFile(path);
@@ -276,8 +276,7 @@ public class RobotOperation {
             pose.setY(y);
             pose.setZ(nowPose.getZ());
             pose.setYaw(0);
-            if (!initCompositeMap(pose)) {
-            } else {
+            if (initCompositeMap(pose)) {
                 //停止地图更新，使用载入地图
                 platform.setMapUpdate(false);
             }

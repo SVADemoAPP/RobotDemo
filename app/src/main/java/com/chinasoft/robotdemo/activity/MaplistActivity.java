@@ -93,33 +93,37 @@ public class MaplistActivity extends BaseActivity {
 //        Constant.userId="10.95.163.179";
         Constant.storeId=SharedPrefHelper.getInt(MaplistActivity.this, "storeId",2);
         Constant.mapId=SharedPrefHelper.getInt(MaplistActivity.this, "mapId",2046);
+
+
         File dir = new File(Constant.sdPath + "/maps/");
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        File mapFile = new File(Constant.sdPath + "/maps/chinasoft_1f.png");
-        if (!mapFile.exists()) {
-            try {
-                mapFile.createNewFile();
-                FileUtil.writeBytesToFile(this.getAssets().open("chinasoft_1f.png"), mapFile);
-            } catch (IOException e) {
-                e.printStackTrace();
+        File stcmDir = new File(Constant.sdPath + "/stcms/");
+        if (!stcmDir.exists()) {
+            stcmDir.mkdirs();
+        }
+        if(SharedPrefHelper.getBoolean(this,"isFirst",true)) {
+            SharedPrefHelper.putBoolean(this,"isFirst",false);
+            File mapFile = new File(Constant.sdPath + "/maps/U5_2F.png");
+            if (!mapFile.exists()) {
+                try {
+                    mapFile.createNewFile();
+                    FileUtil.writeBytesToFile(this.getAssets().open("U5_2F.png"), mapFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            File stcmFile = new File(Constant.sdPath + "/stcms/U5_2F.stcm");
+            if (!stcmFile.exists()) {
+                try {
+                    stcmFile.createNewFile();
+                    FileUtil.writeBytesToFile(this.getAssets().open("U5_2F.stcm"), stcmFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
-//        File stcmDir = new File(Constant.sdPath + "/stcms/");
-//        if (!stcmDir.exists()) {
-//            stcmDir.mkdirs();
-//        }
-//        File stcmFile = new File(Constant.sdPath + "/stcms/U9.stcm");
-//        if (!stcmFile.exists()) {
-//            try {
-//                stcmFile.createNewFile();
-//                FileUtil.writeBytesToFile(this.getAssets().open("U9.stcm"), stcmFile);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
         String[] fileUrls = dir.list();
         for (String str : fileUrls) {
             mapList.add(str);
