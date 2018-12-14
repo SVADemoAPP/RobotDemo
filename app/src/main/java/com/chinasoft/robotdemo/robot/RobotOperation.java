@@ -1,20 +1,12 @@
 package com.chinasoft.robotdemo.robot;
 
 import android.content.Context;
-import android.graphics.PointF;
 import android.os.Handler;
-import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.chinasoft.robotdemo.R;
-import com.chinasoft.robotdemo.activity.PrrucollectActivity;
-import com.chinasoft.robotdemo.activity.PrrufindActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.LLog;
-import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.slamtec.slamware.AbstractSlamwarePlatform;
 import com.slamtec.slamware.discovery.DeviceManager;
 import com.slamtec.slamware.exceptions.ConnectionFailException;
@@ -27,12 +19,9 @@ import com.slamtec.slamware.robot.CompositeMap;
 import com.slamtec.slamware.robot.Location;
 import com.slamtec.slamware.robot.Pose;
 import com.slamtec.slamware.sdp.CompositeMapHelper;
-
-import net.yoojia.imagemap.ImageMap1;
-import net.yoojia.imagemap.TouchImageView1;
+import com.slamtec.slamware.robot.SystemParameters;
 
 import java.io.File;
-import java.util.Vector;
 
 
 /**
@@ -56,6 +45,9 @@ public class RobotOperation {
     private boolean isAlwaysUpdate; //机器人是否始终定时更新位置（不管是否移动）
     private boolean isShowOrbits = true; //是否显示规划轨迹点
     private boolean mContinue = false;
+    private String robotIp;
+    private int robotPort;
+
 
     public void setNotify(boolean notify) {
         isNotify = notify;
@@ -64,6 +56,10 @@ public class RobotOperation {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
+            if(platform==null){
+                Toast.makeText(context,"连接已断开！",Toast.LENGTH_SHORT).show();
+                return;
+            }
             try {
                 nowPose = platform.getPose();
                 nowX = nowPose.getX();
@@ -125,6 +121,8 @@ public class RobotOperation {
         this.currentMap = currentMap;
         this.onRobotListener = onRobotListener;
         this.updatePeriod = updatePeriod;
+        this.robotIp=robotIp;
+        this.robotPort=robotPort;
         handler = new Handler();
         forwardLocation = new Location();
         connect(robotIp, robotPort);
@@ -149,10 +147,16 @@ public class RobotOperation {
     //连接机器人
     private void connect(String robotIp, int robotPort) {
         try {
+
+            platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
+
             if (platform==null)
             {
-                platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
+                onRobotListener.connectFailed("连接失败");
+                return;
             }
+//            platform.setSystemParameter(SystemParameters.SYSPARAM_ROBOT_SPEED,SystemParameters.SYSVAL_ROBOT_SPEED_HIGH);
+//            platform.setSystemParameter(SystemParameters.SYSPARAM_ROBOT_SPEED,"0.6");
             nowPose = platform.getPose();// 当前机器人的位置,
             nowX = nowPose.getX();
             nowY = nowPose.getY();
@@ -204,6 +208,10 @@ public class RobotOperation {
 
     //移动
     public void moveTo(float toX, float toY) {
+        if(platform==null){
+            Toast.makeText(context,"连接已断开！",Toast.LENGTH_SHORT).show();
+            return;
+        }
         isMoving = true;
         forwardLocation.setX(toX);
         forwardLocation.setY(toY);
@@ -232,6 +240,10 @@ public class RobotOperation {
 
     //取消当前action
     public void cancelAction() {
+        if(platform==null){
+            Toast.makeText(context,"连接已断开！",Toast.LENGTH_SHORT).show();
+            return;
+        }
         isMoving = false;
         try {
             platform.getCurrentAction().cancel();
@@ -241,6 +253,10 @@ public class RobotOperation {
     }
 
     public void forceStop() {
+        if(platform==null){
+            Toast.makeText(context,"连接已断开！",Toast.LENGTH_SHORT).show();
+            return;
+        }
         cancelAction();
         try {
             nowPose = platform.getPose();
@@ -257,11 +273,16 @@ public class RobotOperation {
     public void disconnect() {
         if (platform != null) {
             platform.disconnect();
+
+            platform=null;
         }
     }
 
     private void errorDisconnect(String errormsg) {
+        LLog.getLog().e("异常",errormsg);
 //        disconnect();
+        handler.removeCallbacks(runnable);
+        disconnect();
         onRobotListener.catchError(errormsg);
     }
 
@@ -270,6 +291,10 @@ public class RobotOperation {
      * 在第一次进入点击坐标确认后执行
      */
     public void doAfterConfirm(float x, float y) {
+        if(platform==null){
+            Toast.makeText(context,"连接已断开！",Toast.LENGTH_SHORT).show();
+            return;
+        }
         try {
             Pose pose = new Pose();
             pose.setX(x);

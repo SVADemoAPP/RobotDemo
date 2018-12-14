@@ -47,6 +47,11 @@ public class LLog {
         write(this.PATH_LOGCAT + "/Logs_Prru/" + MyDate.getFileName(), "Prru" + userId + ".txt", title, strcontent);
     }
 
+    public void rsrp(String title, String strcontent) {
+        Log.e(title, strcontent);
+        write(this.PATH_LOGCAT + "/Logs_Rsrp", "Rsrp" + MyDate.getFileName() + ".txt", title, strcontent);
+    }
+
     public void crash(String title, String strcontent) {
         write(this.PATH_LOGCAT, "crash" + MyDate.getFileName() + ".txt", title, strcontent);
     }

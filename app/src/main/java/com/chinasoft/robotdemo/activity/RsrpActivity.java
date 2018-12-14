@@ -18,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -27,7 +26,6 @@ import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.RouteAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.MaxrsrpPosition;
-import com.chinasoft.robotdemo.bean.PrruData;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
 import com.chinasoft.robotdemo.db.dbflow.DirectionData;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
@@ -576,12 +574,23 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void catchError(String errormsg) {
-        if (isTestLine) {
-            showRegain();
-        }
+//        if (isTestLine) {
+//            showRegain();
+//        }
         showToast("异常断开");
         LLog.getLog().e("异常断开", errormsg);
         //finish();
+        if (isTestLine) {
+            isTestLine = false;
+            iv_operation.setImageResource(R.mipmap.home_start);
+            drawPrruAfterTestLine();
+            showToast("路径测试结束");
+            showClear();
+            try {
+                ro.forceStop();
+            } catch (Exception e) {
+            }
+        }
     }
 
 
@@ -885,6 +894,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
      * 设置 PrruColor
      */
     private synchronized void setPrruColorPoint(float x,float y,long prru) {
+        LLog.getLog().rsrp(x+","+y,prru+"");
         int color;
         if (-75 < prru && prru <= 0) {  //1e8449
             color = Color.parseColor("#1e8449");

@@ -1,69 +1,47 @@
 package com.chinasoft.robotdemo.activity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.support.v4.view.ViewCompat;
-import android.text.TextUtils;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.OvershootInterpolator;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.bumptech.glide.Glide;
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.PrruModelListAdapter;
-import com.chinasoft.robotdemo.adapter.RouteAdapter;
-import com.chinasoft.robotdemo.adapter.UserIdAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
-import com.chinasoft.robotdemo.bean.MaxrsrpPosition;
-import com.chinasoft.robotdemo.bean.PrruData;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
-import com.chinasoft.robotdemo.db.dbflow.DirectionData;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.robot.OnRobotListener;
 import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
-import com.chinasoft.robotdemo.util.DBUtils;
 import com.chinasoft.robotdemo.util.LLog;
 import com.chinasoft.robotdemo.view.CompassView;
 import com.chinasoft.robotdemo.view.MyListView;
 import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.slamtec.slamware.robot.Location;
 
 import net.yoojia.imagemap.ImageMap1;
 import net.yoojia.imagemap.TouchImageView1;
 import net.yoojia.imagemap.core.CircleShape;
-import net.yoojia.imagemap.core.CollectPointShape;
 import net.yoojia.imagemap.core.CustomShape;
 import net.yoojia.imagemap.core.LineShape;
-import net.yoojia.imagemap.core.PrruGkcShape;
 import net.yoojia.imagemap.core.RequestShape;
 import net.yoojia.imagemap.core.Shape;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 public class PrrufindActivity extends BaseActivity implements OnRobotListener {
@@ -562,12 +540,22 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void catchError(String errormsg) {
-        if (isTestLine) {
-            showRegain();
-        }
+//        if (isTestLine) {
+//            showRegain();
+//        }
         showToast("异常断开");
         LLog.getLog().e("异常断开", errormsg);
         //finish();
+        if (isTestLine) {
+            isTestLine = false;
+            iv_operation.setImageResource(R.mipmap.home_start);
+            showToast("寻找Prru结束");
+            showClear();
+            try {
+                ro.forceStop();
+            } catch (Exception e) {
+            }
+        }
     }
 
 

@@ -1,24 +1,14 @@
 package com.chinasoft.robotdemo.activity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -32,16 +22,12 @@ import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
 import com.chinasoft.robotdemo.robot.RobotOperation;
 import com.chinasoft.robotdemo.util.Constant;
 import com.chinasoft.robotdemo.util.FileUtil;
-import com.chinasoft.robotdemo.util.InterRequestUtil;
 import com.chinasoft.robotdemo.util.LLog;
 import com.chinasoft.robotdemo.util.PrruSubscribe;
 import com.chinasoft.robotdemo.util.Subscription;
 import com.chinasoft.robotdemo.util.UpLoad;
-import com.chinasoft.robotdemo.util.UpdateCommunityInfo;
 import com.chinasoft.robotdemo.view.popup.SuperPopupWindow;
 import com.google.gson.Gson;
-import com.slamtec.slamware.discovery.DeviceManager;
-import com.slamtec.slamware.discovery.DiscoveryMode;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,7 +35,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,11 +75,8 @@ public class MaplistActivity extends BaseActivity {
         subscription=new Subscription(this);
         prruSubscribe=new PrruSubscribe(this);
         Constant.userId=upLoad.getLocaIpOrMac();
-//        Constant.userId="10.95.163.179";
         Constant.storeId=SharedPrefHelper.getInt(MaplistActivity.this, "storeId",2);
         Constant.mapId=SharedPrefHelper.getInt(MaplistActivity.this, "mapId",2046);
-
-
         File dir = new File(Constant.sdPath + "/maps/");
         if (!dir.exists()) {
             dir.mkdirs();
@@ -159,7 +141,7 @@ public class MaplistActivity extends BaseActivity {
         });
         Map<String, String> map = new HashMap();
         map.put("username", "admin");
-        map.put("password", "admin");
+        map.put("password", "fanbinbin123");
         login(map);
     }
 
