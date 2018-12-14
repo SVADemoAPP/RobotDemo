@@ -32,11 +32,12 @@ public class SettingActivity extends BaseActivity {
     private EditText mEdtRbPort;
     private EditText mEdtServerIp;
     private EditText mEdtServerPort;
-    private TextView mEdtSettingScale;
-    private TextView mEdtSettingPointX;
-    private TextView mEdtSettingPointY;
-    private TextView mEdtSettingStoreId;
-    private TextView mEdtSettingMapId;
+    private EditText mEdtSettingScale;
+    private EditText mEdtSettingPointX;
+    private EditText mEdtSettingPointY;
+    private EditText mEdtSettingStoreId;
+    private EditText mEdtSettingMapId;
+    private EditText mEdtSettingRbSpeed;
     @Override
     public void setContentLayout() {
         setContentView(R.layout.activity_setting);
@@ -63,6 +64,7 @@ public class SettingActivity extends BaseActivity {
         mEdtSettingPointY = findViewById(R.id.edt_setting_pointY);
         mEdtSettingStoreId = findViewById(R.id.edt_setting_storeId);
         mEdtSettingMapId= findViewById(R.id.edt_setting_mapId);
+        mEdtSettingRbSpeed = findViewById(R.id.et_rb_speed);
         mTvExit.setOnClickListener(this);
         mTvReset.setOnClickListener(this);
         mTvSave.setOnClickListener(this);
@@ -148,6 +150,7 @@ public class SettingActivity extends BaseActivity {
         mEdtSettingStoreId.setText(SharedPrefHelper.getInt(SettingActivity.this, "storeId",2)+"");
         mEdtSettingMapId.setText(SharedPrefHelper.getInt(SettingActivity.this, "mapId",2046)+"");
         mEdtSettingScale.setText(SharedPrefHelper.getFloat(SettingActivity.this, "mapScale",20)+"");
+        mEdtSettingRbSpeed.setText(SharedPrefHelper.getString(SettingActivity.this, "robotSpeed",""));
         httpsFlag = SharedPrefHelper.getBoolean(SettingActivity.this, "https", true);
         setHttpState(httpsFlag);
         mEdtServerIp.requestFocus();
@@ -166,6 +169,7 @@ public class SettingActivity extends BaseActivity {
         mEdtSettingStoreId.setText("");
         mEdtSettingMapId.setText("");
         mEdtSettingScale.setText("");
+        mEdtSettingRbSpeed.setText("");
         httpsFlag = false;
         setHttpState(httpsFlag);
         mEdtServerIp.requestFocus();
@@ -184,6 +188,7 @@ public class SettingActivity extends BaseActivity {
         String storeId = mEdtSettingStoreId.getText().toString().trim();
         String mapId = mEdtSettingMapId.getText().toString().trim();
         String scale = mEdtSettingScale.getText().toString().trim();
+        String rbSpeed=mEdtSettingRbSpeed.getText().toString().trim();
         if (TextUtils.isEmpty(serverIp)) {
             mEdtServerIp.requestFocus();
             showToast("请填写服务器IP");
@@ -239,6 +244,7 @@ public class SettingActivity extends BaseActivity {
         SharedPrefHelper.putFloat(SettingActivity.this, "mapScale", Float.valueOf(scale));
         SharedPrefHelper.putInt(SettingActivity.this, "storeId", Integer.valueOf(storeId));
         SharedPrefHelper.putInt(SettingActivity.this, "mapId", Integer.valueOf(mapId));
+        SharedPrefHelper.putString(SettingActivity.this, "robotSpeed", rbSpeed);
         showToast("保存成功");
         setResult(2);
         finish();

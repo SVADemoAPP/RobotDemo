@@ -142,6 +142,7 @@ public class MaplistActivity extends BaseActivity {
         Map<String, String> map = new HashMap();
         map.put("username", "admin");
         map.put("password", "fanbinbin123");
+        tv_next.setVisibility(View.GONE);
         login(map);
     }
 
@@ -177,9 +178,13 @@ public class MaplistActivity extends BaseActivity {
                         LLog.getLog().e("登录", "成功");
                         subscription();
                         requestPruModel();     //请求PruModelList信息
+                        tv_next.setVisibility(View.VISIBLE);
                         return;
+                    }else{
+                        showToast("Tester登录失败");
                     }
                 } catch (JSONException e) {
+                    showToast("Tester登录失败");
                 }
             }
         }, new Response.ErrorListener() {
@@ -246,7 +251,7 @@ public class MaplistActivity extends BaseActivity {
         Constant.mapScale = SharedPrefHelper.getFloat(this, "mapScale", 20f);
         Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
         Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
-
+        Constant.robotSpeed = SharedPrefHelper.getString(this, "robotSpeed", "");
     }
 
 
@@ -261,7 +266,8 @@ public class MaplistActivity extends BaseActivity {
                     + ":" + SharedPrefHelper.getInt(this, "serverPort", 8083);
             Map<String, String> map = new HashMap();
             map.put("username", "admin");
-            map.put("password", "admin");
+            map.put("password", "fanbinbin123");
+            tv_next.setVisibility(View.GONE);
             login(map);
         }
     }

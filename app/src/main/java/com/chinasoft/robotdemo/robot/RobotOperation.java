@@ -2,6 +2,7 @@ package com.chinasoft.robotdemo.robot;
 
 import android.content.Context;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.chinasoft.robotdemo.framwork.sharef.SharedPrefHelper;
@@ -147,13 +148,14 @@ public class RobotOperation {
     //连接机器人
     private void connect(String robotIp, int robotPort) {
         try {
-
             platform = DeviceManager.connect(robotIp, robotPort); // 连接到机器人底盘
-
             if (platform==null)
             {
                 onRobotListener.connectFailed("连接失败");
                 return;
+            }
+            if(!TextUtils.isEmpty(Constant.robotSpeed)){
+                platform.setSystemParameter(SystemParameters.SYSPARAM_ROBOT_SPEED,Constant.robotSpeed);
             }
 //            platform.setSystemParameter(SystemParameters.SYSPARAM_ROBOT_SPEED,SystemParameters.SYSVAL_ROBOT_SPEED_HIGH);
 //            platform.setSystemParameter(SystemParameters.SYSPARAM_ROBOT_SPEED,"0.6");

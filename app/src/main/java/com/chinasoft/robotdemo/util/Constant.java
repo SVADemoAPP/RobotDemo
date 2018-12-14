@@ -27,4 +27,5 @@ public class Constant {
     public static String userId;
     public static int storeId;
     public static int mapId;
+    public static String robotSpeed;
 }

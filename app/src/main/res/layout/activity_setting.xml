@@ -403,6 +403,34 @@
                     </LinearLayout>
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="25dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="25dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="机器人速度"
+                        android:textColor="@color/white"
+                        android:textSize="15dp"
+                        android:typeface="serif" />
+
+                    <EditText
+                        android:id="@+id/et_rb_speed"
+                        android:layout_width="match_parent"
+                        android:layout_height="36dp"
+                        android:background="@drawable/tv_selector"
+                        android:gravity="center"
+                        android:hint="low、medium、high或0到1数字"
+                        android:textColor="@color/white"
+                        android:textColorHint="@color/gray_stroken"
+                        android:textSize="17dp"
+                        android:typeface="serif" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
