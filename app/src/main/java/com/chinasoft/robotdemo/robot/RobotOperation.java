@@ -190,15 +190,15 @@ public class RobotOperation {
             CompositeMap compositeMap = compositeMapHelper.loadFile(path);
             try {
                 platform.setCompositeMap(compositeMap, pose);
-//                LLog.getLog().robot("雷达地图", "载入成功");
+                LLog.getLog().e("雷达地图", "载入成功");
                 return true;
             } catch (Exception e) {
-//                LLog.getLog().robot("雷达地图", "载入错误");
+                LLog.getLog().e("雷达地图", "载入错误");
                 e.printStackTrace();
                 return false;
             }
         } else {
-//            LLog.getLog().robot("雷达地图", "文件不存在");
+            LLog.getLog().e("雷达地图", "文件不存在");
             return false;
         }
     }
@@ -281,7 +281,7 @@ public class RobotOperation {
     }
 
     private void errorDisconnect(String errormsg) {
-        LLog.getLog().e("异常",errormsg);
+        LLog.getLog().e("异常断开",errormsg);
 //        disconnect();
         handler.removeCallbacks(runnable);
         disconnect();

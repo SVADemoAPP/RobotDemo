@@ -442,39 +442,39 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         cStep++;
         switch (cStep) {
             case 1:
-                LLog.getLog().e("扫描", "1");
+//                LLog.getLog().e("扫描", "1");
                 ro.moveTo(nowCollectPrru.x + 0.5f, nowCollectPrru.y);
                 break;
             case 2:
-                LLog.getLog().e("扫描", "2");
+//                LLog.getLog().e("扫描", "2");
                 ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
                 break;
             case 3:
-                LLog.getLog().e("扫描", "3");
+//                LLog.getLog().e("扫描", "3");
                 ro.moveTo(nowCollectPrru.x, nowCollectPrru.y + 0.5f);
                 break;
             case 4:
-                LLog.getLog().e("扫描", "4");
+//                LLog.getLog().e("扫描", "4");
                 ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
                 break;
             case 5:
-                LLog.getLog().e("扫描", "5");
+//                LLog.getLog().e("扫描", "5");
                 ro.moveTo(nowCollectPrru.x - 0.5f, nowCollectPrru.y);
                 break;
             case 6:
-                LLog.getLog().e("扫描", "6");
+//                LLog.getLog().e("扫描", "6");
                 ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
                 break;
             case 7:
-                LLog.getLog().e("扫描", "7");
+//                LLog.getLog().e("扫描", "7");
                 ro.moveTo(nowCollectPrru.x, nowCollectPrru.y - 0.5f);
                 break;
             case 8:
-                LLog.getLog().e("扫描", "8");
+//                LLog.getLog().e("扫描", "8");
                 ro.moveTo(nowCollectPrru.x, nowCollectPrru.y);
                 break;
             case 9:
-                LLog.getLog().e("扫描", "9");
+//                LLog.getLog().e("扫描", "9");
                 arriveDes();
                 iv_operation.setImageResource(R.mipmap.home_start);
 
@@ -544,7 +544,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
 //            showRegain();
 //        }
         showToast("异常断开");
-        LLog.getLog().e("异常断开", errormsg);
+//        LLog.getLog().e("异常断开", errormsg);
         //finish();
         if (isTestLine) {
             isTestLine = false;
@@ -579,7 +579,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId="+Constant.mapId, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
-                        LLog.getLog().e("getLocAndPrruInfo成功", s);
+//                        LLog.getLog().e("getLocAndPrruInfo成功", s);
                         lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                         if (lap.code == 0 && lap.data.prruData != null) {
                                 Float rsrp = getRsrpByGpp(nowCollectNeCode, lap.data.prruData);
@@ -589,7 +589,7 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
-                        LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
+//                        LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
                     }
                 });
         }

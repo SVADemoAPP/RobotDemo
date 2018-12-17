@@ -585,7 +585,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
 //            showRegain();
 //        }
         showToast("异常断开");
-        LLog.getLog().e("异常断开", errormsg);
+//        LLog.getLog().e("异常断开", errormsg);
         //finish();
         if (isTestLine) {
             isTestLine = false;
@@ -617,7 +617,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
             Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId="+Constant.mapId, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
-                    LLog.getLog().e("getLocAndPrruInfo成功", s);
+//                    LLog.getLog().e("getLocAndPrruInfo成功", s);
                     lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                     if (lap.code == 0) {
                         if(lap.data.data!=null){
@@ -628,7 +628,7 @@ public class LocationaccActivity extends BaseActivity implements OnRobotListener
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
-                    LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
+//                    LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
                 }
             });
 

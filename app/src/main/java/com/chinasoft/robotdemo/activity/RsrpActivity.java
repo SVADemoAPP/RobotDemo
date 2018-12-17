@@ -578,7 +578,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 //            showRegain();
 //        }
         showToast("异常断开");
-        LLog.getLog().e("异常断开", errormsg);
+//        LLog.getLog().e("异常断开", errormsg);
         //finish();
         if (isTestLine) {
             isTestLine = false;
@@ -640,7 +640,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             Constant.interRequestUtil.getLocAndPrruInfo(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getLocAndPrruInfo?userId=" + Constant.userId + "&mapId="+Constant.mapId, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
-                    LLog.getLog().e("getLocAndPrruInfo成功", s);
+//                    LLog.getLog().e("getLocAndPrruInfo成功", s);
                     lap = new Gson().fromJson(s, LocAndPrruInfoResponse.class);
                     if (lap.code == 0) {
                         recordMaxrsrpPostion(x, y, lap.data.prruData);
@@ -649,7 +649,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
-                    LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
+//                    LLog.getLog().e("getLocAndPrruInfo错误", volleyError.toString());
                 }
             });
 
@@ -659,30 +659,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             try{
                 setPrruColorPoint(x,y, Long.parseLong(updateCommunityInfo.RSRP));
             }catch (Exception e){
-                LLog.getLog().e("RSRP异常",e.toString());
+//                LLog.getLog().e("RSRP异常",e.toString());
             }
-//            Constant.interRequestUtil.getPhonePrru(Request.Method.POST, Constant.IP_ADDRESS + "/tester/app/prruPhoneApi/getPhonePrru?userId=" + Constant.userId + "&mapId="+Constant.mapId, new Response.Listener<String>() {
-//                @Override
-//                public void onResponse(String s) {
-//                    LLog.getLog().e("getPhonePrru成功", s);
-//                    LLog.getLog().robot(x + "," + y, s);
-//
-//                    PrruData prruData = new Gson().fromJson(s, PrruData.class);
-//                    if (prruData.getCode() == 0) //成功
-//                    {
-//                        PrruData.DataBean data = prruData.getData();
-//                        setPrruColorPoint(x,y,data.getRsrp(), data.getId());
-//
-//                    } else {
-//                        Toast.makeText(mContext, "prru失败", Toast.LENGTH_LONG);
-//                    }
-//                }
-//            }, new Response.ErrorListener() {
-//                @Override
-//                public void onErrorResponse(VolleyError volleyError) {
-//                    LLog.getLog().e("getPhonePrru错误", volleyError.toString());
-//                }
-//            });
         }
     }
 

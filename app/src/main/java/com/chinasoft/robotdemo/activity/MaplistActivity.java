@@ -182,9 +182,11 @@ public class MaplistActivity extends BaseActivity {
                         return;
                     }else{
                         showToast("Tester登录失败");
+                        LLog.getLog().e("登录", "失败");
                     }
                 } catch (JSONException e) {
                     showToast("Tester登录失败");
+                    LLog.getLog().e("登录", "失败");
                 }
             }
         }, new Response.ErrorListener() {

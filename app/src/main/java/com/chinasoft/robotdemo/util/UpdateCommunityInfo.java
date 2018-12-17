@@ -72,7 +72,6 @@ public class UpdateCommunityInfo {
         try {
             telephonymanager.listen(this.mListener, 256);
         } catch (Exception e) {
-//            LLog.getLog().e("小区信息错误：", e.toString());
         }
     }
 
@@ -84,16 +83,13 @@ public class UpdateCommunityInfo {
             this.cellInfoList.clear();
             this.cellInfoList = this.telephonymanager.getAllCellInfo();
             if (this.cellInfoList != null) {
-//                LLog.getLog().e("所有信号信息", this.cellInfoList.toString());
                 if (this.cellInfoList.size() == 0) {
                     List<NeighboringCellInfo> cellInfoList1 = this.telephonymanager.getNeighboringCellInfo();
                     if (cellInfoList1 != null) {
-//                        LLog.getLog().e("弃用方法获取到的信号长度", new StringBuilder(String.valueOf(cellInfoList1.size())).toString());
                     }
                 }
                 CellInfo cellInfo = (CellInfo) this.cellInfoList.get(0);
                 if (cellInfo == null || !(cellInfo instanceof CellInfoLte)) {
-//                    LLog.getLog().e("小区信息获取失败", "没有LTE信号");
                     try {
                         mccMnc = this.telephonymanager.getNetworkOperator();
                         if (mccMnc != null && mccMnc.length() >= 5) {
@@ -107,13 +103,11 @@ public class UpdateCommunityInfo {
                             this.CI = String.valueOf(l1.getCid());
                             this.eNodeBId = String.valueOf(Integer.valueOf(this.CI).intValue() / 256);
                             this.CellID = String.valueOf(Integer.valueOf(this.CI).intValue() - (Integer.valueOf(this.eNodeBId).intValue() * 256));
-//                            LLog.getLog().e("小区信息更新", "TAC:" + this.TAC + ", PCI:" + this.PCI + ", CI:" + this.CI + ", eNodeBId:" + this.eNodeBId + ", CellID:" + this.CellID + ", RSRP:" + this.RSRP + ", RSRQ:" + this.RSRQ + ", SINR:" + this.SINR + ", MNC:" + this.MNC + ", MCC:" + this.MCC);
                             compaireAndJudge();
                             return;
                         }
                         return;
                     } catch (Exception e1) {
-//                        LLog.getLog().e("小区信息获取失败2", e1.toString());
                         return;
                     }
                 }
@@ -128,13 +122,10 @@ public class UpdateCommunityInfo {
                 String[] split = ((CellInfoLte) cellInfo).getCellSignalStrength().toString().split(" ");
                 this.RSRP = split[2].split("=")[1];
                 this.RSRQ = split[3].split("=")[1];
-//                LLog.getLog().e("小区信息更新", "TAC:" + this.TAC + ", PCI:" + this.PCI + ", CI:" + this.CI + ", eNodeBId:" + this.eNodeBId + ", CellID:" + this.CellID + ", RSRP:" + this.RSRP + ", RSRQ:" + this.RSRQ + ", SINR:" + this.SINR + ", MNC:" + this.MNC + ", MCC:" + this.MCC);
                 compaireAndJudge();
                 return;
             }
-//            LLog.getLog().e("小区信息获取失败", "没有网络信号");
         } catch (Exception e) {
-//            LLog.getLog().e("获取小区信息失败", e.toString());
             try {
                 mccMnc = this.telephonymanager.getNetworkOperator();
                 if (mccMnc != null && mccMnc.length() >= 5) {
@@ -148,11 +139,9 @@ public class UpdateCommunityInfo {
                     this.CI = String.valueOf(l1.getCid());
                     this.eNodeBId = String.valueOf(Integer.valueOf(this.CI).intValue() / 256);
                     this.CellID = String.valueOf(Integer.valueOf(this.CI).intValue() - (Integer.valueOf(this.eNodeBId).intValue() * 256));
-//                    LLog.getLog().e("小区信息更新", "TAC:" + this.TAC + ", PCI:" + this.PCI + ", CI:" + this.CI + ", eNodeBId:" + this.eNodeBId + ", CellID:" + this.CellID + ", RSRP:" + this.RSRP + ", RSRQ:" + this.RSRQ + ", SINR:" + this.SINR + ", MNC:" + this.MNC + ", MCC:" + this.MCC);
                     compaireAndJudge();
                 }
             } catch (Exception e12) {
-//                LLog.getLog().e("小区信息获取失败2", e12.toString());
             }
         }
     }
@@ -194,7 +183,6 @@ public class UpdateCommunityInfo {
                 }
             }
         } catch (Exception e) {
-//            LLog.getLog().e(LTE_TAG, "signalException: " + e.toString());
         }
     }
 }
