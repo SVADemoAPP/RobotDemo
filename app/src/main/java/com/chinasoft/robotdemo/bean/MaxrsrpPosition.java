@@ -6,6 +6,14 @@ public class MaxrsrpPosition {
     private float rsrp;
     private int num;
 
+    public MaxrsrpPosition() {
+    }
+
+    public MaxrsrpPosition(float x, float y) {
+        this.x = x;
+        this.y = y;
+    }
+
     public float getX() {
         return x;
     }
