@@ -126,7 +126,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void dealLogicBeforeInitView() {
-        prruMap.put("0_80_1",new MaxrsrpPosition(60f,47.3f));
+        prruMap.put("0_80_1",new MaxrsrpPosition(64.07f,51.93f));
         prruMap.put("0_81_1",new MaxrsrpPosition(31.7f,74f));
         prruMap.put("0_82_1",new MaxrsrpPosition(31.6f,30.6f));
         prruMap.put("0_83_1",new MaxrsrpPosition(53.5f,30.75f));
@@ -371,7 +371,10 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     //清除上次测试痕迹
     private void clearLastTest() {
         removeRoute(locCount);
-        for (String gpp : mpMap.keySet()) {
+//        for (String gpp : mpMap.keySet()) {
+//            map.removeShape(gpp);
+//        }
+        for (String gpp : prruMap.keySet()) {
             map.removeShape(gpp);
         }
         for(int i=0;i<rsrpCount;i++){
@@ -781,8 +784,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             LLog.getLog().e("Prru次数前5",entry.getValue().toString());
             if(prruMap.containsKey(entry.getKey())){
                 tempPosition=prruMap.get(entry.getKey());
-                //如果距离小于3米，则替换prruMap中的位置
-                if(Math.sqrt(Math.pow(tempPosition.getX()-entry.getValue().getX(),2)+Math.pow(tempPosition.getY()-entry.getValue().getY(),2))<3f){
+                //如果距离小于8米，则替换prruMap中的位置
+                if(Math.sqrt(Math.pow(tempPosition.getX()-entry.getValue().getX(),2)+Math.pow(tempPosition.getY()-entry.getValue().getY(),2))<8f){
                     prruMap.put(entry.getKey(),entry.getValue());
                 }
             }
