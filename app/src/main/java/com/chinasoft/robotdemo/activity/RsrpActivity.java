@@ -114,8 +114,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private long lastClickTime;
     private UpdateCommunityInfo updateCommunityInfo;
     private int rsrpCount=0;
-//    private Map<String,MaxrsrpPosition> prruMap=new HashMap<>();    //存放prru位置的map
-//    private MaxrsrpPosition tempPosition;
+    //TODO 定制版本逻辑，非通用
+//    private List<String> prruList =new ArrayList<String>();    //存放prru位置的map
 
     @Override
     public void setContentLayout() {
@@ -126,11 +126,13 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void dealLogicBeforeInitView() {
-//        prruMap.put("0_80_1",new MaxrsrpPosition(64.07f,51.93f));
-//        prruMap.put("0_81_1",new MaxrsrpPosition(31.7f,74f));
-//        prruMap.put("0_82_1",new MaxrsrpPosition(31.6f,30.6f));
-//        prruMap.put("0_83_1",new MaxrsrpPosition(53.5f,30.75f));
-//        prruMap.put("0_84_1",new MaxrsrpPosition(20.3f,52.6f));
+
+        //TODO 定制版本逻辑，非通用
+//        prruList.add("0_80_1");
+//        prruList.add("0_81_1");
+//        prruList.add("0_82_1");
+//        prruList.add("0_83_1");
+//        prruList.add("0_84_1");
 
         updateCommunityInfo=new UpdateCommunityInfo(this, (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE),new Handler());
         updateCommunityInfo.startUpdateData();
@@ -624,7 +626,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             return;
         }
         for (PrruSigalModel psm : prruSigalModelList) {
-            if (psm.rsrp > -950) {
+            if (psm.rsrp > -1000) {
                 LLog.getLog().robot(x + "," + y, psm.gpp + "____" + psm.rsrp);
                 if (!mpMap.keySet().contains(psm.gpp)) {
                     MaxrsrpPosition mp = new MaxrsrpPosition();
@@ -637,9 +639,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                     tempMp = mpMap.get(psm.gpp);
                     tempMp.setNum(tempMp.getNum()+1); //出现次数+1
                     if (psm.rsrp > tempMp.getRsrp()) { //判断是否更新最大rsrp值及位置
-                        tempMp.setX(x);
-                        tempMp.setY(y);
-                        tempMp.setRsrp(psm.rsrp);
+                            tempMp.setX(x);
+                            tempMp.setY(y);
+                            tempMp.setRsrp(psm.rsrp);
                     }
                 }
             }
@@ -763,8 +765,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
 
 
-    //mpMap按rsrp从大到小排序并画出前5个
+    //显示出符合条件的prru位置
     private void drawPrruAfterTestLine() {
+        //根据满足门限值的prru出现次数倒序排序
         List<Map.Entry<String, MaxrsrpPosition>> lists = new ArrayList<Map.Entry<String, MaxrsrpPosition>>(mpMap.entrySet());
         Collections.sort(lists, new Comparator<Map.Entry<String, MaxrsrpPosition>>() {
             @Override
@@ -780,17 +783,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 }
             }
         });
-//        for (Map.Entry<String, MaxrsrpPosition> entry : lists.size() > 5 ? lists.subList(0, 5) : lists) {
+        //原始逻辑
         for (Map.Entry<String, MaxrsrpPosition> entry : lists) {
-//            LLog.getLog().e("Prru次数前5",entry.getValue().toString());
             LLog.getLog().e("Prru全部",entry.getValue().toString());
-//            if(prruMap.containsKey(entry.getKey())){
-//                tempPosition=prruMap.get(entry.getKey());
-//                //如果距离小于8米，则替换prruMap中的位置
-//                if(Math.sqrt(Math.pow(tempPosition.getX()-entry.getValue().getX(),2)+Math.pow(tempPosition.getY()-entry.getValue().getY(),2))<8f){
-//                    prruMap.put(entry.getKey(),entry.getValue());
-//                }
-//            }
             PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
             pgShape.setNecodeText(entry.getKey());
             pgShape.setPaintColor(Color.parseColor("#ff0000"));
@@ -798,16 +793,23 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             pgShape.setValues(tempMXY[0], tempMXY[1]);
             map.addShape(pgShape, false);
         }
-//        //显示检验过的prru位置
-//        for (Map.Entry<String, MaxrsrpPosition> entry : prruMap.entrySet()) {
-//            PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
-//            pgShape.setNecodeText(entry.getKey());
-//            pgShape.setPaintColor(Color.parseColor("#ff0000"));
-//            tempMXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
-//            pgShape.setValues(tempMXY[0], tempMXY[1]);
-//            map.addShape(pgShape, false);
-//
-//        }
+       //TODO 定制版本逻辑，非通用
+        /*List<Map.Entry<String, MaxrsrpPosition>> finalPrruList = new ArrayList<>(5);
+        for (Map.Entry<String, MaxrsrpPosition> entry : lists) {
+            LLog.getLog().e("Prru全部",entry.getValue().toString());
+            if(prruList.contains(entry.getKey())){
+                finalPrruList.add(entry);
+            }
+        }*/
+        //显示检验过的prru位置
+        for (Map.Entry<String, MaxrsrpPosition> entry : lists) {
+            PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
+            pgShape.setNecodeText(entry.getKey());
+            pgShape.setPaintColor(Color.parseColor("#ff0000"));
+            tempMXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
+            pgShape.setValues(tempMXY[0], tempMXY[1]);
+            map.addShape(pgShape, false);
+        }
 
     }
 
