@@ -18,6 +18,7 @@ import com.android.volley.VolleyError;
 import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.PrruModelListAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
+import com.chinasoft.robotdemo.bean.Position;
 import com.chinasoft.robotdemo.bean.PrruInfo;
 import com.chinasoft.robotdemo.bean.PrruModel;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
@@ -781,54 +782,6 @@ public class PrrufindActivity extends BaseActivity implements OnRobotListener {
         ViewCompat.animate(mFucAcIv).rotation(0.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
         tv_prrusetting.setVisibility(View.GONE);
         isFabMenuOpen = false;
-    }
-
-
-    private  void findPrru(List<PrruInfo> prruInfos, int pRRUNumber, int radius){
-
-        //将prruInfo按照RSRP大小降序排列
-        Collections.sort(prruInfos, new Comparator<PrruInfo>() {
-            @Override
-            public int compare(PrruInfo o1, PrruInfo o2) {
-                int n1 = o1.getRsrp();
-                int n2 = o2.getRsrp();
-                if (n1 > n2) {
-                    return -1;
-                } else if (n1 < n2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
-
-        prruInfos.get(0).setpRRUIndex(1);
-
-    }
-
-    /**
-     * 计算斜率和夹角
-     * @param prruInfos
-     */
-    private void calculateSlopeAndIncludedAngle(List<PrruInfo> prruInfos){
-
-        double x1;
-        double y1;
-        double x2;
-        double y2;
-        double k;
-        for(int i = 1; i < prruInfos.size(); i++){
-            x1 = prruInfos.get(i-1).getPosition().getX();
-            y1 = prruInfos.get(i-1).getPosition().getY();
-            x2 = prruInfos.get(i).getPosition().getX();
-            y2 = prruInfos.get(i).getPosition().getX();
-            if((x2 - x1) == 0){
-                k = Math.tan(89);
-            }else{
-                k = (y2 - y1) / (x2 -x1);
-            }
-            prruInfos.get(i).setSlope(k);
-        }
     }
 
 }

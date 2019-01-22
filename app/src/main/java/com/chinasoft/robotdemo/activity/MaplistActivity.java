@@ -254,6 +254,8 @@ public class MaplistActivity extends BaseActivity {
         Constant.robotIp = SharedPrefHelper.getString(this, "robotIp", "192.168.11.1");
         Constant.robotPort = SharedPrefHelper.getInt(this, "robotPort", 1445);
         Constant.robotSpeed = SharedPrefHelper.getString(this, "robotSpeed", "");
+        Constant.prruNumber = SharedPrefHelper.getInt(this, "prruNumber", 5);
+        Constant.radius = SharedPrefHelper.getInt(this, "radius", 20);
     }
 
 

@@ -342,7 +342,7 @@
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="25dp"
                     android:orientation="horizontal">
-                    <!--x坐标-->
+                    <!--svaId-->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -371,7 +371,7 @@
                             android:textSize="17dp"
                             android:typeface="serif" />
                     </LinearLayout>
-                    <!--y坐标-->
+                    <!--mapId-->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -389,6 +389,66 @@
 
                         <EditText
                             android:id="@+id/edt_setting_mapId"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/tv_selector"
+                            android:gravity="center"
+                            android:hint="0"
+                            android:inputType="number"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/gray_stroken"
+                            android:textSize="17dp"
+                            android:typeface="serif" />
+                    </LinearLayout>
+
+                    <!--prruNumber-->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="prru数量"
+                            android:textColor="@color/white"
+                            android:textSize="15dp"
+                            android:typeface="serif" />
+
+                        <EditText
+                            android:id="@+id/edt_setting_prruNumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="36dp"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/tv_selector"
+                            android:gravity="center"
+                            android:hint="0"
+                            android:inputType="number"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/gray_stroken"
+                            android:textSize="17dp"
+                            android:typeface="serif" />
+                    </LinearLayout>
+                    <!--radius-->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:text="prru半径"
+                            android:textColor="@color/white"
+                            android:textSize="15dp"
+                            android:typeface="serif" />
+
+                        <EditText
+                            android:id="@+id/edt_setting_radius"
                             android:layout_width="match_parent"
                             android:layout_height="36dp"
                             android:layout_marginLeft="10dp"

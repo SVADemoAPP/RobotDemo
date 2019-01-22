@@ -37,6 +37,8 @@ public class SettingActivity extends BaseActivity {
     private EditText mEdtSettingPointY;
     private EditText mEdtSettingStoreId;
     private EditText mEdtSettingMapId;
+    private EditText mEdtSettingPrruNumber;
+    private EditText mEdtSettingRadius;
     private EditText mEdtSettingRbSpeed;
     @Override
     public void setContentLayout() {
@@ -64,6 +66,8 @@ public class SettingActivity extends BaseActivity {
         mEdtSettingPointY = findViewById(R.id.edt_setting_pointY);
         mEdtSettingStoreId = findViewById(R.id.edt_setting_storeId);
         mEdtSettingMapId= findViewById(R.id.edt_setting_mapId);
+        mEdtSettingPrruNumber = findViewById(R.id.edt_setting_prruNumber);
+        mEdtSettingRadius= findViewById(R.id.edt_setting_radius);
         mEdtSettingRbSpeed = findViewById(R.id.et_rb_speed);
         mTvExit.setOnClickListener(this);
         mTvReset.setOnClickListener(this);
@@ -168,6 +172,8 @@ public class SettingActivity extends BaseActivity {
         mEdtSettingPointY.setText("");
         mEdtSettingStoreId.setText("");
         mEdtSettingMapId.setText("");
+        mEdtSettingPrruNumber.setText("");
+        mEdtSettingRadius.setText("");
         mEdtSettingScale.setText("");
         mEdtSettingRbSpeed.setText("");
         httpsFlag = false;
@@ -187,6 +193,8 @@ public class SettingActivity extends BaseActivity {
         String pointY = mEdtSettingPointY.getText().toString().trim();
         String storeId = mEdtSettingStoreId.getText().toString().trim();
         String mapId = mEdtSettingMapId.getText().toString().trim();
+        String prruNumber = mEdtSettingPrruNumber.getText().toString().trim();
+        String radius = mEdtSettingRadius.getText().toString().trim();
         String scale = mEdtSettingScale.getText().toString().trim();
         String rbSpeed=mEdtSettingRbSpeed.getText().toString().trim();
         if (TextUtils.isEmpty(serverIp)) {
@@ -244,6 +252,8 @@ public class SettingActivity extends BaseActivity {
         SharedPrefHelper.putFloat(SettingActivity.this, "mapScale", Float.valueOf(scale));
         SharedPrefHelper.putInt(SettingActivity.this, "storeId", Integer.valueOf(storeId));
         SharedPrefHelper.putInt(SettingActivity.this, "mapId", Integer.valueOf(mapId));
+        SharedPrefHelper.putInt(SettingActivity.this, "prruNumber", Integer.valueOf(prruNumber));
+        SharedPrefHelper.putInt(SettingActivity.this, "radius", Integer.valueOf(radius));
         SharedPrefHelper.putString(SettingActivity.this, "robotSpeed", rbSpeed);
         showToast("保存成功");
         setResult(2);

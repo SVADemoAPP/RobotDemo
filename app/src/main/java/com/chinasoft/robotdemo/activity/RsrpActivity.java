@@ -26,7 +26,8 @@ import com.chinasoft.robotdemo.R;
 import com.chinasoft.robotdemo.adapter.RouteAdapter;
 import com.chinasoft.robotdemo.bean.LocAndPrruInfoResponse;
 import com.chinasoft.robotdemo.bean.MaxrsrpPosition;
-import com.chinasoft.robotdemo.bean.PrruModel;
+import com.chinasoft.robotdemo.bean.Position;
+import com.chinasoft.robotdemo.bean.PrruInfo;
 import com.chinasoft.robotdemo.bean.PrruSigalModel;
 import com.chinasoft.robotdemo.db.dbflow.DirectionData;
 import com.chinasoft.robotdemo.framwork.activity.BaseActivity;
@@ -54,6 +55,7 @@ import net.yoojia.imagemap.core.RequestShape;
 import net.yoojia.imagemap.core.Shape;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -116,6 +118,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private int rsrpCount=0;
     //TODO 定制版本逻辑，非通用
 //    private List<String> prruList =new ArrayList<String>();    //存放prru位置的map
+    private List<PrruInfo> prruInfos = new ArrayList<PrruInfo>();
 
     @Override
     public void setContentLayout() {
@@ -622,28 +625,36 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     }
 
     private synchronized void recordMaxrsrpPostion(float x, float y, List<PrruSigalModel> prruSigalModelList) {
-        if (prruSigalModelList == null) {
+        if (prruSigalModelList == null || prruSigalModelList.size() < 1) {
             return;
         }
-        for (PrruSigalModel psm : prruSigalModelList) {
-            if (psm.rsrp > -1000) {
-                LLog.getLog().robot(x + "," + y, psm.gpp + "____" + psm.rsrp);
-                if (!mpMap.keySet().contains(psm.gpp)) {
-                    MaxrsrpPosition mp = new MaxrsrpPosition();
-                    mp.setNum(1); //出现次数为1
-                    mp.setX(x);
-                    mp.setY(y);
-                    mp.setRsrp(psm.rsrp);
-                    mpMap.put(psm.gpp, mp);
+        Collections.sort(prruSigalModelList, new Comparator<PrruSigalModel>() {
+            @Override
+            public int compare(PrruSigalModel p1, PrruSigalModel p2) {
+                float n1 = p1.rsrp;
+                float n2 = p2.rsrp;
+                if (n1 > n2) {
+                    return -1;
+                } else if (n1 < n2) {
+                    return 1;
                 } else {
-                    tempMp = mpMap.get(psm.gpp);
-                    tempMp.setNum(tempMp.getNum()+1); //出现次数+1
-                    if (psm.rsrp > tempMp.getRsrp()) { //判断是否更新最大rsrp值及位置
-                            tempMp.setX(x);
-                            tempMp.setY(y);
-                            tempMp.setRsrp(psm.rsrp);
-                    }
+                    return 0;
                 }
+            }
+        });
+        PrruSigalModel prruSigalModel = prruSigalModelList.get(0);
+        if (!mpMap.keySet().contains(prruSigalModel.gpp)) {
+            MaxrsrpPosition mp = new MaxrsrpPosition();
+            mp.setX(x);
+            mp.setY(y);
+            mp.setRsrp(prruSigalModel.rsrp);
+            mpMap.put(prruSigalModel.gpp, mp);
+        } else {
+            tempMp = mpMap.get(prruSigalModel.gpp);
+            if (prruSigalModel.rsrp > tempMp.getRsrp()) { //判断是否更新最大rsrp值及位置
+                tempMp.setX(x);
+                tempMp.setY(y);
+                tempMp.setRsrp(prruSigalModel.rsrp);
             }
         }
     }
@@ -671,7 +682,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
              * RSRP打点
              */
             try{
-                setPrruColorPoint(x,y, Long.parseLong(updateCommunityInfo.RSRP));
+                setPrruColorPoint(x,y, Integer.parseInt(updateCommunityInfo.RSRP));
             }catch (Exception e){
 //                LLog.getLog().e("RSRP异常",e.toString());
             }
@@ -767,13 +778,16 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     //显示出符合条件的prru位置
     private void drawPrruAfterTestLine() {
+
+        //显示下行RSRP结果
+        findPrru(prruInfos, Constant.prruNumber, Constant.radius);
         //根据满足门限值的prru出现次数倒序排序
         List<Map.Entry<String, MaxrsrpPosition>> lists = new ArrayList<Map.Entry<String, MaxrsrpPosition>>(mpMap.entrySet());
         Collections.sort(lists, new Comparator<Map.Entry<String, MaxrsrpPosition>>() {
             @Override
             public int compare(Map.Entry<String, MaxrsrpPosition> o1, Map.Entry<String, MaxrsrpPosition> o2) {
-                float n1 = o1.getValue().getNum();
-                float n2 = o2.getValue().getNum();
+                float n1 = o1.getValue().getRsrp();
+                float n2 = o2.getValue().getRsrp();
                 if (n1 > n2) {
                     return -1;
                 } else if (n1 < n2) {
@@ -783,6 +797,9 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 }
             }
         });
+        if(lists.size() > Constant.prruNumber){
+            lists = lists.subList(0,Constant.prruNumber );
+        }
         //原始逻辑
         for (Map.Entry<String, MaxrsrpPosition> entry : lists) {
             LLog.getLog().e("Prru全部",entry.getValue().toString());
@@ -800,16 +817,16 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             if(prruList.contains(entry.getKey())){
                 finalPrruList.add(entry);
             }
-        }*/
+        }
         //显示检验过的prru位置
-        for (Map.Entry<String, MaxrsrpPosition> entry : lists) {
+        for (Map.Entry<String, MaxrsrpPosition> entry : finalPrruList) {
             PrruGkcShape pgShape = new PrruGkcShape(entry.getKey(), R.color.blue, RsrpActivity.this);
             pgShape.setNecodeText(entry.getKey());
             pgShape.setPaintColor(Color.parseColor("#ff0000"));
             tempMXY = realToMap(entry.getValue().getX(), entry.getValue().getY());
             pgShape.setValues(tempMXY[0], tempMXY[1]);
             map.addShape(pgShape, false);
-        }
+        }*/
 
     }
 
@@ -906,8 +923,21 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     /**
      * 设置 PrruColor
      */
-    private synchronized void setPrruColorPoint(float x,float y,long prru) {
+    private synchronized void setPrruColorPoint(float x,float y,int prru) {
         LLog.getLog().rsrp(x+","+y,prru+"");
+        PrruInfo prruInfo = new PrruInfo();
+        prruInfo.setpRRUIndex(-1);
+        prruInfo.setIncludedAngle(-1);
+        prruInfo.setRouteId(-1);
+        prruInfo.setSlope(Double.MAX_VALUE);
+        Position position = new Position();
+        position.setX(x);
+        position.setY(y);
+        prruInfo.setPosition(position);
+        prruInfo.setRsrp(prru);
+
+        prruInfos.add(prruInfo);
+
         int color;
         if (-75 < prru && prru <= 0) {  //1e8449
             color = Color.parseColor("#1e8449");
@@ -965,6 +995,136 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         ViewCompat.animate(mFucAcIv).rotation(0.0F).withLayer().setDuration(300).setInterpolator(new OvershootInterpolator(10.0F)).start();
         tv_routesetting.setVisibility(View.GONE);
         isFabMenuOpen = false;
+    }
+
+    private  void findPrru(List<PrruInfo> prruInfos, int pRRUNumber, int radius){
+
+        calculateSlopeAndIncludedAngle(prruInfos);
+
+        //将prruInfo按照RSRP大小降序排列
+        Collections.sort(prruInfos,(PrruInfo p1, PrruInfo p2) -> (p2.getRsrp() - p1.getRsrp()));
+
+        int prruIndex = 0;
+        int prruNumner = 0;
+        List<PrruInfo> result = new ArrayList<>(pRRUNumber);
+        List<PrruInfo> tempDatas = new ArrayList<>();
+        Map<Integer,List> routeMap = new HashMap<>();
+        while(prruInfos.size() > 0 && prruNumner < pRRUNumber){
+            tempDatas.clear();
+            prruNumner += 1;
+            prruIndex += 1;
+            result.add(prruInfos.get(0));
+            Position p1 =  prruInfos.get(0).getPosition();
+            for (PrruInfo prruInfo : prruInfos){
+                double distance = calculateDistance(p1, prruInfo.getPosition());
+                if(distance < radius){
+                    prruInfo.setpRRUIndex(prruIndex);
+                    tempDatas.add(prruInfo);
+                    if(routeMap.containsKey(prruInfo.getRouteId())){
+                        routeMap.get(prruInfo.getRouteId()).add(prruInfo);
+                    }else {
+                        routeMap.put(prruInfo.getRouteId(),new ArrayList(Arrays.asList(prruInfo)));
+                    }
+                }
+            }
+
+            //如果包含多个路线
+            if(routeMap.keySet().size() > 1){
+
+            }
+            //移除prruInfos中prruIndex已经确定的prruInfo
+            prruInfos.removeAll(tempDatas);
+        }
+        //显示检验过的prru位置
+        for (PrruInfo prruInfo : result) {
+            PrruGkcShape pgShape = new PrruGkcShape(prruInfo.getpRRUIndex(), R.color.yellow, RsrpActivity.this);
+            pgShape.setNecodeText(prruInfo.getpRRUIndex()+"");
+            pgShape.setPaintColor(Color.parseColor("#ff0000"));
+            tempMXY = realToMap(prruInfo.getPosition().getX(),prruInfo.getPosition().getY());
+            pgShape.setValues(tempMXY[0], tempMXY[1]);
+            map.addShape(pgShape, false);
+        }
+
+
+    }
+
+    /**
+     * 计算两点间距离
+     * @param p1
+     * @param p2
+     * @return
+     */
+    private double calculateDistance(Position p1, Position p2){
+        double a = p1.getX() - p2.getX();
+        double b = p1.getY() - p2.getY();
+        return Math.sqrt(a * a + b * b);
+    }
+
+    /**
+     * 计算斜率和夹角
+     * @param prruInfos
+     */
+    private void calculateSlopeAndIncludedAngle(List<PrruInfo> prruInfos){
+        double x1;
+        double y1;
+        double x2;
+        double y2;
+        double k1;
+        double k2;
+        int routeId = 1;
+        double includeAngle;
+        //从第二个点开始循环计算
+        for(int i = 1; i < prruInfos.size(); i++){
+            //上一个相邻点的坐标
+            x1 = Math.floor(prruInfos.get(i-1).getPosition().getX());
+            y1 = Math.floor(prruInfos.get(i-1).getPosition().getY());
+
+            //该点坐标
+            x2 = Math.floor(prruInfos.get(i).getPosition().getX());
+            y2 = Math.floor(prruInfos.get(i).getPosition().getX());
+
+            //上一个相邻点的斜率
+            k1 = prruInfos.get(i-1).getSlope();
+
+            //计算并设置该点斜率
+            if(compareDouble(x1,x2)){
+                k2 = Math.tan(89);
+            }else{
+                k2 = (y2 - y1) / (x2 -x1);
+            }
+            prruInfos.get(i).setSlope(k2);
+
+            //TODO double不能用等于进行判断，需修改
+            //根据斜率值归类路线
+            if(compareDouble(k1,Double.MAX_VALUE)){ //斜率为默认值则表示第一个点，将其与第二个点一起归为路线一
+                prruInfos.get(i-1).setRouteId(routeId);
+                prruInfos.get(i).setRouteId(routeId);
+            }else if(compareDouble(k1,k2)){ //斜率一样则表示为同一路线，设置为当前线路
+                prruInfos.get(i).setRouteId(routeId);
+            }else{ //斜率不同则表示路线变化，线路标识自加1后设置新的路线并计算夹角
+                routeId += 1;
+                prruInfos.get(i).setRouteId(routeId);
+                if((1 + k2 * k1) == 0){
+                    includeAngle = 90.0;
+                }else{
+                    double tanA = (k2 - k1) / (1 + k2 * k1);
+                    if(tanA > 0){
+                        includeAngle = Math.atan(tanA);
+                    }else {
+                        includeAngle = Math.atan(tanA) + 180;
+                    }
+                }
+                prruInfos.get(i-1).setIncludedAngle(includeAngle);
+                prruInfos.get(i).setIncludedAngle(includeAngle);
+            }
+        }
+    }
+
+    private boolean compareDouble(double d1, double d2){
+        if(Math.abs(d1-d2)>0.01){
+            return false;
+        }
+        return true;
     }
 
 
