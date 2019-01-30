@@ -485,7 +485,7 @@
                         android:layout_height="36dp"
                         android:background="@drawable/tv_selector"
                         android:gravity="center"
-                        android:hint="low、medium、high或0到1数字"
+                        android:hint="0--0.7"
                         android:textColor="@color/white"
                         android:textColorHint="@color/gray_stroken"
                         android:textSize="17dp"

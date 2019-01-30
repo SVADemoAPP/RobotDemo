@@ -155,6 +155,8 @@ public class SettingActivity extends BaseActivity {
         mEdtSettingMapId.setText(SharedPrefHelper.getInt(SettingActivity.this, "mapId",2046)+"");
         mEdtSettingScale.setText(SharedPrefHelper.getFloat(SettingActivity.this, "mapScale",20)+"");
         mEdtSettingRbSpeed.setText(SharedPrefHelper.getString(SettingActivity.this, "robotSpeed",""));
+        mEdtSettingPrruNumber.setText(SharedPrefHelper.getInt(SettingActivity.this, "prruNumber",5)+"");
+        mEdtSettingRadius.setText(SharedPrefHelper.getInt(SettingActivity.this, "radius",20)+"");
         httpsFlag = SharedPrefHelper.getBoolean(SettingActivity.this, "https", true);
         setHttpState(httpsFlag);
         mEdtServerIp.requestFocus();

@@ -3,6 +3,7 @@ package net.yoojia.imagemap.core;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -37,7 +38,12 @@ public class PrruGkcShape extends Shape {
         this.context = context;
         this.tag = tag;
         this.drawPaint.setTextSize(28.0f);
-        this.view_inArea = View.inflate(context, R.layout.prru_in_area, null);
+        if(coverColor == Color.YELLOW){
+            this.view_inArea = View.inflate(context, R.layout.prru_in_area, null);
+        }else {
+            this.view_inArea = View.inflate(context, R.layout.prru_red, null);
+        }
+
         this.bmp_show = convertViewToBitmap(this.view_inArea);
     }
 
