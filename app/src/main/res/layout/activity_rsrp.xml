@@ -8,7 +8,9 @@
         android:id="@+id/imagemap"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true" />
+        android:layout_centerInParent="true" >
+
+    </net.yoojia.imagemap.ImageMap1>
 
     <RelativeLayout
         android:id="@+id/rl_bg2"
@@ -80,10 +82,8 @@
         android:id="@+id/tv_opeleft"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="24dp"
-        android:layout_marginRight="12dp"
         android:layout_marginTop="5dp"
+        android:layout_marginRight="12dp"
         android:layout_toLeftOf="@+id/iv_operation"
         android:background="@drawable/tv_round"
         android:gravity="center"
@@ -109,6 +109,17 @@
         android:textSize="18dp"
         android:textStyle="bold" />
 
+    <Switch
+        android:id="@+id/algoswitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tv_forcestop"
+        android:layout_alignEnd="@+id/iv_operation"
+        android:layout_marginTop="3dp"
+        android:layout_marginEnd="-18dp"
+        android:textOn="关"
+        android:textOff="开"
+        android:checked="false" />
 
 
 </RelativeLayout>

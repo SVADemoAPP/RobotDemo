@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -106,6 +107,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private float rY;
     private TextView tv_home_back;
     private TextView tv_opeleft;
+    private Switch algoSwitch;
     private int mode_opeleft = 0;//操作左边按钮的状态，0为隐藏，1为恢复，2为清除
     private SuperPopupWindow mChooseCenterPointPop;
     private String mMapName;
@@ -146,12 +148,14 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
 
     @Override
     public void initView() {
+
         map = findViewById(R.id.imagemap);
         iv_operation = findViewById(R.id.iv_operation);
         tv_home_back = findViewById(R.id.tv_home_back);
         tv_opeleft = findViewById(R.id.tv_opeleft);
         tv_forcestop = findViewById(R.id.tv_forcestop);
         tv_routesetting = findViewById(R.id.tv_routesetting);
+        algoSwitch = findViewById(R.id.algoswitch);
         mFucAcIv = findViewById(R.id.fuc_menu);
         iv_operation.setOnClickListener(this);
         tv_home_back.setOnClickListener(this);
@@ -1005,9 +1009,13 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
     private  void findPrru(List<PrruInfo> prruInfos, int pRRUNumber, int radius){
 
         calculateSlopeAndIncludedAngle(prruInfos);
-
         //将prruInfo按照RSRP大小降序排列
-        Collections.sort(prruInfos,(PrruInfo p1, PrruInfo p2) -> (p2.getRsrp() - p1.getRsrp()));
+        Collections.sort(prruInfos, new Comparator<PrruInfo>() {
+            @Override
+            public int compare(PrruInfo p1, PrruInfo p2) {
+                return p2.getRsrp() - p1.getRsrp();
+            }
+        });
 
         int prruNumner = 0;
         List<PrruInfo> result = new ArrayList<>(pRRUNumber);
@@ -1030,12 +1038,15 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                     }
                 }
             }
-            boolean flag = true;//优化算法开关
+
+            boolean flag = algoSwitch.isChecked();//优化算法开关
             if(flag && routeMap.keySet().size() > 1){
                 //当前prru所在路线
                List<PrruInfo> prruInfoList = routeMap.get(configPrruInfo.getRouteId());
 
-                algorithm(prruInfoList,routeMap, configPrruInfo, radius,tempDatas);
+               LLog.getLog().rsrp("优化算法开始",System.currentTimeMillis()+"");
+               algorithm(prruInfoList,routeMap, configPrruInfo, radius,tempDatas);
+               LLog.getLog().rsrp("优化算法结束",System.currentTimeMillis()+"");
             }
 
             //移除prruInfos中prruIndex已经确定的prruInfo
@@ -1106,8 +1117,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             x += prruInfo.getPosition().getX();
             y += prruInfo.getPosition().getY();
         }
-        position.setX(x);
-        position.setY(y);
+        position.setX(x/prruInfos.size());
+        position.setY(y/prruInfos.size());
         return position;
     }
 
