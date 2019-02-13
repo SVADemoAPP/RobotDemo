@@ -9,6 +9,7 @@ import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.PointF;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.ViewCompat;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -521,7 +522,6 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         initStart(tempMXY[0], tempMXY[1]);
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -529,8 +529,8 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             ro.endOperation();
             ro.disconnect();
         }
+        mHandler.removeCallbacksAndMessages(null);
     }
-
 
     @Override
     public void onBackPressed() {
@@ -782,14 +782,38 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         tv_opeleft.setVisibility(View.VISIBLE);
     }
 
-
+    private Handler mHandler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case 1:
+                    //显示检验过的prru位置
+                    for (PrruInfo prruInfo : (List<PrruInfo>)msg.obj) {
+                        PrruGkcShape pgShape = new PrruGkcShape(prruInfo.getpRRUIndex(), Color.RED, RsrpActivity.this);
+                        pgShape.setNecodeText(prruInfo.getpRRUIndex()+"");
+                        pgShape.setPaintColor(Color.parseColor("#ff0000"));
+                        tempMXY = realToMap(prruInfo.getPosition().getX(),prruInfo.getPosition().getY());
+                        pgShape.setValues(tempMXY[0], tempMXY[1]);
+                        map.addShape(pgShape, false);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
 
     //显示出符合条件的prru位置
     private void drawPrruAfterTestLine() {
-
-        //显示下行RSRP结果
-        findPrru(prruInfos, Constant.prruNumber, Constant.radius);
+        flag = algoSwitch.isChecked();//优化算法开关
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //显示下行RSRP结果
+                findPrru(prruInfos, Constant.prruNumber, Constant.radius);
+            }
+        }).start();
         //根据满足门限值的prru出现次数倒序排序
         List<Map.Entry<String, MaxrsrpPosition>> lists = new ArrayList<Map.Entry<String, MaxrsrpPosition>>(mpMap.entrySet());
         Collections.sort(lists, new Comparator<Map.Entry<String, MaxrsrpPosition>>() {
@@ -1005,6 +1029,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         tv_routesetting.setVisibility(View.GONE);
         isFabMenuOpen = false;
     }
+    boolean flag=false;
 
     private  void findPrru(List<PrruInfo> prruInfos, int pRRUNumber, int radius){
 
@@ -1021,6 +1046,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
         List<PrruInfo> result = new ArrayList<>(pRRUNumber);
         List<PrruInfo> tempDatas = new ArrayList<>();
         Map<Integer,List<PrruInfo>> routeMap = new HashMap<>();
+        long startTime=System.currentTimeMillis();
         while(prruInfos.size() > 0 && prruNumner < pRRUNumber){
             prruNumner += 1;
             PrruInfo configPrruInfo = prruInfos.get(0);
@@ -1039,7 +1065,7 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
                 }
             }
 
-            boolean flag = algoSwitch.isChecked();//优化算法开关
+
             if(flag && routeMap.keySet().size() > 1){
                 //当前prru所在路线
                List<PrruInfo> prruInfoList = routeMap.get(configPrruInfo.getRouteId());
@@ -1055,16 +1081,15 @@ public class RsrpActivity extends BaseActivity implements OnRobotListener {
             tempDatas.clear();
             routeMap.clear();
         }
-        //显示检验过的prru位置
-        for (PrruInfo prruInfo : result) {
-            PrruGkcShape pgShape = new PrruGkcShape(prruInfo.getpRRUIndex(), Color.RED, RsrpActivity.this);
-            pgShape.setNecodeText(prruInfo.getpRRUIndex()+"");
-            pgShape.setPaintColor(Color.parseColor("#ff0000"));
-            tempMXY = realToMap(prruInfo.getPosition().getX(),prruInfo.getPosition().getY());
-            pgShape.setValues(tempMXY[0], tempMXY[1]);
-            map.addShape(pgShape, false);
-        }
+        LLog.getLog().rsrp("优化算法时间",(System.currentTimeMillis()-startTime)+"");
+        Message msg=new Message();
+        msg.what=1;
+        msg.obj=result;
+        mHandler.sendMessage(msg);
+
     }
+
+
 
     private void algorithm(List<PrruInfo> prruInfoList, Map<Integer,List<PrruInfo>> routeMap, PrruInfo configPrru, int radius, List<PrruInfo> prruInfos){
         List<PrruInfo> cornerPrruInfoList = new ArrayList<>();
